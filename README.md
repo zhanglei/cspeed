@@ -90,9 +90,9 @@ WEB应用路由规则：
 	
 	如下路由所示：
 		www.supjos.cn/web/index/lists
-		模　块: web			一个模块对应一个目录，此处对应web目录
+		模　块: web		一个模块对应一个目录，此处对应web目录
 		控制器: index		控制器文件命名为 Index.php
-		方　法: listsAction  CSpeed系统方法名都以Action结尾
+		方　法: listsAction  	CSpeed系统方法名都以Action结尾
 	
 
 ## 简单的 **API** 应用 ##
