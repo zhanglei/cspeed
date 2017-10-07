@@ -44,7 +44,7 @@ WEB 目录设置为如下：
 	+admin		新增admin模块
 	|--controllers 	admin模块下的控制器目录
 	     |--Index 	admin模块的Index控制器
-	+fronted	fronted模块
+	+fronted		fronted模块
 	|--controllers	fronted模块控制器目录
 	     |--Index	fronted模块Index控制器
 
