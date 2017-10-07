@@ -132,8 +132,8 @@ public 目录下的 index.php 内容如下：
 			|---------Goods.php
 		+--backend						新增模块backend
 			|---------controllers				backend模块的控制器目录
-						|--------Index.php			
-						|--------Goods.php							
+				  |--------Index.php			
+				  |--------Goods.php							
 		
 
 	如果目录结构如上所示：
