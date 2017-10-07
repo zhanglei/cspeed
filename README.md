@@ -38,15 +38,15 @@
 WEB 目录设置为如下：
 
 	+public
-	|--index.php  		入口文件
+	|--index.php  	入口文件
 	+controllers
-	|--Index.php		Index默认控制器
-	+admin			新增admin模块
-	|--controllers 		admin模块下的控制器目录
-	     |--Index 		admin模块的Index控制器
-	+fronted		fronted模块
-	|--controllers		fronted模块控制器目录
-	     |--Index		fronted模块Index控制器
+	|--Index.php	Index默认控制器
+	+admin		新增admin模块
+	|--controllers 	admin模块下的控制器目录
+	     |--Index 	admin模块的Index控制器
+	+fronted	fronted模块
+	|--controllers	fronted模块控制器目录
+	     |--Index	fronted模块Index控制器
 
 
 public 目录下 index.php 内容如下：
@@ -139,7 +139,7 @@ public 目录下的 index.php 内容如下：
 
 	如果目录结构如上所示：
 	
-	那么 默认的 ```app``` 别名指向 cspeed 目录。
+	那么 默认的别名 `app` 指向 cspeed 目录。
 	开发者可以通过 $app->setAlias()来设置别名，具体的设置方法如下：
 
 	假设需要设置一个 backend 的别名 指向目录 /data/supjos/backend ，那么调用方法如下：
@@ -339,17 +339,17 @@ public 目录下的 index.php 内容如下：
 	public __construct();
 	构造函数
 
-	public setHeader();
+	public setHeader($headerName, $headerValue);
 	设置响应的HTTP HEADER
 
-	public unsetHeader();
+	public unsetHeader($headerKey);
 	删除刚刚设置的HTTP HEADER, 此操作需在调用send方法前使用才有效
 
 	public send();
 	响应设置的HTTP HEADER与内容
 	
-	public setJsonContent();
+	public setJsonContent(array $data);
 	设置响应的内容为JSON格式
 
-	public setRawContent();
+	public setRawContent($mixed);
 	设置响应的内容为原始数据，不进行转换
