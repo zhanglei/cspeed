@@ -14,20 +14,20 @@
 	推荐的Nginx配置：
 	
     location / {
-		# try_files $uri $uri/ /index.php$uri;
+	# try_files $uri $uri/ /index.php$uri;
         if (!-e $request_filename) {
             rewrite ^/(.*)$ /index.php/$1 last;
         }
-		# 如果是二级目录请设置为二级目录形式
+	# 如果是二级目录请设置为二级目录形式
     }
 
     location ~ \.php {
-		 fastcgi_pass   127.0.0.1:9000;
-		 fastcgi_index  index.php;
-		 fastcgi_split_path_info ^(.+\.php)(.*)$;     
-		 fastcgi_param  PATH_INFO $fastcgi_path_info;    
-		 fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
-		 include        fastcgi_params;
+	fastcgi_pass   127.0.0.1:9000;
+	fastcgi_index  index.php;
+	fastcgi_split_path_info ^(.+\.php)(.*)$;     
+	fastcgi_param  PATH_INFO $fastcgi_path_info;    
+	fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+	include        fastcgi_params;
     }
 
 
@@ -41,11 +41,11 @@ WEB 目录设置为如下：
 	|----index.php  		入口文件
 	+controllers
 	|---Index.php			Index默认控制器
-	+admin					新增admin模块
+	+admin				新增admin模块
 	|---controllers 		admin模块下的控制器目录
 	      |-----Index 		admin模块的Index控制器
-	+fronted				fronted模块
-	|---controllers		    fronted模块控制器目录
+	+fronted			fronted模块
+	|---controllers		        fronted模块控制器目录
 		  |-----Index		fronted模块Index控制器
 
 
@@ -61,10 +61,9 @@ public 目录下 index.php 内容如下：
 	Index.php:
 		
 	class Index {
-	
-		function indexAction(){
-			echo '<h1>Hello CSpeed</h1>';
-		}
+	    function indexAction(){
+		echo '<h1>Hello CSpeed</h1>';
+	    }
 	}
 	
 配置好 Nginx 路由，打开浏览器，输入配置好的网站地址就会看到刚刚输入的内容：
@@ -125,14 +124,14 @@ public 目录下的 index.php 内容如下：
 
 	系统自动内置一个 app 命名别名，指向 index.php 的上级目录，如下目录所示：
 	
-	+--cspeed										网站目录
+	+--cspeed							网站目录
 		+--public
-			|---------index.php						入口文件
-		+--controllers								默认控制器加载目录
+			|---------index.php				入口文件
+		+--controllers						默认控制器加载目录
 			|---------Index.php
 			|---------Goods.php
-		+--backend								    新增模块backend
-			|---------controllers					backend模块的控制器目录
+		+--backend						新增模块backend
+			|---------controllers				backend模块的控制器目录
 						|--------Index.php			
 						|--------Goods.php							
 		
@@ -147,24 +146,22 @@ public 目录下的 index.php 内容如下：
 
 	namespace app\controllers;
 
-
 	class Index {
-
-		function getVersion()
-		{
-			return 'v2.1.8';
-		}
+	    function getVersion()
+	    {
+		return 'v2.1.8';
+	    }
 	}
 
 	那么当你在CSpeed框架中需要使用 \app\controllers\Index类的时候，可以使用如下两种方法使用：
 
 	方法1：
-		use app\controllers\Index;
+	    use app\controllers\Index;
 
-		$index = new Index();
+	    $index = new Index();
 
 	方法2：
-		$index = new \app\controllers\Index();
+	    $index = new \app\controllers\Index();
 
 
 ## CSpeed 框架的视图引擎 ##
