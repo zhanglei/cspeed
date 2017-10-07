@@ -51,17 +51,18 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
 
     char *path_array[3] = { NULL };             /* Only need three element for the ```module```, ```controller```, ```action``` */
 
-    char delims[] = "/";
-    char *result = NULL;
-    result = strtok( path_info + 1, delims );
-    int i;
-    for (i = 0; result != NULL; ++i)
-    {
-        if (i > 2 ) { break; }
-        path_array[i] = result;
-        result = strtok( NULL, delims);
+    if (CSPEED_STRING_NOT_EMPTY(path_info)){
+        char delims[] = "/";
+        char *result = NULL;
+        result = strtok( path_info + 1, delims );
+        int i;
+        for (i = 0; result != NULL; ++i)
+        {
+            if (i > 2 ) { break; }
+            path_array[i] = result;
+            result = strtok( NULL, delims);
+        }
     }
-
     /* Now the path info were parsed into correctly form */
     /**
      *  If the path_array[0] didn't exists:

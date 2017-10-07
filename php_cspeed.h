@@ -75,6 +75,8 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define CSPEED_METHOD_IN_OBJECT(object, method_name) ( ( Z_OBJ_HT_P(object)->get_method(&Z_OBJ_P(object),\
  zend_string_init(CSPEED_STRL(method_name), 0), NULL)) != NULL ) /* Judge whether the method is in object */
 
+#define CSPEED_STRING_NOT_EMPTY(char)     ((*char) != '\0')        /* Judge the string not empty */
+
 #endif	/* PHP_CSPEED_H */
 
 
