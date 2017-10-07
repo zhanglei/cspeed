@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | Speed framework                                                      |
+  | CSpeed framework                                                     |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2017-2020 www.supjos.cn                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,20 +12,34 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author:  Josin <774542602@qq.com|www.supjos.cn>                      |
+  | Author:Josin<774542602@qq.com|www.supjos.cn>                         |
   +----------------------------------------------------------------------+
 */
-#ifndef SUPJOS_SPEED_VIEW_H
-#define SUPJOS_SPEED_VIEW_H
 
-#define SPEED_VIEW_VARIABLES "_speed_variables"
-/* {{{
-  The supjos\mvc\View Class entry
-*/
-zend_class_entry *speed_view_ce;
-/*}}}*/
+/* $Id$ */
+
+#ifndef CSPEED_VIEW_H
+#define CSPEED_VIEW_H
+
+zend_class_entry *cspeed_view_ce;                                   /* The class View */
+
+#define CSPEED_VIEW_VARIABLES       "__cspeed_view_variables"       /* The variables the view has */
+#define CSPEED_VIEW_SUFFIX          "__cspeed_view_suffix"          /* The view template file's suffix */
+#define CSPEED_VIEW_SUFFIX_V        "phtml"                         /* The view template file's suffix */
+#define CSPEED_VIEW_DIRS_V          "../views"                      /* The view directory */
+#define CSPEED_VIEW_DIRS            "__cspeed_view_dir"             /* The view directory which the view engine to find the view file */
+
+CSPEED_INIT(view);                                                  /* Init function declare */
 
 #endif
+
+
+
+
+
+
+
+
 
 
 /*

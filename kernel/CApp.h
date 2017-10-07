@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | Speed framework                                                      |
+  | CSpeed framework                                                     |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2017-2020 www.supjos.cn                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,20 +12,31 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author:  Josin <774542602@qq.com|www.supjos.cn>                      |
+  | Author:Josin<774542602@qq.com|www.supjos.cn>                         |
   +----------------------------------------------------------------------+
 */
 
-#ifndef SUPJOS_SPEED_MODEL_H
-#define SUPJOS_SPEED_MODEL_H
+/* $Id$ */
 
-/* {{{
-  The supjos\mvc\Model class entry
- */
-zend_class_entry *speed_model_ce;
-/*}}}*/
+#ifndef CSPEED_APP_H
+#define CSPEED_APP_H
+
+zend_class_entry *cspeed_app_ce;                                /* The global CApp class entry */
+
+#define CSPEED_APP_AUTOLOAD_ALIASES   "__cspeed_app_aliases"    /* The aliases which let the system to locate the file */
+
+CSPEED_INIT(app);                                               /* The init function for the CApp class */
+
 
 #endif
+
+
+
+
+
+
+
+
 
 /*
  * Local variables:
@@ -35,3 +46,7 @@ zend_class_entry *speed_model_ce;
  * vim600: noet sw=4 ts=4 fdm=marker
  * vim<600: noet sw=4 ts=4
  */
+
+
+
+

@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | Speed framework                                                      |
+  | CSpeed framework                                                     |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2017-2020 www.supjos.cn                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,19 +12,30 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author:  Josin <774542602@qq.com|www.supjos.cn>                      |
+  | Author:Josin<774542602@qq.com|www.supjos.cn>                         |
   +----------------------------------------------------------------------+
 */
 
-#ifndef SUPJOS_SPEED_CONTROLLER_H
-#define SUPJOS_SPEED_CONTROLLER_H
+/* $Id$ */
 
-#define SPEED_CONTROLLER_VIEW_SETS "_sets"  /* The property to store the View object */
+#ifndef CSPEED_DISPATCH_H
+#define CSPEED_DISPATCH_H
 
-/* {{{ 
-    The supjos\Controller class_entry
-*/
-zend_class_entry *speed_controller_ce;
-/*}}}*/
+void request_dispatcher_url(zval *);                  /* Dispatcher the url request to different controller's action */
 
 #endif
+
+
+
+
+
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

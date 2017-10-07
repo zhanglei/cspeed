@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | Speed framework                                                      |
+  | CSpeed framework                                                     |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2017-2020 www.supjos.cn                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,24 +12,33 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author:  Josin <774542602@qq.com|www.supjos.cn>                      |
+  | Author:Josin<774542602@qq.com|www.supjos.cn>                         |
   +----------------------------------------------------------------------+
 */
 
-#ifndef SUPJOS_SPEED_APP_H
-#define SUPJOS_SPEED_APP_H
+/* $Id$ */
 
-/* {{{
-  The supjos\mvc\App class
- */
-zend_class_entry *speed_app_ce;
-/*}}}*/
+#ifndef   CSPEED_TOOL_REQUIRE_H
+#define   CSPEED_TOOL_REQUIRE_H
 
-
-#define SPEED_APP_INCLUDE_PATH    "_app_include_path"     /* The path which the speed to include the Class file */
-#define SPEED_APP_ALIASES         "_app_aliases"          /* All aliases which the speed determine to include the Class file */
+void cspeed_require_file(char *, zval *, zval *, zval *);              /* The function to requrie file */
 
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
  * Local variables:

@@ -1,10 +1,10 @@
 <?php
 $br = (php_sapi_name() == "cli")? "":"<br>";
 
-if(!extension_loaded('speed')) {
-	dl('speed.' . PHP_SHLIB_SUFFIX);
+if(!extension_loaded('cspeed')) {
+	dl('cspeed.' . PHP_SHLIB_SUFFIX);
 }
-$module = 'speed';
+$module = 'cspeed';
 $functions = get_extension_funcs($module);
 echo "Functions available in the test extension:$br\n";
 foreach($functions as $func) {

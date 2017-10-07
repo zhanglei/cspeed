@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | Speed framework                                                      |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2017-2020 www.supjos.cn                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,20 +12,28 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author:  Josin <774542602@qq.com|www.supjos.cn>                      |
+  | Author:                                                              |
   +----------------------------------------------------------------------+
 */
 
-#ifndef SUPJOS_SPEED_CALLBACK_H
-#define SUPJOS_SPEED_CALLBACK_H
+/* $Id$ */
 
-/* {{{
-  Controller must implement from this interface
- */
-zend_class_entry *speed_callback_ce;
-/*}}}*/
+#ifndef CSPEED_TOOL_HELPER_H
+#define CSPEED_TOOL_HELPER_H
+
+char *cspeed_reverse_slash_char(char *src);                           /* Change the source string's slash to reslash */
+
+char *cspeed_get_cwd();                                               /* Get current directory */
+
+char *title_upper_string(char *src);                                  /* Upper case the first char */
 
 #endif
+
+
+
+
+
+
 
 /*
  * Local variables:

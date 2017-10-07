@@ -1,10 +1,10 @@
 --TEST--
-Check for speed presence
+Check for cspeed presence
 --SKIPIF--
-<?php if (!extension_loaded("speed")) print "skip"; ?>
+<?php if (!extension_loaded("cspeed")) print "skip"; ?>
 --FILE--
 <?php 
-echo "speed extension is available";
+echo "cspeed extension is available";
 /*
 	you can add regression tests for your extension here
 
@@ -18,4 +18,4 @@ echo "speed extension is available";
 */
 ?>
 --EXPECT--
-speed extension is available
+cspeed extension is available

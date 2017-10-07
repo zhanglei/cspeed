@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | Speed framework                                                      |
+  | CSpeed framework                                                     |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2017-2020 www.supjos.cn                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,38 +12,33 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author:  Josin <774542602@qq.com|www.supjos.cn>                      |
+  | Author:Josin<774542602@qq.com|www.supjos.cn>                         |
   +----------------------------------------------------------------------+
 */
-#ifndef SUPJOS_SPEED_REQUEST_H
-#define SUPJOS_SPEED_REQUEST_H
 
+/* $Id$ */
 
-/* {{{ 
-  The supjos\net\Request class entry
- */
-zend_class_entry *speed_request_ce;
-/*}}}*/
+#ifndef CSPEED_RESPONSE_H
+#define CSPEED_RESPONSE_H
 
-/* Get the $_GET[getkey] value*/
-zval *request_get(zend_string *get_key);
+zend_class_entry *cspeed_response_ce;                                               /* Response class entry */
 
-/* Get the $_POST[postkey] value*/
-zval *request_post(zend_string *post_key);
+#define CSPEED_RESPONSE_HEADER_VARIABLES      "__response_http_headers"             /* Response HTTP headers */
+#define CSPEED_RESPONSE_DATA                  "__response_data"                     /* The data which you want to response to the client */
 
-/* Get the $_SERVER[serverkey] value*/
-zval *request_server(zend_string *server_key);
-
-/* Get the PATH_INFO or REQUEST_PATH_INFO from $_SERVER */
-zval *request_path_info();
-
-/* Get the server-info with char key */
-zval *get_server_info(char *key);
-
-/* Whether the current request is THE GIVEN METHOD REQUEST */
-zend_bool request_is(char *r_method);
+CSPEED_INIT(response);
 
 #endif
+
+
+
+
+
+
+
+
+
+
 
 /*
  * Local variables:
