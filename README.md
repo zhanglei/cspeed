@@ -175,7 +175,7 @@ public 目录下的 index.php 内容如下：
 	$view->render('index', ['name'=>'CSpeed', 'version'=>'v2.1.8']);
 	
 	/* 如果需要添加单个变量到视图模块中，可以使用 setVar 方法 */
-	$view->setVar('addVar', ['a', 'b' ,'c', 'd');
+	$view->setVar('addVar', ['a', 'b' ,'c', 'd']);
 
 	/* 如果需要或者视图的渲染效果但是并不输入使用 getRender方法，参数与 render 方法一致 */
 	$viewResult = $view->getRender('index', ['name'=>'CSpeed', 'version'=>'v2.1.8']);
