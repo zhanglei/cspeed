@@ -1,4 +1,4 @@
-# CSpeed micro framework #
+#CSpeed micro framework written in C Code  #
 
 ----------
 
@@ -6,7 +6,7 @@
 	
 	Linux kernel 4.4.x、PHP7.1.8、Nginx1.12.1
 
-	扩展只支持PHP7.x以上版本，低于PHP7.x一下的版本请先升级PHP版本
+	扩展只支持PHP7.x以上版本，低于PHP7.x以下的版本请先升级PHP版本
 
 	在WEB应用模式下，扩展通过解析 PATH_INFO 参数信息进行路由转发，请先确保 WEB服务器支持 PATH_INFO 模式，并且需要隐藏index.php
 	否则系统不生效,无法完成路由解析。
@@ -214,4 +214,142 @@ public 目录下的 index.php 内容如下：
 
 		共完成一百九十多万请求，每次请求4.4kb数据，零错误,CPU占用23%左右内存占用极低。
 	
+
+## API 索引 ##
+
+### Cs\App 类 ###
 	
+	public get($urlPattern, $closure);
+	正则匹配 $urlPattern 的GET请求
+
+	public post($urlPattern, $closure);
+	正则匹配 $urlPattern 的POST请求
+
+	public put($urlPattern, $closure);
+	正则匹配 $urlPattern 的PUT请求
+
+	public patch($urlPattern, $closure);
+	正则匹配 $urlPattern 的PATCH请求
+
+	public delete($urlPattern, $closure);
+	正则匹配 $urlPattern 的DELETE请求
+
+	public head($urlPattern, $closure);
+	正则匹配 $urlPattern 的HEAD请求
+
+	public options($urlPattern, $closure);
+	正则匹配 $urlPattern 的OPTIONS请求
+
+	public autoload();
+	CSpeed框架的自动加载函数，切勿私自调用
+
+	public setAlias($aliasName, $aliasPath);
+	设置自动加载别名
+
+	public run();
+	CSpeed框架处理URL请求
+
+### Cs\mvc\View 类 ###
+	
+	public __construct();
+	构造函数
+	
+	public render($templateFile, $templateVariables);
+	渲染视图
+	
+	public setSuffix($suffixName);
+	设置视图的后缀
+	
+	public setVar($varName, $varValue);
+	设置视图中需要使用的变量，本方法可以多次调用
+
+	public getRender($templateFile, $templateVariables);
+	获取渲染的视图内容
+
+	public setViewDir($dir);
+	设置视图渲染路路径
+	
+	public partial($templateFile, $templateVariables);
+	视图内进行渲染视图,如：布局layouts
+
+### Cs\net\Request 类 ###
+
+	public getHttpHost();
+	获取HTTP HOST信息
+
+	public getHttpUserAgent();
+	获取HTTP User Agent信息
+
+	public getServerName();
+	获取Server Name 信息
+
+	public getServerAddr();
+	获取Server Addr 信息
+
+	public getRemotePort();
+	获取 Remote Port 信息
+	
+	public getReqeustScheme();
+	获取Request Scheme 信息
+
+	public getServerProtocol();
+	获取Server Protocol 信息
+
+	public getDocumentRoot();
+	获取Document Root 信息
+
+	public getRequestUri();
+	获取Request Uri 信息
+
+	public getScriptName();
+	获取Script Name 信息
+
+	public getPathInfo();
+	获取Path Info 信息
+	
+	public getQueryString();
+	获取Query String 信息
+
+	public isGet();
+	是否GET请求
+
+	public isPut();
+	是否Put请求
+
+	public isPatch();
+	是否Patch请求
+
+	public isDelete();
+	是否DELETE请求
+
+	public isHead();
+	是否Head请求
+
+	public isOptions();
+	是否Options请求
+
+	public get();
+	获取$_GET参数
+
+	public getPost();
+	获取$_POST参数
+
+### Cs\net\Response 类 ###
+
+	public __construct();
+	构造函数
+
+	public setHeader();
+	设置响应的HTTP HEADER
+
+	public unsetHeader();
+	删除刚刚设置的HTTP HEADER, 此操作需在调用send方法前使用才有效
+
+	public send();
+	响应设置的HTTP HEADER与内容
+	
+	public setJsonContent();
+	设置相应的内容为JSON格式
+
+	public setRawContent();
+	设置相应的内容为原始数据，不进行转换
