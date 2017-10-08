@@ -38,15 +38,15 @@
 WEB 目录设置为如下：
 
 	+public
-	|--index.php  	入口文件
+	    |--index.php  	入口文件
 	+controllers
-	|--Index.php	Index默认控制器
-	+admin		新增admin模块
-	|--controllers 	admin模块下的控制器目录
-	     |--Index 	admin模块的Index控制器
-	+fronted		fronted模块
-	|--controllers	fronted模块控制器目录
-	     |--Index	fronted模块Index控制器
+	    |--Index.php	Index默认控制器
+	+admin              新增admin模块
+	    |--controllers 	admin模块下的控制器目录
+	       |--Index 	admin模块的Index控制器
+	+fronted            fronted模块
+	    |--controllers	fronted模块控制器目录
+	       |--Index     fronted模块Index控制器
 
 
 public 目录下 index.php 内容如下：
@@ -107,8 +107,15 @@ public 目录下的 index.php 内容如下：
 
 	/**
 	 * 方法的第一个参数支持正则匹配，第二个参数是一个Closure闭包函数
+	 * 第一个参数支持使用替代符: {name} 和 {id} 两个, 其中 {name}: 匹配包含字母横线的标识符,首字母不是数字, {id} :匹配数字,如下
 	 */
-	$app->get('/index$', function(){
+	$app->get('/index/{name}$', function($match){
+		/* 当在第一个参数中使用了替代符的时候,第二个函数包含有一个参数参数为一个数组,分别指向第一个参数的替代符 */
+		/* 因此当路由是/index/xxxx-xxxx的时候, $match[1]就指向此替代符, 如果设置了多个替代符的时候依次获取即可如:
+		 * 路由: /index/{name}/{id} 指向路由 /index/cspeed/11 那么
+		 * $match[1] = cspeed, $match[2] = 11		
+		 * 如: /index/cspeed-v1 那么$match[1] = cspeed-v1
+		 */
 		echo '<h1>Hello CSpeed</h1>';
 	});
 
