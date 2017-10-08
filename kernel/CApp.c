@@ -259,7 +259,7 @@ CSPEED_METHOD(App, setAlias)/*{{{ proto App::setAlias() */
         RETURN_FALSE
     }
     zval *all_default_aliases = zend_read_property(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), 1, NULL);
-    add_assoc_str(all_default_aliases, ZSTR_VAL(alias_name), alias_path);
+    add_assoc_str(all_default_aliases, ZSTR_VAL(alias_name) + 1, alias_path);
 }/*}}}*/
 
 CSPEED_METHOD(App, run)/*{{{ proto App::run() */
