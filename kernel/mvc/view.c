@@ -41,9 +41,11 @@ void render_file(INTERNAL_FUNCTION_PARAMETERS, zval *ret_val, zval *view_obj)/*{
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|a", &temp_file, &array_variables) == FAILURE) {
         return ;
     }
-    zval *view_dir = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_DIRS), 1, NULL);
-    zval *suffix   = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_SUFFIX), 1, NULL);
-    zend_string *real_path_file = strpprintf(0, "%s/%s/%s.%s", cspeed_get_cwd(), Z_STRVAL_P(view_dir), ZSTR_VAL(temp_file), Z_STRVAL_P(suffix));
+    zval *view_root = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_ROOT_DIR), 1, NULL);
+    zval *view_dir  = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_DIRS), 1, NULL);
+    zval *suffix    = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_SUFFIX), 1, NULL);
+    /*zend_string *real_path_file = strpprintf(0, "%s/%s/%s.%s", cspeed_get_cwd(), Z_STRVAL_P(view_dir), ZSTR_VAL(temp_file), Z_STRVAL_P(suffix));*/
+    zend_string *real_path_file = strpprintf(0, "%s/../%s/%s/%s.%s", cspeed_get_cwd(), Z_STRVAL_P(view_root), Z_STRVAL_P(view_dir), ZSTR_VAL(temp_file), Z_STRVAL_P(suffix));
     
     zval *view_variables = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_VARIABLES), 1, NULL);
     if (array_variables) {
@@ -68,6 +70,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_view_construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_view_render, 0, 0, 1)
+    ZEND_ARG_INFO(0, template)
+    ZEND_ARG_INFO(0, variables)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_view_partial, 0, 0, 1)
     ZEND_ARG_INFO(0, template)
     ZEND_ARG_INFO(0, variables)
 ZEND_END_ARG_INFO()
@@ -100,6 +107,12 @@ CSPEED_METHOD(View, __construct)    /*{{{ proto View::__construct() */
 }/*}}}*/
 
 CSPEED_METHOD(View, render)         /*{{{ proto View::render($file, $variables) */
+{
+    render_file(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL, getThis());
+
+}/*}}}*/
+
+CSPEED_METHOD(View, partial)         /*{{{ proto View::partial($file, $variables) */
 {
     render_file(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL, getThis());
 
@@ -149,6 +162,7 @@ static const zend_function_entry cspeed_view_functions[] = { /*{{{ All methods t
     CSPEED_ME(View, setVar,         arginfo_view_set_var,          ZEND_ACC_PUBLIC)
     CSPEED_ME(View, getRender,      arginfo_view_get_render,       ZEND_ACC_PUBLIC)
     CSPEED_ME(View, setViewDir,     arginfo_view_set_view_dir,     ZEND_ACC_PUBLIC)
+    CSPEED_ME(View, partial,        arginfo_view_partial,          ZEND_ACC_PUBLIC)
 
     PHP_FE_END
 };/*}}}*/
@@ -162,6 +176,7 @@ CSPEED_INIT(view) /*{{{ Initialise function to initialise the view components */
     zend_declare_property_null(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_VARIABLES), ZEND_ACC_PROTECTED);
     zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_SUFFIX), CSPEED_VIEW_SUFFIX_V, ZEND_ACC_PROTECTED);
     zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_DIRS), CSPEED_VIEW_DIRS_V, ZEND_ACC_PROTECTED);
+    zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_ROOT_DIR), ".", ZEND_ACC_PROTECTED);
 }/*}}}*/
 
 

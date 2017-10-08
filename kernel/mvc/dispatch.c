@@ -27,6 +27,7 @@
 #include "ext/standard/info.h"
 #include "php_cspeed.h"
 
+#include "kernel/mvc/view.h"        /* The view object */
 #include "kernel/mvc/dispatch.h"
 #include "kernel/net/request.h"     /* Use the Request object */
 #include "kernel/net/response.h"    /* Use the Response object to response the user request */
@@ -101,8 +102,17 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
     /* After loading the controller file, find the loading file */
     zend_class_entry *controller_ptr = zend_hash_find_ptr(CG(class_table), zend_string_tolower(zend_string_init(CSPEED_STRL(default_controller), 0)));
     if (controller_ptr) {
+        /*Add the view into the controller*/
+        zval view_object;
+        object_init_ex(&view_object, cspeed_view_ce);
+        zend_update_property_string(cspeed_view_ce, &view_object, CSPEED_STRL(CSPEED_VIEW_ROOT_DIR), default_module);
+        zend_declare_property_null(controller_ptr, CSPEED_STRL("view"), ZEND_ACC_PUBLIC);
+        /*}}}*/
+
         zval controller_obj;
         object_init_ex(&controller_obj, controller_ptr);
+
+        zend_update_property(controller_ptr, &controller_obj, CSPEED_STRL("view"), &view_object);
         if (CSPEED_METHOD_IN_OBJECT(&controller_obj, default_action)){
             /* After creating the controller object, you can do some initialise thing before calling the need action */
 
