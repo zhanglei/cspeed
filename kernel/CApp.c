@@ -254,6 +254,10 @@ CSPEED_METHOD(App, setAlias)/*{{{ proto App::setAlias() */
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &alias_name, &alias_path) == FAILURE) {
         return ;
     }
+    if ( ( *ZSTR_VAL(alias_name) ) != '@') {
+        php_error_docref(NULL, E_ERROR, "Namespace alias must be start with @.");
+        RETURN_FALSE
+    }
     zval *all_default_aliases = zend_read_property(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), 1, NULL);
     add_assoc_str(all_default_aliases, ZSTR_VAL(alias_name), alias_path);
 }/*}}}*/
