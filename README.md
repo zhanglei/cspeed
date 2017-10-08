@@ -56,7 +56,7 @@ public 目录下 index.php 内容如下：
 	$app->run();
 	/* 超简单的框架已经完成 */
 
-在 public 同级的目录下创建一个 Index.php 文件,内容如下：
+在 public 同级的目录controllers下创建一个 Index.php 文件,内容如下：
 	
 	Index.php:
 		
