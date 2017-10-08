@@ -62,6 +62,7 @@ public 目录下 index.php 内容如下：
 		
 	class Index {
 	    function indexAction(){
+		// 当需要渲染视图的时候，请使用 $this->view 获得 View 引擎然后使用引擎具有的方法进行视图渲染 
 		echo '<h1>Hello CSpeed</h1>';
 	    }
 	}
@@ -185,6 +186,9 @@ public 目录下的 index.php 内容如下：
 
 	/* 默认视图文件夹保存在 public 目录同级的 views 目录下, 可以通过 setViewDir 进行更改, 目录不能以 "/" 结尾 */
 	$view->setViewDir('../views');
+	
+	/*视图内渲染*/
+	$view->partial('layouts/head', ['a', 'b', 'c']);
 
 ## 模型 ##
 	
