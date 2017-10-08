@@ -37,34 +37,67 @@
 
 #include <string.h>
 
+#include "ext/pcre/php_pcre.h"
+#include "ext/standard/php_string.h"
+
 #include <unistd.h>         /* Access function */
 #include <fcntl.h>          /* Access function */
 
 int cspeed_deal_reqeust(zend_string *url, zend_fcall_info *zfi, zend_fcall_info_cache *zfic, zval *ret_val) /*{{{ Common function for the App class */
 {
     char *path_info = cspeed_request_server_str_key_val("PATH_INFO");
+    if (CSPEED_STRING_NOT_EMPTY(path_info) 
+        || ( ( *(ZSTR_VAL(url)) == '/' ) && (ZSTR_LEN(url) == 1) ) ) {
+        zend_string *pattern = strpprintf(0, "#%s#", ZSTR_VAL(url));
 
-    zend_string *pattern = strpprintf(0, "#%s#", path_info);
+        /* The nested thing to get the preg mathces */
+        zval nested_pattern, nested_pattern_string;
+        array_init(&nested_pattern);
+        add_next_index_string(&nested_pattern, "#{name}#");
+        add_next_index_string(&nested_pattern, "#{id}#");
 
-    zval func_name;
-    ZVAL_STRING(&func_name, "preg_match");
-    zval url_pattern, given_url;
-    ZVAL_STRING(&url_pattern, ZSTR_VAL(pattern));
-    ZVAL_STRING(&given_url, ZSTR_VAL(url));
-    zval params[] = {
-        url_pattern,
-        given_url
-    };
-    zval retval;
-    call_user_function(CG(function_table), NULL, &func_name, &retval, 2, params);
-    zend_string_release(pattern);
-    if (Z_LVAL(retval) > 0) {
-        /* The given url matches the pattern */
-        zfi->retval = ret_val;
-        zend_call_function(zfi, zfic);
-        return 0;
+        array_init(&nested_pattern_string);
+        add_next_index_string(&nested_pattern_string, "([^0-9][a-zA-Z0-9-]+)");
+        add_next_index_string(&nested_pattern_string, "(\\d+)");
+
+        zval url_pattern;
+        ZVAL_STRING(&url_pattern, ZSTR_VAL(pattern));
+
+        zval preg_replace_result;
+        zval preg_function_name;
+        ZVAL_STRING(&preg_function_name, "preg_replace");
+        zval preg_params[] = {
+            nested_pattern,
+            nested_pattern_string,
+            url_pattern
+        };
+        call_user_function(CG(function_table), NULL, &preg_function_name, &preg_replace_result, 3, preg_params);
+
+        pcre_cache_entry *pce_regexp;
+        if ((pce_regexp = pcre_get_compiled_regex_cache(Z_STR(preg_replace_result))) == NULL) {
+            return -1;
+        } else {
+            zval matches, subparts;
+            ZVAL_NULL(&subparts);
+            php_pcre_match_impl(pce_regexp, CSPEED_STRL(path_info), &matches, &subparts, 0, 0, 0, 0);
+
+            if (!zend_hash_num_elements(Z_ARRVAL(subparts))) {
+                zval_ptr_dtor(&subparts);
+                return -1;
+            } else {
+                zend_hash_index_del(Z_ARRVAL(subparts), 0);
+                zfi->retval = ret_val;
+                zfi->params = &subparts;
+                zfi->param_count = 1;
+                zend_call_function(zfi, zfic);
+
+                zval_ptr_dtor(&subparts);
+                return 0;
+            }
+        }
+    } else {
+        return -1;
     }
-    return -1;
 }/*}}}*/
 
 void handle_request(INTERNAL_FUNCTION_PARAMETERS)/*{{{ Handle the user input from the PHP level*/
@@ -96,6 +129,7 @@ void cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCT
     if (slash_pos == NULL) { /* No slash find */
         zend_string *real_file_path = strpprintf(0, "./%s", ZSTR_VAL(class_name_with_namespace));
         cspeed_require_file(ZSTR_VAL(real_file_path), NULL, NULL, NULL);
+        zend_string_release(real_file_path);
     } else {                 /* find the slash */
         char *current_alias = (char *)malloc(sizeof(char) * (slash_pos - ZSTR_VAL(class_name_with_namespace) + 1));
         memset(current_alias, 0, (slash_pos - ZSTR_VAL(class_name_with_namespace) + 1));
@@ -123,8 +157,11 @@ void cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCT
                 return ;
             }
             cspeed_require_file(real_file_path, NULL, NULL, NULL);
+            free(current_alias);
+            free(real_file_path);
         } else {            /* Not found the needing alias */
             php_error_docref(NULL, E_ERROR, "Namespace alias: %s not found. please set it first before use.", current_alias);
+            free(current_alias);
             return ;
         }
     }
