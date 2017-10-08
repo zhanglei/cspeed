@@ -41,12 +41,12 @@ WEB 目录设置为如下：
 	    |--index.php  	入口文件
 	+controllers
 	    |--Index.php	Index默认控制器
-	+admin              新增admin模块
+	+admin                  新增admin模块
 	    |--controllers 	admin模块下的控制器目录
 	       |--Index 	admin模块的Index控制器
-	+fronted            fronted模块
+	+fronted                fronted模块
 	    |--controllers	fronted模块控制器目录
-	       |--Index     fronted模块Index控制器
+	       |--Index         fronted模块Index控制器
 
 
 public 目录下 index.php 内容如下：
