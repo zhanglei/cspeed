@@ -29,6 +29,8 @@
 
 #include "kernel/tool/helper.h"
 
+#include "kernel/db/pdo.h"
+
 /* If you declare any globals in php_cspeed.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(cspeed)
 */
@@ -51,7 +53,19 @@ PHP_INI_END()
    Return a string to confirm that the module is compiled in */
 PHP_FUNCTION(confirm_cspeed_compiled)
 {
-    cspeed_require_file("../views/index.phtml", NULL, NULL);
+    zval object;
+    cspeed_pdo_construct(&object, "mysql:host=localhost;dbname=supjos", "root", "Root@localhost", NULL);
+
+    zval pdo_statement;
+    cspeed_pdo_prepare(&object, "SELECT * FROM www_product LIMIT 10", &pdo_statement);
+
+    zval retval;
+    cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
+
+    zval result;
+    cspeed_pdo_statement_fetch_all(&pdo_statement, &result);
+
+    RETURN_ZVAL(&result, 1, NULL);
 }
 /* }}} */
 
@@ -74,10 +88,14 @@ PHP_MINIT_FUNCTION(cspeed)
 	/* If you have INI entries, uncomment these lines
 	REGISTER_INI_ENTRIES();
 	*/
+    di_init();
     app_init();
+    view_init();
+    mysql_init();
     request_init();
     response_init();
-    view_init();
+    controller_init();
+    model_interface_init();
 
 	return SUCCESS;
 }

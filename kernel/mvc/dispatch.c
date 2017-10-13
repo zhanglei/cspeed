@@ -91,6 +91,7 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
                 default_action = ZSTR_VAL(strpprintf(0, "%sAction", path_array[2]));
             }
         }
+        zend_string_release(module_path_exists);
     }
     /* Combine the full path to include the file */
     zend_string *full_include_controller_path = strpprintf(0, "%s/../%s/controllers/%s.php", cspeed_get_cwd(), default_module, default_controller);
@@ -99,6 +100,7 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
         return ;
     }
     cspeed_require_file(ZSTR_VAL(full_include_controller_path), NULL, NULL, NULL);
+    zend_string_release(full_include_controller_path);
     /* After loading the controller file, find the loading file */
     zend_class_entry *controller_ptr = zend_hash_find_ptr(CG(class_table), zend_string_tolower(zend_string_init(CSPEED_STRL(default_controller), 0)));
     if (controller_ptr) {
