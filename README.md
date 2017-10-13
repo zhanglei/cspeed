@@ -14,10 +14,7 @@
 	推荐的Nginx配置：
 	
     location / {
-	# try_files $uri $uri/ /index.php$uri;
-        if (!-e $request_filename) {
-            rewrite ^/(.*)$ /index.php/$1 last;
-        }
+	try_files $uri $uri/ /index.php$uri$args;
 	# 如果是二级目录请设置为二级目录形式
     }
 
@@ -43,10 +40,10 @@ WEB 目录设置为如下：
 	    |--Index.php	Index默认控制器
 	+admin                  新增admin模块
 	    |--controllers 	admin模块下的控制器目录
-	       |--Index 	admin模块的Index控制器
+	       |--Index.php 	admin模块的Index控制器
 	+fronted                fronted模块
 	    |--controllers	fronted模块控制器目录
-	       |--Index         fronted模块Index控制器
+	       |--Index.php     fronted模块Index控制器
 
 
 public 目录下 index.php 内容如下：
