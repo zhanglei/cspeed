@@ -23,6 +23,18 @@
 
 zend_class_entry *cspeed_mysql_ce;
 
+#define CSPEED_MYSQL_PDO_OBJECT       "__cspeed_mysql_pdo"      /* The mysql's pdo object */
+
+#define CSPEED_MYSQL_SELECT           "__cspeed_mysql_select"   /* The select fields */
+#define CSPEED_MYSQL_FROM             "__cspeed_mysql_from"     /* The from fields */
+#define CSPEED_MYSQL_WHERE            "__cspeed_mysql_where"    /* The where fields */
+#define CSPEED_MYSQL_GROUP_BY         "__cspeed_mysql_group_by" /* Group By */
+#define CSPEED_MYSQL_ORDER_BY         "__cspeed_mysql_order_by" /* Order By */
+#define CSPEED_MYSQL_HAVING           "__cspeed_mysql_having"   /* Having */
+#define CSPEED_MYSQL_LIMIT            "__cspeed_mysql_limit"    /* Limit */
+#define CSPEED_MYSQL_RAW_SQL          "__cspeed_mysql_raw_sql"  /* Raw Sql */
+#define CSPEED_MYSQL_BIND_PARAMS      "__cspeed_mysql_bind_params"/* Raw Sql */
+
 CSPEED_INIT(mysql);
 
 #endif

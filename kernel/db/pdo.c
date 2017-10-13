@@ -163,7 +163,7 @@ void cspeed_pdo_statement_execute(zval *pdostatement_obj, zval *bind_parameters,
 {
     zval function_name;
     ZVAL_STRING(&function_name, "execute");
-    if (bind_parameters) {
+    if (bind_parameters){
         uint32_t param_count = 1;
         zval params[] = { *bind_parameters };
         call_user_function(NULL, pdostatement_obj, &function_name, retval, param_count, params);
@@ -172,6 +172,7 @@ void cspeed_pdo_statement_execute(zval *pdostatement_obj, zval *bind_parameters,
         zval *params = NULL;
         call_user_function(NULL, pdostatement_obj, &function_name, retval, param_count, params);
     }
+    return ;
 }/*}}}*/
 
 void cspeed_pdo_statement_fetch(zval *pdostatement_obj, zval *retval)/*{{{*/

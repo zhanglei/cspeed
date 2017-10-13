@@ -58,6 +58,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_limit, 0, 0, 1)
     ZEND_ARG_INFO(0, limit_conditions)
 ZEND_END_ARG_INFO();
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_query, 0, 0, 1)
+    ZEND_ARG_INFO(0, raw_sql)
+    ZEND_ARG_INFO(0, bind_params)
+ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_execute, 0, 0, 0)
+ZEND_END_ARG_INFO();
+
 /*}}}*/
 
 CSPEED_METHOD(ModelInterface, select) /*{{{ proto ModelInterface::select() */
@@ -85,19 +93,36 @@ CSPEED_METHOD(ModelInterface, having) /*{{{ proto ModelInterface::having() */
 
 }/*}}}*/
 
+CSPEED_METHOD(ModelInterface, orderBy) /*{{{ proto ModelInterface::orderBy() */
+{
+
+}/*}}}*/
+
 CSPEED_METHOD(ModelInterface, limit) /*{{{ proto ModelInterface::limit() */
 {
 
 }/*}}}*/
 
+CSPEED_METHOD(ModelInterface, query) /*{{{ proto ModelInterface::query() */
+{
+
+}/*}}}*/
+
+CSPEED_METHOD(ModelInterface, execute) /*{{{ proto ModelInterface::execute() */
+{
+
+}/*}}}*/
+
 static const zend_function_entry cspeed_model_functions[] = { /*{{{*/
-    ZEND_ABSTRACT_ME(Model, select, arginfo_cspeed_model_select)
-    ZEND_ABSTRACT_ME(Model, from, arginfo_cspeed_model_from)
-    ZEND_ABSTRACT_ME(Model, where, arginfo_cspeed_model_where)
-    ZEND_ABSTRACT_ME(Model, groupBy, arginfo_cspeed_model_group_by)
-    ZEND_ABSTRACT_ME(Model, having, arginfo_cspeed_model_having)
-    ZEND_ABSTRACT_ME(Model, orderBy, arginfo_cspeed_model_order_by)
-    ZEND_ABSTRACT_ME(Model, limit, arginfo_cspeed_model_limit)
+    ZEND_ABSTRACT_ME(ModelInterface, select, arginfo_cspeed_model_select)
+    ZEND_ABSTRACT_ME(ModelInterface, from, arginfo_cspeed_model_from)
+    ZEND_ABSTRACT_ME(ModelInterface, where, arginfo_cspeed_model_where)
+    ZEND_ABSTRACT_ME(ModelInterface, groupBy, arginfo_cspeed_model_group_by)
+    ZEND_ABSTRACT_ME(ModelInterface, having, arginfo_cspeed_model_having)
+    ZEND_ABSTRACT_ME(ModelInterface, orderBy, arginfo_cspeed_model_order_by)
+    ZEND_ABSTRACT_ME(ModelInterface, limit, arginfo_cspeed_model_limit)
+    ZEND_ABSTRACT_ME(ModelInterface, query, arginfo_cspeed_model_query)
+    ZEND_ABSTRACT_ME(ModelInterface, execute, arginfo_cspeed_model_execute)
     PHP_FE_END
 };/*}}}*/
 
