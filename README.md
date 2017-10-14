@@ -228,7 +228,30 @@ public 目录下的 index.php 内容如下：
 
 ## 模型 ##
 	
-	鉴于上一个版本中的数据库性能有影响，本版本正处于重构状态。开发中~敬请期待.
+	CSpeed框架仅提供一个简单的MySql类以及一个ModelInterface接口供用户自己实现模型或者增强现有的模型：
+	
+	$mysql = new \Cs\db\pdo\MySql([
+		'dsn'          =>    'mysql:host=localhost;dbname=cspeed',
+		'username' =>	 'root',
+		'password'  =>    '3333'
+	]);
+	
+	/* 查询一条记录 */
+	$mysql->select(['id', 'price', 'name'])->from('www_product')
+		  ->where(['id' => 88])->find();
+	 
+	/* 查询满足条件的所有记录 */
+        $mysql->select(['id', 'price', 'name'])->from('www_product')->findAll();
+        
+        /* 执行原生SQL查询 */
+        $mysql->query(" SELECT * FROM www_product  ");
+        $results = $mysql->execute(); 
+        
+        /* 执行预处理 */
+        $mysql->query(' INSERT INTO www_product (id, price, name) VALUES (:id, :price, :name) ', [':id' => 33, ':price'=>3.33, ":name"=>"Apple"]);
+        $mysql->exeucte();
+        /* 获取刚刚插入的数据ID */
+        $id = $mysql->lastInsertId();
 
 ## 测试结果 ##
 	
