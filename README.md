@@ -67,7 +67,7 @@ public 目录下 index.php 内容如下：
 	$app = new \Cs\App();
 
 	$app->run();
-	/* 超简单的框架已经完成 */
+	/* 超简单的框架已经完成，只需要上面两行代码就可完成一个MVC框架 */
 	
 	/* 注意App类构造函数可选参数Di类对象，如： */
 	$di = new \Cs\di\Di();
@@ -83,7 +83,7 @@ public 目录下 index.php 内容如下：
 	/* 当进行了上面的步骤后，在控制器中可以使用$this-get('view')来获取设置的对象，以达到对象复用的目的 */
 	
 
-在 public 同级的目录下创建一个 Index.php 文件,内容如下：
+在 public 同级的controllers目录下创建一个 Index.php 文件,内容如下：
 	
 	Index.php:
 		
