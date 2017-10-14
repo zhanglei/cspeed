@@ -199,7 +199,8 @@ public 目录下的 index.php 内容如下：
 
 	方法2：
 	    $index = new \app\controllers\Index();
-
+	
+	以上两种方法都可以使得 CSpeed 框架自动加载您所编写的 Index.php 文件
 
 ## CSpeed 框架的视图引擎 ##
 	
@@ -207,7 +208,7 @@ public 目录下的 index.php 内容如下：
 
 	/* 方法包含两个参数，
 	 * 第一个参数为：需要渲染的视图的文件名
-	 * 第二个参数为：需要在视图中使用的变量，传入一个数据或者不传入
+	 * 第二个参数为：需要在视图中使用的变量，传入一个数组或者不传入
 	 */
 	$view->render('index', ['name'=>'CSpeed', 'version'=>'v2.1.8']);
 	
