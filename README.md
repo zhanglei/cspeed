@@ -134,6 +134,11 @@ public 目录下的 index.php 内容如下：
 
 	/**
 	 * 方法的第一个参数支持正则匹配，第二个参数是一个Closure闭包函数
+	 * 第一个参数支持使用替代符 ： {name } 与 {id}, 其中 {name} 表示匹配字母数字横线并且首字母不是数字的字符串， {id}表示匹配任何数字，注意当使用了替代符的时候，匿名函数包含有一个参数 $match 来一一对应与匹配的替代符，如：
+	 * $app->get('/index/cspeed-v1/18$', function($match){
+	 * 
+	 * });
+	 * 那么 $match[1] 则表示 cspeed-v1 $match[2]表示为18，依次类推
 	 */
 	$app->get('/index$', function(){
 		echo '<h1>Hello CSpeed</h1>';
@@ -152,16 +157,16 @@ public 目录下的 index.php 内容如下：
 
 	系统自动内置一个 app 命名别名，指向 index.php 的上级目录，如下目录所示：
 	
-	+--cspeed							网站目录
-		+--public
-			|---------index.php				入口文件
-		+--controllers						默认控制器加载目录
-			|---------Index.php
-			|---------Goods.php
-		+--backend						新增模块backend
-			|---------controllers				backend模块的控制器目录
-				  |--------Index.php			
-				  |--------Goods.php							
+	+--cspeed                          网站目录
+	   +--public
+	       |--index.php                入口文件
+	   +--controllers                  默认控制器加载目录
+	       |--Index.php
+	       |--Goods.php
+	   +--backend                    新增模块backend
+	       |--controllers              backend模块的控制器目录
+		   |--Index.php			
+		   |--Goods.php							
 		
 
 	如果目录结构如上所示：
