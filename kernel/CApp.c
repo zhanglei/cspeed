@@ -33,6 +33,7 @@
 #include "kernel/tool/helper.h"
 #include "kernel/tool/require.h"
 
+#include "kernel/di/di.h"
 #include "kernel/mvc/dispatch.h"
 
 #include <string.h>
@@ -238,6 +239,18 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
     zval params[] = { callback };
     call_user_function(CG(function_table), NULL, &function_name, &retval, param_count, params);
     zval_ptr_dtor(&retval);
+
+    zval *di_object = NULL;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|o", &di_object) == FAILURE) {
+        return ;
+    }
+    if (di_object) {
+        if ( !instanceof_function(Z_OBJCE_P(di_object), cspeed_di_ce ) ){
+            php_error_docref(NULL, E_ERROR, "Parameter must be instance of class derived from  Cs\\di\\Di class.");
+            RETURN_FALSE
+        }
+        zend_update_property(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_APP_DI_OBJECT), di_object);
+    }
 }/*}}}*/
 
 CSPEED_METHOD(App, get)/*{{{ proto App::get() */
@@ -331,6 +344,7 @@ CSPEED_INIT(app)
     cspeed_app_ce = zend_register_internal_class(&ce);
 
     zend_declare_property_null(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), ZEND_ACC_PRIVATE);
+    zend_declare_property_null(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_DI_OBJECT), ZEND_ACC_PRIVATE);
 }
 /*}}}*/
 

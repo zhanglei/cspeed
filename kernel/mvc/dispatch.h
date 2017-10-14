@@ -21,7 +21,11 @@
 #ifndef CSPEED_DISPATCH_H
 #define CSPEED_DISPATCH_H
 
-void request_dispatcher_url(zval *);                  /* Dispatcher the url request to different controller's action */
+#define CSPEED_DISPATCH_DEFAULT_MODULE        "."           /* Default Module */
+#define CSPEED_DISPATCH_DEFAULT_CONTROLLER    "Index"       /* Default Controller */
+#define CSPEED_DISPATCH_DEFAULT_ACTION        "indexAction" /* Default Action */
+
+void request_dispatcher_url(zval *);                        /* Dispatcher the url request to different controller's action */
 
 #endif
 

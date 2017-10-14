@@ -21,7 +21,9 @@
 #ifndef CSPEED_DI_DI_H
 #define CSPEED_DI_DI_H
 
-zend_class_entry *cspeed_di_ce;
+zend_class_entry *cspeed_di_ce;                             /* The Di class */
+
+#define CSPEED_DI_OBJECT          "__cspeed_di_objects"     /* The object sets */
 
 CSPEED_INIT(di);
 

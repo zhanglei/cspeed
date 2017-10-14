@@ -27,8 +27,11 @@
 #include "ext/standard/info.h"
 #include "php_cspeed.h"
 
+#include "kernel/CApp.h"           /* The view object */
+#include "kernel/di/di.h"           /* The view object */
 #include "kernel/mvc/view.h"        /* The view object */
 #include "kernel/mvc/dispatch.h"
+#include "kernel/mvc/controller.h"  /* Use the controller features */
 #include "kernel/net/request.h"     /* Use the Request object */
 #include "kernel/net/response.h"    /* Use the Response object to response the user request */
 #include "kernel/tool/require.h"    /* Use the require tool to do the file rendering */
@@ -46,9 +49,9 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
     */
     char *path_info = cspeed_request_server_str_key_val("PATH_INFO");
     
-    char *default_module        = ".";
-    char *default_controller    = "Index";
-    char *default_action        = "indexAction";
+    char *default_module        = CSPEED_DISPATCH_DEFAULT_MODULE;
+    char *default_controller    = CSPEED_DISPATCH_DEFAULT_CONTROLLER;
+    char *default_action        = CSPEED_DISPATCH_DEFAULT_ACTION;
 
     char *path_array[3] = { NULL };             /* Only need three element for the ```module```, ```controller```, ```action``` */
 
@@ -113,8 +116,14 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
 
         zval controller_obj;
         object_init_ex(&controller_obj, controller_ptr);
+        if (instanceof_function(controller_ptr, cspeed_controller_ce)) {
+            zval *di_objects = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_APP_DI_OBJECT), 1, NULL); /* The di object */
+            zval *di_sets = zend_read_property(cspeed_di_ce, di_objects, CSPEED_STRL(CSPEED_DI_OBJECT), 1, NULL);
+            zend_update_property(controller_ptr, &controller_obj, CSPEED_STRL(CSPEED_DI_OBJECT), di_sets);
+        }
 
         zend_update_property(controller_ptr, &controller_obj, CSPEED_STRL("view"), &view_object);
+        
         if (CSPEED_METHOD_IN_OBJECT(&controller_obj, default_action)){
             /* After creating the controller object, you can do some initialise thing before calling the need action */
 

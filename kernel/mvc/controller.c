@@ -27,6 +27,7 @@
 #include "ext/standard/info.h"
 #include "php_cspeed.h"
 
+#include "kernel/di/di.h"
 #include "kernel/mvc/controller.h"
 
 /*{{{*/
@@ -36,7 +37,10 @@ ZEND_END_ARG_INFO()
 
 CSPEED_METHOD(Controller, __construct)/*{{{ proto Controller::__construct() */
 {
-
+    zval objects;
+    array_init(&objects);
+    zend_update_property(cspeed_controller_ce, getThis(), CSPEED_STRL(CSPEED_DI_OBJECT), &objects);
+    zval_ptr_dtor(&objects);
 }/*}}}*/
 
 static const zend_function_entry cspeed_controller_functions[] = { /*{{{*/
@@ -49,6 +53,8 @@ CSPEED_INIT(controller) /*{{{*/
     zend_class_entry ce;
     INIT_NS_CLASS_ENTRY(ce, "Cs\\mvc", "Controller", cspeed_controller_functions);
     cspeed_controller_ce = zend_register_internal_class(&ce);
+
+    zend_class_implements(cspeed_controller_ce, 1, cspeed_di_ce);
 }/*}}}*/
 
 

@@ -60,19 +60,19 @@ if test "$PHP_CSPEED" != "no"; then
   dnl PHP_SUBST(CSPEED_SHARED_LIBADD)
 
   PHP_NEW_EXTENSION(cspeed,
-    cspeed.c \
-    kernel/CApp.c \
-    kernel/di/di.c  \
-    kernel/db/pdo.c  \
-    kernel/db/mysql.c  \
-    kernel/mvc/view.c \
-    kernel/net/request.c \
-    kernel/tool/helper.c \
-    kernel/mvc/dispatch.c \
-    kernel/tool/require.c \
-    kernel/net/response.c  \
-    kernel/mvc/controller.c \
-    kernel/db/model_interface.c,
+    cspeed.c         \
+    kernel/CApp.c     \
+    kernel/di/di.c     \
+    kernel/db/pdo.c     \
+    kernel/mvc/view.c    \
+    kernel/net/request.c  \
+    kernel/tool/helper.c   \
+    kernel/mvc/dispatch.c   \
+    kernel/tool/require.c    \
+    kernel/net/response.c     \
+    kernel/mvc/controller.c    \
+    kernel/db/model_interface.c \
+    kernel/db/mysql.c,
   $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_ADD_BUILD_DIR([$ext_builddir/kernel])
   PHP_ADD_BUILD_DIR([$ext_builddir/kernel/db])

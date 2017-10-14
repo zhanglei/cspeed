@@ -97,6 +97,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_view_set_view_dir, 0, 0, 1)
     ZEND_ARG_INFO(0, view_dir)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_view_set_module_dir, 0, 0, 1)
+    ZEND_ARG_INFO(0, root_dir)
+ZEND_END_ARG_INFO()
+
 /*}}}*/
 
 CSPEED_METHOD(View, __construct)    /*{{{ proto View::__construct() */
@@ -145,6 +149,17 @@ CSPEED_METHOD(View, setVar)         /*{{{ proto View::setVar($var_name, $var_val
     add_assoc_zval(view_variables, ZSTR_VAL(var_name), var_value );
 }/*}}}*/
 
+CSPEED_METHOD(View, setModuleDir)         /*{{{ proto View::setModuleDir($var_name) */
+{
+    zend_string *root_dir;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &root_dir) == FAILURE) {
+        return ;
+    }
+    if (CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(root_dir))){
+        zend_update_property_str(cspeed_view_ce, getThis(), CSPEED_STRL(CSPEED_VIEW_ROOT_DIR), root_dir);
+    }
+}/*}}}*/
+
 CSPEED_METHOD(View, setViewDir)         /*{{{ proto View::setViewDir($dirname) */
 {
     zend_string *view_dir;
@@ -162,6 +177,7 @@ static const zend_function_entry cspeed_view_functions[] = { /*{{{ All methods t
     CSPEED_ME(View, setVar,         arginfo_view_set_var,          ZEND_ACC_PUBLIC)
     CSPEED_ME(View, getRender,      arginfo_view_get_render,       ZEND_ACC_PUBLIC)
     CSPEED_ME(View, setViewDir,     arginfo_view_set_view_dir,     ZEND_ACC_PUBLIC)
+    CSPEED_ME(View, setModuleDir,   arginfo_view_set_module_dir,   ZEND_ACC_PUBLIC)
     CSPEED_ME(View, partial,        arginfo_view_partial,          ZEND_ACC_PUBLIC)
 
     PHP_FE_END

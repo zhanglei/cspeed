@@ -66,6 +66,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_mysql_where, 0, 0, 1)
     ZEND_ARG_INFO(0, where_condition)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_mysql_and_where, 0, 0, 1)
+    ZEND_ARG_INFO(0, where_condition)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_mysql_group_by, 0, 0, 1)
     ZEND_ARG_INFO(0, group_by_condition)
 ZEND_END_ARG_INFO()
@@ -196,6 +200,46 @@ CSPEED_METHOD(MySql, where)/*{{{ proto MySql::where($where_condition)*/
     zval *var_value;
     smart_str where_str = {0};
     smart_str_appends(&where_str, " WHERE ");
+    ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(where), val_key, var_value) {
+        if (isalpha(*(ZSTR_VAL(val_key)))) {
+            smart_str_appendc(&where_str, '`');
+            smart_str_appends(&where_str, ZSTR_VAL(val_key));
+            smart_str_appends(&where_str, "`='");
+            if (Z_TYPE_P(var_value) == IS_LONG){
+                smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, "%d", Z_LVAL_P(var_value))));
+            } else if (Z_TYPE_P(var_value) == IS_STRING) {
+                smart_str_appends(&where_str, Z_STRVAL_P(var_value));
+            }
+            smart_str_appends(&where_str, "' AND ");
+        }
+    } ZEND_HASH_FOREACH_END();
+    smart_str_0(&where_str);
+    char *temp_where_str = (char *)malloc(sizeof(char) * ZSTR_LEN(where_str.s) - 4);
+    memset(temp_where_str, 0, ZSTR_LEN(where_str.s) - 4);
+    memcpy(temp_where_str, ZSTR_VAL(where_str.s), ZSTR_LEN(where_str.s) - 5);
+    zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_WHERE), temp_where_str);
+    smart_str_free(&where_str);
+    zval_ptr_dtor(where);
+    free(temp_where_str);
+    RETURN_ZVAL(getThis(), 1, NULL);
+}/*}}}*/
+
+CSPEED_METHOD(MySql, andWhere)/*{{{ proto MySql::andWhere($where_condition)*/
+{
+    zval *where;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &where) == FAILURE) {
+        return ;
+    }
+    /* Get the where condition */
+    zval *previous_where = zend_read_property(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_WHERE), 1, NULL);
+    /*zend_string *val_key;*/
+    zend_string *val_key;
+    zval *var_value;
+    smart_str where_str = {0};
+    if (Z_TYPE_P(previous_where) == IS_STRING && previous_where) {
+        smart_str_appends(&where_str, Z_STRVAL_P(previous_where));
+    }
+    smart_str_appends(&where_str, " AND ");
     ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(where), val_key, var_value) {
         if (isalpha(*(ZSTR_VAL(val_key)))) {
             smart_str_appendc(&where_str, '`');
@@ -448,6 +492,7 @@ static const zend_function_entry cspeed_mysql_functions[] = { /*{{{*/
     CSPEED_ME(MySql, select, arginfo_cspeed_mysql_select, ZEND_ACC_PUBLIC)
     CSPEED_ME(MySql, from, arginfo_cspeed_mysql_from, ZEND_ACC_PUBLIC)
     CSPEED_ME(MySql, where, arginfo_cspeed_mysql_where, ZEND_ACC_PUBLIC)
+    CSPEED_ME(MySql, andWhere, arginfo_cspeed_mysql_and_where, ZEND_ACC_PUBLIC)
     CSPEED_ME(MySql, groupBy, arginfo_cspeed_mysql_group_by, ZEND_ACC_PUBLIC)
     CSPEED_ME(MySql, having, arginfo_cspeed_mysql_having, ZEND_ACC_PUBLIC)
     CSPEED_ME(MySql, orderBy, arginfo_cspeed_mysql_order_by, ZEND_ACC_PUBLIC)

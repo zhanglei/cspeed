@@ -91,11 +91,15 @@ PHP_MINIT_FUNCTION(cspeed)
     di_init();
     app_init();
     view_init();
+
+    /* NOTE THAT: The model_interface_init() must before the mysql_init() method */
+    model_interface_init();
     mysql_init();
+    
+    /* Other init function */
     request_init();
     response_init();
     controller_init();
-    model_interface_init();
 
 	return SUCCESS;
 }
