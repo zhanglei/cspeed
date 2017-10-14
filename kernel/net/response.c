@@ -49,9 +49,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_response_send, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_response_set_json_content, 0, 0, 1)
+    ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_response_set_raw_content, 0, 0, 1)
+    ZEND_ARG_INFO(0, data)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_response_set_redirect, 0, 0, 1)
+    ZEND_ARG_INFO(0, url)
 ZEND_END_ARG_INFO()
 
 /*}}}*/
@@ -135,14 +141,35 @@ CSPEED_METHOD(Response, setRawContent)/*{{{ Set the response with the given form
 }
 /*}}}*/
 
+CSPEED_METHOD(Response, redirect)/*{{{ Set the response with the given format  */
+{
+    zend_string *url;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &url) == FAILURE) {
+        return ;
+    }
+    if (CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(url))) {
+        sapi_header_line ctr = {0};
+        ctr.line_len    = spprintf(&(ctr.line), 0, "%s %s", "Location:", ZSTR_VAL(url));
+        ctr.response_code   = 0;
+        if (sapi_header_op(SAPI_HEADER_REPLACE, &ctr) == SUCCESS) {
+            efree(ctr.line);            
+            RETURN_TRUE
+        }
+        efree(ctr.line);
+    }
+    RETURN_FALSE
+}
+/*}}}*/
+
 /*{{{ All methods for the class Response */
 static const zend_function_entry  cspeed_response_functions[] = {
     CSPEED_ME(Response, __construct,   arginfo_response_construct,          ZEND_ACC_PUBLIC)
     CSPEED_ME(Response, setHeader,     arginfo_response_set_http_header,    ZEND_ACC_PUBLIC)
     CSPEED_ME(Response, unsetHeader,   arginfo_response_set_http_header,    ZEND_ACC_PUBLIC)
     CSPEED_ME(Response, send,          arginfo_response_send,               ZEND_ACC_PUBLIC)
-    CSPEED_ME(Response, setJsonContent, arginfo_response_set_json_content,  ZEND_ACC_PUBLIC)
+    CSPEED_ME(Response, setJsonContent,arginfo_response_set_json_content,   ZEND_ACC_PUBLIC)
     CSPEED_ME(Response, setRawContent, arginfo_response_set_raw_content,    ZEND_ACC_PUBLIC)
+    CSPEED_ME(Response, redirect,      arginfo_response_set_redirect,       ZEND_ACC_PUBLIC)
 
     PHP_FE_END
 };/*}}}*/
