@@ -171,7 +171,7 @@ public 目录下的 index.php 内容如下：
 
 	如果目录结构如上所示：
 	
-	那么 默认的 ```app``` 别名指向 cspeed 目录。
+	那么 默认的 `app` 别名指向 cspeed 目录。
 	开发者可以通过 $app->setAlias()来设置别名，具体的设置方法如下：
 
 	假设需要设置一个 backend 的别名 指向目录 /data/supjos/backend ，那么调用方法如下：
