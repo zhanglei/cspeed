@@ -8,8 +8,8 @@
 
 	扩展只支持PHP7.x以上版本，低于PHP7.x以下的版本请先升级PHP版本
 
-	在WEB应用模式下，扩展通过解析 PATH_INFO 参数信息进行路由转发，请先确保 WEB服务器支持 PATH_INFO 模式，并且需要隐藏index.php
-	否则系统不生效,无法完成路由解析。
+	在WEB应用模式下，扩展通过解析 PATH_INFO 参数信息进行路由转发，请先确保 WEB服务器支持 PATH_INFO 模式；
+	并且需要隐藏index.php，否则系统不生效,无法完成路由解析。
 
 	推荐的Nginx配置：
 	
