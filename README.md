@@ -1,4 +1,4 @@
-# CSpeed micro framework #
+# CSpeed PHP Micro Framework #
 
 ----------
 
