@@ -252,7 +252,7 @@ public 目录下的 index.php 内容如下：
         
 	/* 执行预处理 */
 	$mysql->query(' INSERT INTO www_product (id, price, name) VALUES (:id, :price, :name) ',
- 	 [':id' => 33, ':price'=>3.33, ":name"=>"Apple"]);
+ 	               [':id' => 33, ':price'=>3.33, ":name"=>"Apple"]);
 	$mysql->exeucte();
 	/* 获取刚刚插入的数据ID */
 	$id = $mysql->lastInsertId();
@@ -622,6 +622,10 @@ public 目录下的 index.php 内容如下：
 			$content:	需要响应的内容， 如：
 		setRawContent('<h1>Hello CSpeed</h1>');
 
+	/* 进行URL跳转 */
+	public function redirect($url);
+		参数：
+			$url:	需要跳转的URL地址
 		
 		
 	
