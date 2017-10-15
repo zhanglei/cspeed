@@ -30,6 +30,7 @@
 #include "kernel/mvc/view.h"
 #include "kernel/tool/helper.h"
 #include "kernel/tool/require.h"
+#include "kernel/mvc/dispatch.h"
 
 #include <unistd.h>         /* Access function */
 #include <fcntl.h>          /* Access function */
@@ -192,7 +193,10 @@ CSPEED_INIT(view) /*{{{ Initialise function to initialise the view components */
     zend_declare_property_null(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_VARIABLES), ZEND_ACC_PROTECTED);
     zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_SUFFIX), CSPEED_VIEW_SUFFIX_V, ZEND_ACC_PROTECTED);
     zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_DIRS), CSPEED_VIEW_DIRS_V, ZEND_ACC_PROTECTED);
-    zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_ROOT_DIR), ".", ZEND_ACC_PROTECTED);
+    zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_ROOT_DIR), CSPEED_DISPATCH_DEFAULT_MODULE, ZEND_ACC_PROTECTED);
+    zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_DISPATCH_DEFAULT_MODULE), "", ZEND_ACC_PUBLIC);
+    zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_CONTROLLER_ID), "", ZEND_ACC_PUBLIC);
+    zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_ACTION_ID), "", ZEND_ACC_PUBLIC);
 }/*}}}*/
 
 

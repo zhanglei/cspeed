@@ -111,6 +111,9 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
         zval view_object;
         object_init_ex(&view_object, cspeed_view_ce);
         zend_update_property_string(cspeed_view_ce, &view_object, CSPEED_STRL(CSPEED_VIEW_ROOT_DIR), default_module);
+        zend_update_property_string(cspeed_view_ce, &view_object, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_MODULE_ID), default_module);
+        zend_update_property_string(cspeed_view_ce, &view_object, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_CONTROLLER_ID), default_controller);
+        zend_update_property_string(cspeed_view_ce, &view_object, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_ACTION_ID), default_action);
         zend_declare_property_null(controller_ptr, CSPEED_STRL("view"), ZEND_ACC_PUBLIC);
         /*}}}*/
 
@@ -118,8 +121,10 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
         object_init_ex(&controller_obj, controller_ptr);
         if (instanceof_function(controller_ptr, cspeed_controller_ce)) {
             zval *di_objects = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_APP_DI_OBJECT), 1, NULL); /* The di object */
-            zval *di_sets = zend_read_property(cspeed_di_ce, di_objects, CSPEED_STRL(CSPEED_DI_OBJECT), 1, NULL);
-            zend_update_property(controller_ptr, &controller_obj, CSPEED_STRL(CSPEED_DI_OBJECT), di_sets);
+            if (!Z_ISNULL_P(di_objects)) {
+                zval *di_sets = zend_read_property(cspeed_di_ce, di_objects, CSPEED_STRL(CSPEED_DI_OBJECT), 1, NULL);
+                zend_update_property(controller_ptr, &controller_obj, CSPEED_STRL(CSPEED_DI_OBJECT), di_sets);
+            }
         }
 
         zend_update_property(controller_ptr, &controller_obj, CSPEED_STRL("view"), &view_object);

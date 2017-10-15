@@ -27,6 +27,7 @@ char *cspeed_get_cwd();                                               /* Get cur
 
 char *title_upper_string(char *src);                                  /* Upper case the first char */
 
+char *title_lower_string(char *src);                                  /* Lower case the first char */
 #endif
 
 

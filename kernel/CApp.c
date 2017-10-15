@@ -244,7 +244,7 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|o", &di_object) == FAILURE) {
         return ;
     }
-    if (di_object) {
+    if (di_object != NULL) {
         if ( !instanceof_function(Z_OBJCE_P(di_object), cspeed_di_ce ) ){
             php_error_docref(NULL, E_ERROR, "Parameter must be instance of class derived from  Cs\\di\\Di class.");
             RETURN_FALSE

@@ -56,6 +56,12 @@ char *title_upper_string(char *src) /*{{{ Upper case the first char */
     return src;
 }/*}}}*/
 
+char *title_lower_string(char *src) /*{{{ Upper case the first char */
+{
+    *src = tolower(src[0]);
+    return src;
+}/*}}}*/
+
 
 
 
