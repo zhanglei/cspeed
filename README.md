@@ -251,7 +251,8 @@ public 目录下的 index.php 内容如下：
 	$results = $mysql->execute(); 
         
 	/* 执行预处理 */
-	$mysql->query(' INSERT INTO www_product (id, price, name) VALUES (:id, :price, :name) ', [':id' => 33, ':price'=>3.33, ":name"=>"Apple"]);
+	$mysql->query(' INSERT INTO www_product (id, price, name) VALUES (:id, :price, :name) ',
+ 	 [':id' => 33, ':price'=>3.33, ":name"=>"Apple"]);
 	$mysql->exeucte();
 	/* 获取刚刚插入的数据ID */
 	$id = $mysql->lastInsertId();
