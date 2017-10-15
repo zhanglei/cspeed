@@ -231,19 +231,19 @@ public 目录下的 index.php 内容如下：
 
 ## 模型 ##
 	
-	CSpeed框架仅提供一个简单的MySql类以及一个ModelInterface接口供用户自己实现模型或者增强现有的模型：
+        CSpeed框架仅提供一个简单的MySql类以及一个ModelInterface接口供用户自己实现模型或者增强现有的模型：
 	
-	$mysql = new \Cs\db\pdo\MySql([
+        $mysql = new \Cs\db\pdo\MySql([
 		'dsn'          =>    'mysql:host=localhost;dbname=cspeed',
 		'username' =>	 'root',
 		'password'  =>    '3333'
-	]);
+        ]);
 	
-	/* 查询一条记录 */
-	$mysql->select(['id', 'price', 'name'])->from('www_product')
-		  ->where(['id' => 88])->find();
+        /* 查询一条记录 */
+        $mysql->select(['id', 'price', 'name'])->from('www_product')
+                  ->where(['id' => 88'])->find();
 	 
-	/* 查询满足条件的所有记录 */
+        /* 查询满足条件的所有记录 */
         $mysql->select(['id', 'price', 'name'])->from('www_product')->findAll();
         
         /* 执行原生SQL查询 */
