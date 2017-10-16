@@ -39,10 +39,16 @@
 	
 	3、make -j8 install
 	
-	4、重启服务器Apache或者Nginx的PHP-FPM
+	4、在编译安装成功的命令行界面会提示“Installed .... /usr/local/path_to_php/lib/php/extensions/non-debug-non-zts-2xxxx”,
+	   用户仅需要在您的 PHP 配置文件 php.ini 添加一行：extension_dir = "xxxx", 其中的xxxx就表示上面的”/usr/local/path_to_php/xxx“目录
+	5、在php.ini文件中另外新增一行： extension = cspeed.so
 	
-经过以上步骤后，可以通过在phpinfo()中查看cspeed扩展或者使用如下函数检测：
-	extension_loaded('cspeed') 如果函数返回true则表示安装成功.
+	6、重启服务器Apache或者Nginx的PHP-FPM
+	
+经过以上步骤后，可以通过在phpinfo()中查看cspeed扩展
+或者使用如下函数检测：
+	extension_loaded('cspeed');
+    如果函数返回true则表示安装成功.
     
 ----------
 
@@ -136,8 +142,8 @@ public 目录下的 index.php 内容如下：
 	 * 方法的第一个参数支持正则匹配，第二个参数是一个Closure闭包函数
 	 * 第一个参数支持使用替代符 ： {name} 与 {id}, 其中 {name} 表示匹配字母数字横线并且首字母不是数字的字符串；
 	 *  {id}表示匹配任何数字，注意当使用了替代符的时候，匿名函数包含有一个参数：
-	 *  $match 来一一对应与匹配的替代符，如：
-	 *  $app->get('/index/cspeed-v1/18$', function($match){
+	 *  $match 来一一对应与匹配的替代符，如下面的正则匹配 URL “/index/cspeed-v1/18”的话：
+	 *  $app->get('/index/{name}/{id}$', function($match){
 	 * 
 	 *  });
 	 *  那么 $match[1] 则表示 cspeed-v1 $match[2]表示为18，依次类推
