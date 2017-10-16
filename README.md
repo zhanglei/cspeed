@@ -14,7 +14,7 @@
 	推荐的Nginx配置：
 	
     location / {
-        try_files $uri $uri/ /index.php$uri;
+        try_files $uri $uri/ /index.php$uri$args;
     }
 
     location ~ \.php {
