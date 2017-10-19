@@ -3,6 +3,21 @@
 ----------
 
 ## 最新版本特性  ##
+
+**CSpeed v1.2.1** 修复路由bug：
+	默认的CSpeed引擎在1.2.1之前的版本，系统路由的规则如下：
+	默认的PATH_INFO信息的第一段自动作为模块优先处理，所以导致如下的bug：
+	/user/index与/user/index/index的路由规则是一致的问题。
+	在新的CSpeed引擎v1.2.1版本中已经予以修复。请及时更新。
+	
+	v1.2.1新增方法：
+	Cs\App 类：
+		
+		function registerModules(['admin', 'fronted']);
+			参数说明：
+				方法的参数为需要CSpeed引擎允许执行的模块，如果在路由规则中的模块不在此注册函数内，CSpeed引擎不予以执行。
+	
+	自本版本开始README文件不提供API索引，开发者可以通过源码里面的IDE目录提供的对应的函数进行查阅。
 	
 **CSpeed v1.2.0** 发布特性：
 	

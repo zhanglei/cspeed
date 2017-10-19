@@ -111,4 +111,14 @@ class App
 
     }
 
+    /**
+     * Register the needed modules, to let the CSpeed only parsing the given module.
+     * $param array $modules  The module which you allowed to parse.
+     * for example :
+     * registerModules(['admin', 'frontend']);
+     */
+    function registerModules(array $modules)
+    {
+
+    }
 }

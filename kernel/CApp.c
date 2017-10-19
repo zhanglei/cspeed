@@ -210,6 +210,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_autoload, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_register_modules, 0, 0, 1)
+    ZEND_ARG_INFO(0, modules)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_set_alias, 0, 0, 2)
     ZEND_ARG_INFO(0, alias_name)
     ZEND_ARG_INFO(0, alias_path)
@@ -251,6 +255,11 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
         }
         zend_update_property(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_APP_DI_OBJECT), di_object);
     }
+
+    /*modules*/
+    zval modules;
+    array_init(&modules);
+    zend_update_property(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_APP_MODULES), &modules);
 }/*}}}*/
 
 CSPEED_METHOD(App, get)/*{{{ proto App::get() */
@@ -312,6 +321,15 @@ CSPEED_METHOD(App, setAlias)/*{{{ proto App::setAlias() */
     add_assoc_str(all_default_aliases, ZSTR_VAL(alias_name) + 1, alias_path);
 }/*}}}*/
 
+CSPEED_METHOD(App, registerModules)/*{{{ App::registerModules(['admin', 'backend', 'fronted'])*/
+{
+    zval *modules;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &modules) == FAILURE){
+        return ;
+    }
+    zend_update_property(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_APP_MODULES), modules);
+}/*}}}*/
+
 CSPEED_METHOD(App, run)/*{{{ proto App::run() */
 {
     /* When enter into the run method, the cspeed will into the MVC logic */
@@ -330,6 +348,7 @@ static const zend_function_entry cspeed_app_functions[] = {
     CSPEED_ME(App, head,                arginfo_cspeed_head,                        ZEND_ACC_PUBLIC)
     CSPEED_ME(App, options,             arginfo_cspeed_options,                     ZEND_ACC_PUBLIC)
     CSPEED_ME(App, autoload,            arginfo_cspeed_autoload,                    ZEND_ACC_PUBLIC)
+    CSPEED_ME(App, registerModules,     arginfo_cspeed_register_modules,            ZEND_ACC_PUBLIC)
     CSPEED_ME(App, setAlias,            arginfo_cspeed_set_alias,                   ZEND_ACC_PUBLIC)
     CSPEED_ME(App, run,                 arginfo_cspeed_run,                         ZEND_ACC_PUBLIC)
     PHP_FE_END
@@ -345,6 +364,7 @@ CSPEED_INIT(app)
 
     zend_declare_property_null(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), ZEND_ACC_PRIVATE);
     zend_declare_property_null(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_DI_OBJECT), ZEND_ACC_PRIVATE);
+    zend_declare_property_null(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_MODULES), ZEND_ACC_PRIVATE);
 }
 /*}}}*/
 

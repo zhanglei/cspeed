@@ -67,6 +67,50 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
             result = strtok( NULL, delims);
         }
     }
+
+    /* All registered module */
+    zval *all_modules = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_APP_MODULES), 1, NULL);
+
+    /* To judge the module is correctly register or not */
+    if (path_array[2] != NULL) {
+        /* First we must to check whether the module is registered or not */
+        if (Z_ISNULL_P(all_modules)){
+            php_error_docref(NULL, E_ERROR, "Registered module empty. You must register it first.");
+            return ;
+        }
+        zend_bool is_exists = zend_hash_str_exists(Z_ARRVAL_P(all_modules), CSPEED_STRL(path_array[0]));
+        if ( is_exists ) {
+            php_error_docref(NULL, E_ERROR, "Module: %s not registered. You must register it first.", path_array[0]);
+            return ;
+        }
+        /* path_array[0] : module, path_array[1]: controller, path_array[2] : action*/
+        zend_string *module_path_exists = strpprintf(0, "%s/../%s", cspeed_get_cwd(), path_array[0]);
+        if (access(ZSTR_VAL(module_path_exists), F_OK) == -1) {
+            php_error_docref(NULL, E_ERROR, "Module registered. But not exists in project.");
+            return ;
+        }
+        if (path_array[0] != NULL) {
+            default_module = path_array[0];
+        }
+        if (path_array[1] != NULL) {
+            title_upper_string(path_array[1]);
+            default_controller = path_array[1];
+        }
+        if (path_array[2] != NULL) {
+            default_action = ZSTR_VAL(strpprintf(0, "%sAction", path_array[2]));
+        }
+        zend_string_release(module_path_exists);
+    } else {
+        /*path_array[0]: controller, path_array[1] : action*/
+        if (path_array[0] != NULL) {
+            title_upper_string(path_array[0]);
+            default_controller = path_array[0];
+        }
+        if (path_array[1] != NULL) {
+            default_action = ZSTR_VAL(strpprintf(0, "%sAction", path_array[1]));
+        }
+    }
+
     /* Now the path info were parsed into correctly form */
     /**
      *  If the path_array[0] didn't exists:
@@ -75,27 +119,27 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
      *      path_array[0] means module, path_array[1] equals controller path_array[2] equal action
      *  if not exists, using the default settting
      */
-    if (path_array[0] != NULL){
-        zend_string *module_path_exists = strpprintf(0, "%s/../%s", cspeed_get_cwd(), path_array[0]);
-        if (access(ZSTR_VAL(module_path_exists), F_OK) == -1) {
-            /* Module not exists, path_array[0] means the controller */
-            title_upper_string(path_array[0]);
-            default_controller = path_array[0];
-            if (path_array[1] != NULL) {
-                default_action = ZSTR_VAL(strpprintf(0, "%sAction", path_array[1]));
-            }
-        } else {
-            default_module = path_array[0];
-            if (path_array[1] != NULL) {
-                title_upper_string(path_array[1]);
-                default_controller = path_array[1];
-            }
-            if (path_array[2] != NULL) {
-                default_action = ZSTR_VAL(strpprintf(0, "%sAction", path_array[2]));
-            }
-        }
-        zend_string_release(module_path_exists);
-    }
+    // if (path_array[0] != NULL){
+    //     zend_string *module_path_exists = strpprintf(0, "%s/../%s", cspeed_get_cwd(), path_array[0]);
+    //     if (access(ZSTR_VAL(module_path_exists), F_OK) == -1) {
+    //         /* Module not exists, path_array[0] means the controller */
+    //         title_upper_string(path_array[0]);
+    //         default_controller = path_array[0];
+    //         if (path_array[1] != NULL) {
+    //             default_action = ZSTR_VAL(strpprintf(0, "%sAction", path_array[1]));
+    //         }
+    //     } else {
+    //         default_module = path_array[0];
+    //         if (path_array[1] != NULL) {
+    //             title_upper_string(path_array[1]);
+    //             default_controller = path_array[1];
+    //         }
+    //         if (path_array[2] != NULL) {
+    //             default_action = ZSTR_VAL(strpprintf(0, "%sAction", path_array[2]));
+    //         }
+    //     }
+    //     zend_string_release(module_path_exists);
+    // }
     /* Combine the full path to include the file */
     zend_string *full_include_controller_path = strpprintf(0, "%s/../%s/controllers/%s.php", cspeed_get_cwd(), default_module, default_controller);
     if (access(ZSTR_VAL(full_include_controller_path), F_OK) == -1) {

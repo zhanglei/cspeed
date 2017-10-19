@@ -25,6 +25,8 @@ zend_class_entry *cspeed_app_ce;                                /* The global CA
 
 #define CSPEED_APP_AUTOLOAD_ALIASES   "__cspeed_app_aliases"    /* The aliases which let the system to locate the file */
 
+#define CSPEED_APP_MODULES            "__cspeed_app_modules"    /* All modules, which cspeed to dispatch the URL */
+
 #define CSPEED_APP_DI_OBJECT          "__cspeed_app_di_object"  /* The di object which passed to App class */
 
 CSPEED_INIT(app);                                               /* The init function for the CApp class */
