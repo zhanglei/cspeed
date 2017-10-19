@@ -75,11 +75,7 @@
 	推荐的Nginx配置：
 	
     location / {
-	# try_files $uri $uri/ /index.php$uri;
-        if (!-e $request_filename) {
-            rewrite ^/(.*)$ /index.php/$1 last;
-        }
-	# 如果是二级目录请设置为二级目录形式
+	try_files $uri $uri/ /index.php$uri$args;
     }
 
     location ~ \.php {
