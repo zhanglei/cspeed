@@ -1,4 +1,4 @@
-# CSpeed micro framework v1.2.0 #
+# CSpeed micro framework v1.2.1 #
 
 ----------
 
@@ -268,7 +268,54 @@ public 目录下的 index.php 内容如下：
 
 ## 模型 ##
 	
-	鉴于上一个版本中的数据库性能有影响，本版本正处于重构状态。开发中~敬请期待.
+	/* 使用模型前需要先向CSpeed引擎注入对应的模块 */
+	index.php 入口文件:
+	
+	$di -> set('db', function(){
+		return new \Cs\db\pdo\MySql([
+			'dsn'		=>	'mysql:host=localhost;dbname=cspeed',
+			'username'	=>	'root',
+			'password'	=>	'cspeed'
+		]);
+	});
+	
+	/* 在控制器中或者CSpeed项目的其余地方 */
+	User模型：
+		class User extends \Cs\mvc\Model
+		{
+			// 此处没有重写tableName方法，故操作的数据表是： user	
+		}
+		
+	【增加记录】：
+		$user = new User();
+		$user->name = 'cspeed';
+		$user->version = 'v1.2.1';
+		$user->save();
+		
+	【更新记录】:
+		$user = User::find()->where('id = 1');
+		$user->name = 'CSpeed';
+		$user->version = 'v1.2.2';
+		$user->save();
+		
+	【删除记录】：
+		$user = User::find()->where(['id'=>1]);
+		$user->delete();
+		
+	【查询记录】：
+		// 一条记录
+		$info = User::find()->where(['id'=>3])
+					  ->andWhere('name="CSpeed"')->one();
+		// 所有的记录：
+		$infos = User::find()->all();
+	
+	如果需要启用事务：请使用：
+		$this->get('db')->begin(); // 启用事务
+		$this->get('db')->rollback(); // 回滚事务
+		$this->get('db')->commit(); // 提交事务
+	上面示例：
+		$this->get('db')：
+	是使用的注入容器的方法，其中的db对应于$di->set('db', function(){}); 中的 db。
 
 ## 测试结果 ##
 	
