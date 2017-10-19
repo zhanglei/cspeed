@@ -147,7 +147,7 @@ CSPEED_METHOD(MySql, __construct)/*{{{ proto MySql::__construct(array $options =
         cspeed_pdo_construct(&pdo_object, Z_STRVAL_P(dsn), Z_STRVAL_P(username), Z_STRVAL_P(password), pdo_options);
     }
     /* Store the getting pdo object into the property */
-    zend_update_property(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), &pdo_object);
+    zend_update_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), &pdo_object);
     zval_ptr_dtor(options);
     zval_ptr_dtor(&pdo_object);
 }/*}}}*/
@@ -518,7 +518,7 @@ CSPEED_INIT(mysql)/*{{{*/
     /* Implements from the ModelInterface */
     zend_class_implements(cspeed_mysql_ce, 1, cspeed_model_interface_ce);
 
-    zend_declare_property_null(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), ZEND_ACC_PROTECTED);
+    zend_declare_property_null(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), ZEND_ACC_PUBLIC|ZEND_ACC_STATIC);
     zend_declare_property_string(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_SELECT), "", ZEND_ACC_PROTECTED);
     zend_declare_property_string(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_FROM), "", ZEND_ACC_PROTECTED);
     zend_declare_property_string(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_WHERE), "", ZEND_ACC_PROTECTED);

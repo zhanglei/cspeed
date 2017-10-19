@@ -24,7 +24,7 @@
 extern zend_module_entry cspeed_module_entry;
 #define phpext_cspeed_ptr &cspeed_module_entry
 
-#define PHP_CSPEED_VERSION "0.1.5"
+#define PHP_CSPEED_VERSION "1.2.0"
 
 #ifdef PHP_WIN32
 #	define PHP_CSPEED_API __declspec(dllexport)
@@ -41,12 +41,10 @@ extern zend_module_entry cspeed_module_entry;
 /*
   	Declare any global variables you may need between the BEGIN
 	and END macros here:
-
-ZEND_BEGIN_MODULE_GLOBALS(cspeed)
-	zend_long  global_value;
-	char *global_string;
-ZEND_END_MODULE_GLOBALS(cspeed)
 */
+ZEND_BEGIN_MODULE_GLOBALS(cspeed)
+  zend_array  global_config;
+ZEND_END_MODULE_GLOBALS(cspeed)
 
 /* Always refer to the globals in your function as CSPEED_G(variable).
    You are encouraged to rename these macros something shorter, see

@@ -31,9 +31,7 @@
 
 #include "kernel/db/pdo.h"
 
-/* If you declare any globals in php_cspeed.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(cspeed)
-*/
 
 /* True global resources - no need for thread safety here */
 static int le_cspeed;
@@ -53,19 +51,27 @@ PHP_INI_END()
    Return a string to confirm that the module is compiled in */
 PHP_FUNCTION(confirm_cspeed_compiled)
 {
-    zval object;
-    cspeed_pdo_construct(&object, "mysql:host=localhost;dbname=supjos", "root", "Root@localhost", NULL);
+    // zend_printf("hello world");
+    // RETURN_FALSE;
+    zval *result = cspeed_parse_ini_file("test.ini", NULL, NULL, 0);
+    if (result) {
+        RETURN_ZVAL(result, 1, NULL);
+    } else {
+        RETURN_FALSE
+    }
+    // zval object;
+    // cspeed_pdo_construct(&object, "mysql:host=localhost;dbname=supjos", "root", "Root@localhost", NULL);
 
-    zval pdo_statement;
-    cspeed_pdo_prepare(&object, "SELECT * FROM www_product LIMIT 10", &pdo_statement);
+    // zval pdo_statement;
+    // cspeed_pdo_prepare(&object, "SELECT * FROM www_product LIMIT 10", &pdo_statement);
 
-    zval retval;
-    cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
+    // zval retval;
+    // cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
 
-    zval result;
-    cspeed_pdo_statement_fetch_all(&pdo_statement, &result);
+    // zval result;
+    // cspeed_pdo_statement_fetch_all(&pdo_statement, &result);
 
-    RETURN_ZVAL(&result, 1, NULL);
+    // RETURN_ZVAL(&result, 1, NULL);
 }
 /* }}} */
 
@@ -100,6 +106,9 @@ PHP_MINIT_FUNCTION(cspeed)
     request_init();
     response_init();
     controller_init();
+
+    /* ActiveRecord model */
+    model_init();
 
 	return SUCCESS;
 }
