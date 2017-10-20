@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
+  | CSpeed framework                                                     |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -12,7 +12,7 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author:                                                              |
+  | Author:Josin<774542602@qq.com|www.supjos.cn>                         |
   +----------------------------------------------------------------------+
 */
 
@@ -36,55 +36,12 @@ ZEND_DECLARE_MODULE_GLOBALS(cspeed)
 /* True global resources - no need for thread safety here */
 static int le_cspeed;
 
-/* {{{ PHP_INI
- */
-/* Remove comments and fill if you need to have entries in php.ini
-PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("cspeed.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_cspeed_globals, cspeed_globals)
-    STD_PHP_INI_ENTRY("cspeed.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_cspeed_globals, cspeed_globals)
-PHP_INI_END()
-*/
-/* }}} */
-
-/* Every user-visible function in PHP should document itself in the source */
-/* {{{ proto string confirm_cspeed_compiled(string arg)
-   Return a string to confirm that the module is compiled in */
-PHP_FUNCTION(confirm_cspeed_compiled)
+/* {{{ proto string getCSpeedVersion()
+   Return the CSpeed version */
+PHP_FUNCTION(getCSpeedVersion)
 {
-    // zend_printf("hello world");
-    // RETURN_FALSE;
-    zval *result = cspeed_parse_ini_file("test.ini", NULL, NULL, 0);
-    if (result) {
-        RETURN_ZVAL(result, 1, NULL);
-    } else {
-        RETURN_FALSE
-    }
-    // zval object;
-    // cspeed_pdo_construct(&object, "mysql:host=localhost;dbname=supjos", "root", "Root@localhost", NULL);
-
-    // zval pdo_statement;
-    // cspeed_pdo_prepare(&object, "SELECT * FROM www_product LIMIT 10", &pdo_statement);
-
-    // zval retval;
-    // cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
-
-    // zval result;
-    // cspeed_pdo_statement_fetch_all(&pdo_statement, &result);
-
-    // RETURN_ZVAL(&result, 1, NULL);
+    RETURN_STRING(PHP_CSPEED_VERSION);
 }
-/* }}} */
-
-
-/* {{{ php_cspeed_init_globals
- */
-/* Uncomment this function if you have INI entries
-static void php_cspeed_init_globals(zend_cspeed_globals *cspeed_globals)
-{
-	cspeed_globals->global_value = 0;
-	cspeed_globals->global_string = NULL;
-}
-*/
 /* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION
@@ -109,6 +66,8 @@ PHP_MINIT_FUNCTION(cspeed)
 
     /* ActiveRecord model */
     model_init();
+
+    config_init();
 
 	return SUCCESS;
 }
@@ -151,12 +110,10 @@ PHP_RSHUTDOWN_FUNCTION(cspeed)
 PHP_MINFO_FUNCTION(cspeed)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "cspeed support", "enabled");
+    php_info_print_table_header(2, "CSpeed support", "enabled");
+    php_info_print_table_header(2, "Author", "Josin<774542602@qq.com|www.supjos.cn>");
+	php_info_print_table_header(2, "Version", PHP_CSPEED_VERSION);
 	php_info_print_table_end();
-
-	/* Remove comments if you have entries in php.ini
-	DISPLAY_INI_ENTRIES();
-	*/
 }
 /* }}} */
 
@@ -165,7 +122,7 @@ PHP_MINFO_FUNCTION(cspeed)
  * Every user visible function must have an entry in cspeed_functions[].
  */
 const zend_function_entry cspeed_functions[] = {
-	PHP_FE(confirm_cspeed_compiled,	NULL)		/* For testing, remove later. */
+	PHP_FE(getCSpeedVersion,	NULL)		/* For testing, remove later. */
 	PHP_FE_END	/* Must be the last line in cspeed_functions[] */
 };
 /* }}} */

@@ -29,7 +29,7 @@ char *title_upper_string(char *src);                                            
 
 char *title_lower_string(char *src);                                                      /* Lower case the first char */
 
-zval *cspeed_parse_ini_file(char *file_name, char *node_name, char *node_key, zend_bool); /* Parsethe ini file with the given node and key */
+void cspeed_parse_ini_file(char *file_name, char *node_name, char *node_key, zend_bool, zval *retval); /* Parsethe ini file with the given node and key */
 
 #endif
 

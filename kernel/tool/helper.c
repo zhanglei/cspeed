@@ -140,7 +140,7 @@ void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, zval *arg3, int cal
     }
 }/* }}} */
 
-zval *cspeed_parse_ini_file(char *file_name, char *node_name, char *node_key, zend_bool parse_section)/*{{{ parse the INI file, with the given key and node */
+void cspeed_parse_ini_file(char *file_name, char *node_name, char *node_key, zend_bool parse_section, zval *retval)/*{{{ parse the INI file, with the given key and node */
 {
     zend_file_handle fh;
     zend_ini_parser_cb_t ini_parser_cb;
@@ -162,24 +162,24 @@ zval *cspeed_parse_ini_file(char *file_name, char *node_name, char *node_key, ze
     array_init(&ini_array_value);
     if (zend_parse_ini_file(&fh, 0, (int)ZEND_INI_SCANNER_NORMAL, ini_parser_cb, &ini_array_value) == FAILURE) {
         zval_dtor(&ini_array_value);
-        return NULL;
+        ZVAL_NULL(&ini_array_value);
     } else {
         /* To find the key and the node value from the data */
         if (node_name != NULL) {
             zval *node_value = zend_hash_find(Z_ARRVAL_P(&ini_array_value), zend_string_init(CSPEED_STRL(node_name), 0));
             if (node_key == NULL) {
                 Z_TRY_ADDREF_P(node_value);
-                return node_value;
+                ZVAL_COPY_VALUE(retval, node_value);
             } else {
                 zval *key_value = zend_hash_find(Z_ARRVAL_P(node_value), zend_string_init(CSPEED_STRL(node_key), 0));
-                return key_value;
+                ZVAL_COPY_VALUE(retval, key_value);
             }
         } else if ( ( node_name == NULL ) && ( node_key != NULL ) ) {
             zval *key_value = zend_hash_find(Z_ARRVAL_P(&ini_array_value), zend_string_init(CSPEED_STRL(node_key), 0));
-            return key_value;
+            ZVAL_COPY_VALUE(retval, key_value);
         } else {
             Z_TRY_ADDREF_P(&ini_array_value);
-            return &ini_array_value;
+            ZVAL_COPY_VALUE(retval, &ini_array_value);
         }
     }
 }

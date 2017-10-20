@@ -34,10 +34,10 @@ void cspeed_pdo_commit(zval *pdo_object, zval *retval);
 void cspeed_pdo_roll_back(zval *pdo_object, zval *retval);
 
 /* Commit the current sql error code */
-void cspeed_pdo_error_code(zval *pdo_object, zval *retval);
+void cspeed_pdo_error_code(zval *pdostatement_obj, zval *retval);
 
 /* Commit the current sql error info */
-void cspeed_pdo_error_info(zval *pdo_object, zval *retval);
+void cspeed_pdo_error_info(zval *pdostatement_obj, zval *retval);
 
 /* Exec the current sql */
 void cspeed_pdo_exec(zval *pdo_object, char *sql, zval *retval);

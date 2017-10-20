@@ -260,6 +260,9 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
     zval modules;
     array_init(&modules);
     zend_update_property(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_APP_MODULES), &modules);
+
+    /* \Cs\App::$app */
+    zend_update_static_property(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_PROPERTY), di_object);
 }/*}}}*/
 
 CSPEED_METHOD(App, get)/*{{{ proto App::get() */
@@ -365,6 +368,7 @@ CSPEED_INIT(app)
     zend_declare_property_null(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), ZEND_ACC_PRIVATE);
     zend_declare_property_null(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_DI_OBJECT), ZEND_ACC_PRIVATE);
     zend_declare_property_null(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_MODULES), ZEND_ACC_PRIVATE);
+    zend_declare_property_null(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_PROPERTY), ZEND_ACC_PUBLIC|ZEND_ACC_STATIC);
 }
 /*}}}*/
 

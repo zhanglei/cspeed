@@ -18,27 +18,14 @@
 
 /* $Id$ */
 
-#ifndef CSPEED_APP_H
-#define CSPEED_APP_H
+#ifndef CSPEED_TOOL_CONFIGS_H
+#define CSPEED_TOOL_CONFIGS_H
 
-zend_class_entry *cspeed_app_ce;                                /* The global CApp class entry */
+zend_class_entry *cspeed_config_ce;
 
-#define CSPEED_APP_AUTOLOAD_ALIASES   "__cspeed_app_aliases"    /* The aliases which let the system to locate the file */
-
-#define CSPEED_APP_MODULES            "__cspeed_app_modules"    /* All modules, which cspeed to dispatch the URL */
-#define CSPEED_APP_DI_OBJECT          "__cspeed_app_di_object"  /* The di object which passed to App class */
-#define CSPEED_APP_PROPERTY           "app"                     /* The app property */
-
-CSPEED_INIT(app);                                               /* The init function for the CApp class */
-
+#define CSPEED_CONFIG_VARIABLES         "__cspeed_config_variables"             /*All variables*/
 
 #endif
-
-
-
-
-
-
 
 
 
@@ -50,7 +37,3 @@ CSPEED_INIT(app);                                               /* The init func
  * vim600: noet sw=4 ts=4 fdm=marker
  * vim<600: noet sw=4 ts=4
  */
-
-
-
-

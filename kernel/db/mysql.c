@@ -46,7 +46,34 @@ char *get_build_sql(zval *this) /*{{{ Return the builded SQL*/
     zval *having = zend_read_property(cspeed_mysql_ce, this, CSPEED_STRL(CSPEED_MYSQL_HAVING), 1, NULL);
     zval *order_by = zend_read_property(cspeed_mysql_ce, this, CSPEED_STRL(CSPEED_MYSQL_ORDER_BY), 1, NULL);
 
-    return ZSTR_VAL(strpprintf(0, " SELECT %s FROM %s%s%s%s%s%s", Z_STRVAL_P(select), Z_STRVAL_P(from), Z_STRVAL_P(where), Z_STRVAL_P(group_by), Z_STRVAL_P(having), Z_STRVAL_P(order_by), Z_STRVAL_P(limit) ));
+    return ZSTR_VAL(strpprintf(0, "SELECT %s FROM %s%s%s%s%s%s", Z_STRVAL_P(select), Z_STRVAL_P(from), 
+        Z_STRVAL_P(where), Z_STRVAL_P(group_by), Z_STRVAL_P(having), Z_STRVAL_P(order_by), Z_STRVAL_P(limit) ));
+}/*}}}*/
+
+void reset_mysql_sql(zval *this)/*{{{ Rest the SQL for the next running */
+{
+    zend_update_property_string(cspeed_mysql_ce, this, CSPEED_STRL(CSPEED_MYSQL_SELECT), "");
+    zend_update_property_string(cspeed_mysql_ce, this, CSPEED_STRL(CSPEED_MYSQL_FROM), "");
+    zend_update_property_string(cspeed_mysql_ce, this, CSPEED_STRL(CSPEED_MYSQL_WHERE), "");
+    zend_update_property_string(cspeed_mysql_ce, this, CSPEED_STRL(CSPEED_MYSQL_GROUP_BY), "");
+    zend_update_property_string(cspeed_mysql_ce, this, CSPEED_STRL(CSPEED_MYSQL_LIMIT), "");
+    zend_update_property_string(cspeed_mysql_ce, this, CSPEED_STRL(CSPEED_MYSQL_HAVING), "");
+    zend_update_property_string(cspeed_mysql_ce, this, CSPEED_STRL(CSPEED_MYSQL_ORDER_BY), "");
+}/*}}}*/
+
+zend_bool output_sql_errors(zval *pdo_statement)  /*{{{ Return the SQL running errors*/
+{
+    zval retval;
+    cspeed_pdo_error_info(pdo_statement, &retval);
+    zval *sql_state = zend_hash_index_find(Z_ARRVAL(retval), 0);
+    zval *sql_code = zend_hash_index_find(Z_ARRVAL_P(&retval), 1);
+    zval *sql_info = zend_hash_index_find(Z_ARRVAL_P(&retval), 2);
+    if ( memcmp( Z_STRVAL_P(sql_state), CSPEED_STRL("0000"))){
+        php_output_discard();
+        zend_printf("SQL ERROR: %d %s", Z_LVAL_P(sql_code), Z_STRVAL_P(sql_info));
+        return TRUE;
+    }
+    return FALSE;
 }/*}}}*/
 
 /*{{{*/
@@ -385,7 +412,7 @@ CSPEED_METHOD(MySql, query)/*{{{ proto MySql::query($rawsql)*/
 
 CSPEED_METHOD(MySql, execute)/*{{{ proto MySql::execute($rawsql)*/
 {
-    zval *pdo_object = zend_read_property(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1, NULL);
+    zval *pdo_object = zend_read_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1);
     zval *sql_property = zend_read_property(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_RAW_SQL), 1, NULL);
     zval *param_property = zend_read_property(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_BIND_PARAMS), 1, NULL);
 
@@ -398,15 +425,20 @@ CSPEED_METHOD(MySql, execute)/*{{{ proto MySql::execute($rawsql)*/
     zval retval;
     cspeed_pdo_statement_execute(&pdo_statement, param_property, &retval);
 
-    zval result;
-    cspeed_pdo_statement_fetch_all(&pdo_statement, &result);
+    if (!output_sql_errors(&pdo_statement)){
 
-    RETURN_ZVAL(&result, 1, NULL);
+        zval result;
+        cspeed_pdo_statement_fetch_all(&pdo_statement, &result);
+
+        zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_RAW_SQL), ""); /*Reset the SQL*/
+
+        RETURN_ZVAL(&result, 1, NULL);
+    }
 }/*}}}*/
 
 CSPEED_METHOD(MySql, begin)/*{{{ proto MySql::begin()*/
 {
-    zval *pdo_object = zend_read_property(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1, NULL);
+    zval *pdo_object = zend_read_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1);
 
     zval retval;
     cspeed_pdo_begin_transaction(pdo_object, &retval);
@@ -415,7 +447,7 @@ CSPEED_METHOD(MySql, begin)/*{{{ proto MySql::begin()*/
 
 CSPEED_METHOD(MySql, rollback)/*{{{ proto MySql::rollback()*/
 {
-    zval *pdo_object = zend_read_property(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1, NULL);
+    zval *pdo_object = zend_read_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1);
 
     zval retval;
     cspeed_pdo_roll_back(pdo_object, &retval);
@@ -424,7 +456,7 @@ CSPEED_METHOD(MySql, rollback)/*{{{ proto MySql::rollback()*/
 
 CSPEED_METHOD(MySql, commit)/*{{{ proto MySql::commit()*/
 {
-    zval *pdo_object = zend_read_property(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1, NULL);
+    zval *pdo_object = zend_read_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1);
 
     zval retval;
     cspeed_pdo_commit(pdo_object, &retval);
@@ -433,7 +465,7 @@ CSPEED_METHOD(MySql, commit)/*{{{ proto MySql::commit()*/
 
 CSPEED_METHOD(MySql, lastInsertId)/*{{{ proto MySql::lastInsertId()*/
 {
-    zval *pdo_object = zend_read_property(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1, NULL);
+    zval *pdo_object = zend_read_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1);
 
     zval retval;
     cspeed_pdo_last_insert_id(pdo_object, NULL, &retval);
@@ -442,7 +474,7 @@ CSPEED_METHOD(MySql, lastInsertId)/*{{{ proto MySql::lastInsertId()*/
 
 CSPEED_METHOD(MySql, rowCount)/*{{{ proto MySql::rowCount()*/
 {
-    zval *pdo_object = zend_read_property(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1, NULL);
+    zval *pdo_object = zend_read_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1);
 
     zval retval;
     cspeed_pdo_statement_row_count(pdo_object, &retval);
@@ -451,7 +483,7 @@ CSPEED_METHOD(MySql, rowCount)/*{{{ proto MySql::rowCount()*/
 
 CSPEED_METHOD(MySql, find)/*{{{ proto MySql::find()*/
 {
-    zval *pdo_object = zend_read_property(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1, NULL);
+    zval *pdo_object = zend_read_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1);
 
     zval pdo_statement;
     cspeed_pdo_prepare(pdo_object, get_build_sql(getThis()), &pdo_statement);
@@ -462,15 +494,20 @@ CSPEED_METHOD(MySql, find)/*{{{ proto MySql::find()*/
     zval retval;
     cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
 
-    zval result;
-    cspeed_pdo_statement_fetch(&pdo_statement, &result);
+    if (!output_sql_errors(&pdo_statement)){
 
-    RETURN_ZVAL(&result, 1, NULL);
+        zval result;
+        cspeed_pdo_statement_fetch(&pdo_statement, &result);
+
+        reset_mysql_sql(getThis()); /*Reset the SQL*/
+
+        RETURN_ZVAL(&result, 1, NULL);
+    }
 }/*}}}*/
 
 CSPEED_METHOD(MySql, findAll)/*{{{ proto MySql::findAll()*/
 {
-    zval *pdo_object = zend_read_property(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1, NULL);
+    zval *pdo_object = zend_read_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1);
 
     zval pdo_statement;
     cspeed_pdo_prepare(pdo_object, get_build_sql(getThis()), &pdo_statement);
@@ -481,10 +518,15 @@ CSPEED_METHOD(MySql, findAll)/*{{{ proto MySql::findAll()*/
     zval retval;
     cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
 
-    zval result;
-    cspeed_pdo_statement_fetch_all(&pdo_statement, &result);
+    if (!output_sql_errors(&pdo_statement)){
 
-    RETURN_ZVAL(&result, 1, NULL);
+        zval result;
+        cspeed_pdo_statement_fetch_all(&pdo_statement, &result);
+
+        reset_mysql_sql(getThis()); /*Reset the SQL*/
+
+        RETURN_ZVAL(&result, 1, NULL);
+    }
 }/*}}}*/
 
 static const zend_function_entry cspeed_mysql_functions[] = { /*{{{*/

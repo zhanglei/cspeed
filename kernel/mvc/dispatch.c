@@ -111,35 +111,6 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
         }
     }
 
-    /* Now the path info were parsed into correctly form */
-    /**
-     *  If the path_array[0] didn't exists:
-     *    The path_array[0] means controller, path_array[1] equals action
-     *  Else if path_array[0] exists the directory: 
-     *      path_array[0] means module, path_array[1] equals controller path_array[2] equal action
-     *  if not exists, using the default settting
-     */
-    // if (path_array[0] != NULL){
-    //     zend_string *module_path_exists = strpprintf(0, "%s/../%s", cspeed_get_cwd(), path_array[0]);
-    //     if (access(ZSTR_VAL(module_path_exists), F_OK) == -1) {
-    //         /* Module not exists, path_array[0] means the controller */
-    //         title_upper_string(path_array[0]);
-    //         default_controller = path_array[0];
-    //         if (path_array[1] != NULL) {
-    //             default_action = ZSTR_VAL(strpprintf(0, "%sAction", path_array[1]));
-    //         }
-    //     } else {
-    //         default_module = path_array[0];
-    //         if (path_array[1] != NULL) {
-    //             title_upper_string(path_array[1]);
-    //             default_controller = path_array[1];
-    //         }
-    //         if (path_array[2] != NULL) {
-    //             default_action = ZSTR_VAL(strpprintf(0, "%sAction", path_array[2]));
-    //         }
-    //     }
-    //     zend_string_release(module_path_exists);
-    // }
     /* Combine the full path to include the file */
     zend_string *full_include_controller_path = strpprintf(0, "%s/../%s/controllers/%s.php", cspeed_get_cwd(), default_module, default_controller);
     if (access(ZSTR_VAL(full_include_controller_path), F_OK) == -1) {
@@ -190,7 +161,6 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
         php_error_docref(NULL, E_ERROR, "Controller class: %s not exists the include file.", default_controller);
         return ;
     }
-    /*zend_printf("module:[%s]<br>controller:[%s]<br>action:[%s]<br>", default_module, default_controller, default_action);*/
 
 }/*}}}*/
 
