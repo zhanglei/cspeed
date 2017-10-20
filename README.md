@@ -489,12 +489,11 @@ public 目录下的 index.php 内容如下：
 				别名指向的绝对路径
 	
 	/* 注册模块，只有已注册过的模块，路由才能通过 */
-	public function registerModules($aliasKey, $aliasFullPath);
+	public function registerModules($modules);
 		参数:
-			$aliasKey:
-				别名名称
-			$aliasFullPath:
-				别名指向的绝对路径
+			$modules:
+				类型：数组类型数据，表示需要注册的模块，如：
+			registerModules(['admin', 'fronted']);
 				
 	/* CSpeed 框架执行URL分析 */
 	public function run();
