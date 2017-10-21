@@ -170,7 +170,7 @@ CSPEED_METHOD(MySql, __construct)/*{{{ proto MySql::__construct(array $options =
     zval pdo_object;
     if (pdo_options == NULL) {
         cspeed_pdo_construct(&pdo_object, Z_STRVAL_P(dsn), Z_STRVAL_P(username), Z_STRVAL_P(password), NULL);
-    } else {
+    } else if ( pdo_options && (Z_TYPE_P(pdo_options) == IS_ARRAY) ) {
         cspeed_pdo_construct(&pdo_object, Z_STRVAL_P(dsn), Z_STRVAL_P(username), Z_STRVAL_P(password), pdo_options);
     }
     /* Store the getting pdo object into the property */
@@ -182,26 +182,21 @@ CSPEED_METHOD(MySql, __construct)/*{{{ proto MySql::__construct(array $options =
 CSPEED_METHOD(MySql, select)/*{{{ proto MySql::select($fields)*/
 {
     zval *fields;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &fields) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &fields) == FAILURE) {
         return ;
     }
-    smart_str field_str = {0};
-    zval *value;
-    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(fields), value) {
-        if ( (Z_TYPE_P(value) == IS_STRING) && isalpha(*(Z_STRVAL_P(value))) ){
-            smart_str_appendc(&field_str, '`');
-            smart_str_appends(&field_str, Z_STRVAL_P(value));
-            smart_str_appends(&field_str, "`,");
-        }
-    } ZEND_HASH_FOREACH_END();
-    smart_str_0(&field_str);
-    char *temp_select_str = (char *)malloc(sizeof(char) * ZSTR_LEN(field_str.s));
-    memset(temp_select_str, 0, ZSTR_LEN(field_str.s));
-    memcpy(temp_select_str, ZSTR_VAL(field_str.s), ZSTR_LEN(field_str.s) - 1);
-    zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_SELECT), temp_select_str);
-    free(temp_select_str);
+    if (fields && (Z_TYPE_P(fields) == IS_ARRAY) ) {
+        zval result;
+        cspeed_build_quote_string(fields, &result);
+        zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_SELECT), Z_STRVAL(result));
+        zval_ptr_dtor(&result);
+    } else if (fields && (Z_TYPE_P(fields) == IS_STRING)){
+        zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_SELECT), Z_STRVAL_P(fields));
+    } else {
+        php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
+        RETURN_FALSE
+    }
     zval_ptr_dtor(fields);
-    smart_str_free(&field_str);
     RETURN_ZVAL(getThis(), 1, NULL);
 }/*}}}*/
 
@@ -219,101 +214,74 @@ CSPEED_METHOD(MySql, from)/*{{{ proto MySql::from($table)*/
 CSPEED_METHOD(MySql, where)/*{{{ proto MySql::where($where_condition)*/
 {
     zval *where;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &where) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &where) == FAILURE) {
         return ;
     }
-    /*zend_string *val_key;*/
-    zend_string *val_key;
-    zval *var_value;
-    smart_str where_str = {0};
-    smart_str_appends(&where_str, " WHERE ");
-    ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(where), val_key, var_value) {
-        if (isalpha(*(ZSTR_VAL(val_key)))) {
-            smart_str_appendc(&where_str, '`');
-            smart_str_appends(&where_str, ZSTR_VAL(val_key));
-            smart_str_appends(&where_str, "`='");
-            if (Z_TYPE_P(var_value) == IS_LONG){
-                smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, "%d", Z_LVAL_P(var_value))));
-            } else if (Z_TYPE_P(var_value) == IS_STRING) {
-                smart_str_appends(&where_str, Z_STRVAL_P(var_value));
-            }
-            smart_str_appends(&where_str, "' AND ");
-        }
-    } ZEND_HASH_FOREACH_END();
-    smart_str_0(&where_str);
-    char *temp_where_str = (char *)malloc(sizeof(char) * ZSTR_LEN(where_str.s) - 4);
-    memset(temp_where_str, 0, ZSTR_LEN(where_str.s) - 4);
-    memcpy(temp_where_str, ZSTR_VAL(where_str.s), ZSTR_LEN(where_str.s) - 5);
-    zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_WHERE), temp_where_str);
-    smart_str_free(&where_str);
+    if (where && (Z_TYPE_P(where) == IS_ARRAY)){
+        zval result;
+        cspeed_build_equal_string(where, " WHERE ", &result);
+        zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_WHERE), Z_STRVAL(result));
+        zval_ptr_dtor(&result);
+    } else if (where && (Z_TYPE_P(where) == IS_STRING)){
+        zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_WHERE), 
+            ZSTR_VAL(strpprintf(0, " WHERE %s", Z_STRVAL_P(where)))
+        );
+    } else {
+        php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
+        RETURN_FALSE
+    }
     zval_ptr_dtor(where);
-    free(temp_where_str);
     RETURN_ZVAL(getThis(), 1, NULL);
 }/*}}}*/
 
 CSPEED_METHOD(MySql, andWhere)/*{{{ proto MySql::andWhere($where_condition)*/
 {
     zval *where;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &where) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &where) == FAILURE) {
         return ;
     }
     /* Get the where condition */
     zval *previous_where = zend_read_property(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_WHERE), 1, NULL);
-    /*zend_string *val_key;*/
-    zend_string *val_key;
-    zval *var_value;
-    smart_str where_str = {0};
-    if (Z_TYPE_P(previous_where) == IS_STRING && previous_where) {
-        smart_str_appends(&where_str, Z_STRVAL_P(previous_where));
+    if (where && (Z_TYPE_P(where) == IS_ARRAY)){
+        zval result;
+        cspeed_build_equal_string(where, "", &result);
+        zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_WHERE), 
+            ZSTR_VAL(strpprintf(0, "%s AND %s", Z_STRVAL_P(previous_where), Z_STRVAL(result)))
+        );
+        zval_ptr_dtor(&result);
+    } else if (where && (Z_TYPE_P(where) == IS_STRING)){
+        zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_WHERE), 
+            ZSTR_VAL(strpprintf(0, "%s AND %s", Z_STRVAL_P(previous_where), Z_STRVAL_P(where)))
+        );
+    } else {
+        php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
+        RETURN_FALSE
     }
-    smart_str_appends(&where_str, " AND ");
-    ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(where), val_key, var_value) {
-        if (isalpha(*(ZSTR_VAL(val_key)))) {
-            smart_str_appendc(&where_str, '`');
-            smart_str_appends(&where_str, ZSTR_VAL(val_key));
-            smart_str_appends(&where_str, "`='");
-            if (Z_TYPE_P(var_value) == IS_LONG){
-                smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, "%d", Z_LVAL_P(var_value))));
-            } else if (Z_TYPE_P(var_value) == IS_STRING) {
-                smart_str_appends(&where_str, Z_STRVAL_P(var_value));
-            }
-            smart_str_appends(&where_str, "' AND ");
-        }
-    } ZEND_HASH_FOREACH_END();
-    smart_str_0(&where_str);
-    char *temp_where_str = (char *)malloc(sizeof(char) * ZSTR_LEN(where_str.s) - 4);
-    memset(temp_where_str, 0, ZSTR_LEN(where_str.s) - 4);
-    memcpy(temp_where_str, ZSTR_VAL(where_str.s), ZSTR_LEN(where_str.s) - 5);
-    zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_WHERE), temp_where_str);
-    smart_str_free(&where_str);
     zval_ptr_dtor(where);
-    free(temp_where_str);
     RETURN_ZVAL(getThis(), 1, NULL);
 }/*}}}*/
 
 CSPEED_METHOD(MySql, groupBy)/*{{{ proto MySql::groupBy($groupBy)*/
 {
     zval *group_by;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &group_by) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &group_by) == FAILURE) {
         return ;
     }
-    zval *var_value;
-    smart_str group_by_str = {0};
-    smart_str_appends(&group_by_str, " GROUP BY ");
-    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(group_by), var_value) {
-        if (Z_TYPE_P(var_value) == IS_STRING) {
-            smart_str_appendc(&group_by_str, '`');
-            smart_str_appends(&group_by_str, Z_STRVAL_P(var_value));
-            smart_str_appends(&group_by_str, "`,");
-        }
-    } ZEND_HASH_FOREACH_END();
-    smart_str_0(&group_by_str);
-    char *temp_group_by = (char *)malloc(sizeof(char) * (ZSTR_LEN(group_by_str.s)));
-    memset(temp_group_by, 0, ZSTR_LEN(group_by_str.s));
-    memcpy(temp_group_by, ZSTR_VAL(group_by_str.s), ZSTR_LEN(group_by_str.s) - 1);
-    zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_GROUP_BY), temp_group_by);
-    free(temp_group_by);
-    smart_str_free(&group_by_str);
+    if (group_by && (Z_TYPE_P(group_by) == IS_ARRAY)){
+        zval result;
+        cspeed_build_quote_string(group_by, &result);
+        zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_GROUP_BY), 
+            ZSTR_VAL(strpprintf(0, " GROUP BY %s", Z_STRVAL(result)))
+        );
+        zval_ptr_dtor(&result);
+    } else if (group_by && (Z_TYPE_P(group_by) == IS_STRING)){
+        zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_GROUP_BY), 
+            ZSTR_VAL(strpprintf(0, " GROUP BY %s", Z_STRVAL_P(group_by)))
+        );
+    } else {
+        php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
+        RETURN_FALSE
+    }
     zval_ptr_dtor(group_by);
     RETURN_ZVAL(getThis(), 1, NULL);
 }/*}}}*/
@@ -321,33 +289,22 @@ CSPEED_METHOD(MySql, groupBy)/*{{{ proto MySql::groupBy($groupBy)*/
 CSPEED_METHOD(MySql, having)/*{{{ proto MySql::having($having)*/
 {
     zval *having;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &having) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &having) == FAILURE) {
         return ;
     }
-    zend_string *var_key;
-    zval *var_value;
-    smart_str have_str = {0};
-    smart_str_appends(&have_str, " HAVING ");
-    ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(having), var_key, var_value) {
-        if (isalpha(*(ZSTR_VAL(var_key)))) {
-            smart_str_appendc(&have_str, '`');
-            smart_str_appends(&have_str, ZSTR_VAL(var_key));
-            smart_str_appends(&have_str, "`='");
-            if (Z_TYPE_P(var_value) == IS_LONG){
-                smart_str_appends(&have_str, ZSTR_VAL(strpprintf(0, "%d", Z_LVAL_P(var_value))));
-            } else if (Z_TYPE_P(var_value) == IS_STRING) {
-                smart_str_appends(&have_str, Z_STRVAL_P(var_value));
-            }
-            smart_str_appends(&have_str, "' AND ");
-        }
-    } ZEND_HASH_FOREACH_END();
-    smart_str_0(&have_str);
-    char *temp_having_str = (char *)malloc(sizeof(char) * (ZSTR_LEN(have_str.s) - 4 ));
-    memset(temp_having_str, 0, ZSTR_LEN(have_str.s) - 4);
-    memcpy(temp_having_str, ZSTR_VAL(have_str.s), ZSTR_LEN(have_str.s) - 5);
-    zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_HAVING), temp_having_str);
-    free(temp_having_str);
-    smart_str_free(&have_str);
+    if (having && (Z_TYPE_P(having) == IS_ARRAY)){
+        zval result;
+        cspeed_build_equal_string(having, " HAVING ", &result);
+        zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_HAVING), Z_STRVAL(result));
+        zval_ptr_dtor(&result);
+    } else if (having && (Z_TYPE_P(having) == IS_STRING)){
+        zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_HAVING), 
+            ZSTR_VAL(strpprintf(0, " HAVING %s", Z_STRVAL_P(having)))
+        );
+    } else {
+        php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
+        RETURN_FALSE
+    }
     zval_ptr_dtor(having);
     RETURN_ZVAL(getThis(), 1, NULL);
 }/*}}}*/
@@ -355,27 +312,34 @@ CSPEED_METHOD(MySql, having)/*{{{ proto MySql::having($having)*/
 CSPEED_METHOD(MySql, orderBy)/*{{{ proto MySql::orderBy($orderBy)*/
 {
     zval *order_by;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &order_by) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &order_by) == FAILURE) {
         return ;
     }
-    zval *var_value;
-    smart_str order_by_str = {0};
-    smart_str_appends(&order_by_str, " ORDER BY ");
-    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(order_by), var_value) {
-        if (Z_TYPE_P(var_value) == IS_STRING) {
-            /*smart_str_appendc(&order_by_str, '`');*/
-            smart_str_appends(&order_by_str, Z_STRVAL_P(var_value));
-            /*smart_str_appends(&order_by_str, "`,");*/
-            smart_str_appendc(&order_by_str, ',');
-        }
-    } ZEND_HASH_FOREACH_END();
-    smart_str_0(&order_by_str);
-    char *temp_order_by = (char *)malloc(sizeof(char) * (ZSTR_LEN(order_by_str.s)));
-    memset(temp_order_by, 0, ZSTR_LEN(order_by_str.s));
-    memcpy(temp_order_by, ZSTR_VAL(order_by_str.s), ZSTR_LEN(order_by_str.s) - 1);
-    zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_ORDER_BY), temp_order_by);
-    free(temp_order_by);
-    smart_str_free(&order_by_str);
+    if (order_by && (Z_TYPE_P(order_by) == IS_ARRAY)){
+        zval *var_value;
+        smart_str order_by_str = {0};
+        smart_str_appends(&order_by_str, " ORDER BY ");
+        ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(order_by), var_value) {
+            if (Z_TYPE_P(var_value) == IS_STRING) {
+                smart_str_appends(&order_by_str, Z_STRVAL_P(var_value));
+                smart_str_appendc(&order_by_str, ',');
+            }
+        } ZEND_HASH_FOREACH_END();
+        smart_str_0(&order_by_str);
+        char *temp_order_by = (char *)malloc(sizeof(char) * (ZSTR_LEN(order_by_str.s)));
+        memset(temp_order_by, 0, ZSTR_LEN(order_by_str.s));
+        memcpy(temp_order_by, ZSTR_VAL(order_by_str.s), ZSTR_LEN(order_by_str.s) - 1);
+        zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_ORDER_BY), temp_order_by);
+        free(temp_order_by);
+        smart_str_free(&order_by_str);
+    } else if (order_by && (Z_TYPE_P(order_by) == IS_STRING)){
+        zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_ORDER_BY), 
+            ZSTR_VAL(strpprintf(0, " ORDER BY %s", Z_STRVAL_P(order_by)))
+        );
+    } else {
+        php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
+        RETURN_FALSE
+    }
     zval_ptr_dtor(order_by);
     RETURN_ZVAL(getThis(), 1, NULL);
 }/*}}}*/
@@ -408,6 +372,7 @@ CSPEED_METHOD(MySql, query)/*{{{ proto MySql::query($rawsql)*/
     if (bind_params) {
         zend_update_property(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_BIND_PARAMS), bind_params);
     }
+    RETURN_TRUE
 }/*}}}*/
 
 CSPEED_METHOD(MySql, execute)/*{{{ proto MySql::execute($rawsql)*/
@@ -426,14 +391,12 @@ CSPEED_METHOD(MySql, execute)/*{{{ proto MySql::execute($rawsql)*/
     cspeed_pdo_statement_execute(&pdo_statement, param_property, &retval);
 
     if (!output_sql_errors(&pdo_statement)){
-
         zval result;
         cspeed_pdo_statement_fetch_all(&pdo_statement, &result);
-
         zend_update_property_string(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_RAW_SQL), ""); /*Reset the SQL*/
-
         RETURN_ZVAL(&result, 1, NULL);
     }
+    RETURN_FALSE
 }/*}}}*/
 
 CSPEED_METHOD(MySql, begin)/*{{{ proto MySql::begin()*/
@@ -495,14 +458,12 @@ CSPEED_METHOD(MySql, find)/*{{{ proto MySql::find()*/
     cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
 
     if (!output_sql_errors(&pdo_statement)){
-
         zval result;
         cspeed_pdo_statement_fetch(&pdo_statement, &result);
-
         reset_mysql_sql(getThis()); /*Reset the SQL*/
-
         RETURN_ZVAL(&result, 1, NULL);
     }
+    RETURN_NULL()
 }/*}}}*/
 
 CSPEED_METHOD(MySql, findAll)/*{{{ proto MySql::findAll()*/
@@ -519,14 +480,12 @@ CSPEED_METHOD(MySql, findAll)/*{{{ proto MySql::findAll()*/
     cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
 
     if (!output_sql_errors(&pdo_statement)){
-
         zval result;
         cspeed_pdo_statement_fetch_all(&pdo_statement, &result);
-
         reset_mysql_sql(getThis()); /*Reset the SQL*/
-
         RETURN_ZVAL(&result, 1, NULL);
     }
+    RETURN_NULL()
 }/*}}}*/
 
 static const zend_function_entry cspeed_mysql_functions[] = { /*{{{*/
@@ -571,3 +530,15 @@ CSPEED_INIT(mysql)/*{{{*/
     zend_declare_property_string(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_RAW_SQL), "", ZEND_ACC_PROTECTED);
     zend_declare_property_null(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_BIND_PARAMS), ZEND_ACC_PROTECTED);
 }/*}}}*/
+
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */
+

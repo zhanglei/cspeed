@@ -27,7 +27,7 @@
 	
 用户可以使用在多模块的系统架构中使用本特性
 	
-2、新增ini配置文件解析类：\Cs\tool\Config
+2、新增 INI 配置文件解析类：\Cs\tool\Config
 	
 	\Cs\tool\Config 类含有三个方法：
 			
@@ -40,7 +40,7 @@
 	3、getConfig($configKey);
 		获取ini配置文件解析后对应的关联数组的数据值.
 	
-	3、优化Model、MySql性能与BUG修复。
+3、优化Model、MySql性能与BUG修复。
 
 **CSpeed v1.2.1** 修复路由bug：
 
