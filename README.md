@@ -396,6 +396,7 @@ CSpeeed支持常见的请求方法，除了上面的 GET 外，还支持 POST、
 	$mysql->select(['id', 'price', 'name'])->from('www_product')->findAll();
         
 执行原生SQL查询
+
 	$mysql->query(" SELECT * FROM www_product  ");
 	$results = $mysql->execute(); 
         
