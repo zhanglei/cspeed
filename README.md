@@ -369,6 +369,7 @@ CSpeeed支持常见的请求方法，除了上面的 GET 外，还支持 POST、
 	$view->setSuffix('ppht');
 
 默认视图文件夹保存在 public 目录同级的 views 目录下, 可以通过 setViewDir 进行更改, 目录不能以 "/" 结尾
+
 	$view->setViewDir('../views');
 	
 视图内渲染
