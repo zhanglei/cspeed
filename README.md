@@ -6,9 +6,9 @@
 
 **CSpeed v1.2.2 特性**
 	
-	1、新增全局静态变量：\Cs\App::$app 获取注入容器Di的示例：
-	
-	在入口文件index.php 文件里：
+1、新增全局静态变量：\Cs\App::$app 获取注入容器Di的示例：
+
+在入口文件index.php 文件里：
 	
 	$di = new \Cs\di\Di();
 	
@@ -21,24 +21,24 @@
 	$app = new \Cs\App($di);
 	$app->run();
 	
-	/* 经过上面的设置后，可以在CSpeed引擎的任何地方
-	使用如下的方法获取Di容器注入的对象 */
+经过上面的设置后，可以在CSpeed引擎的任何地方使用如下的方法获取Di容器注入的对象
+
 	$config = \Cs\App::$app->get('config');
 	
-	/* 用户可以使用在多模块的系统架构中使用本特性 */
+用户可以使用在多模块的系统架构中使用本特性
 	
-	2、新增ini配置文件解析类：\Cs\tool\Config
+2、新增ini配置文件解析类：\Cs\tool\Config
 	
-		Config类含有三个方法：
+	\Cs\tool\Config 类含有三个方法：
 			
-			1、loadConfig($iniFile);
-				加载ini配置文件
+	1、loadConfig($iniFile);
+		加载ini配置文件
 				
-			2、getConfigs();
-				获取ini配置文件解析后的数据
-			
-			3、getConfig($configKey);
-				获取ini配置文件解析后对应的关联数组的数据值.
+	2、getConfigs();
+		获取ini配置文件解析后的数据
+		
+	3、getConfig($configKey);
+		获取ini配置文件解析后对应的关联数组的数据值.
 	
 	3、优化Model、MySql性能与BUG修复。
 
@@ -48,16 +48,17 @@
 
 默认的PATH_INFO信息的第一段自动作为模块优先处理，所以导致如下的bug：
 
-	/user/index与/user/index/index的路由规则是一致的问题。
+	/user/index与/user/index/index的路由规则是一致的问题
 	
 在新的CSpeed引擎v1.2.1版本中已经予以修复。请及时更新。
 	
-	v1.2.1新增方法：
+v1.2.1新增方法：
+
 	Cs\App 类：
 		
-		function registerModules(['admin', 'fronted']);
-			参数说明：
-				方法的参数为需要CSpeed引擎允许执行的模块，如果在路由规则中的模块不在此注册函数内，CSpeed引擎不予以执行。
+	function registerModules(['admin', 'fronted']);
+		参数说明：
+			方法的参数为需要CSpeed引擎允许执行的模块，如果在路由规则中的模块不在此注册函数内，CSpeed引擎不予以执行。
 		
 **CSpeed v1.2.0** 发布特性：
 	
@@ -66,7 +67,7 @@
 	
 使用示例：
 	
-	在应用的入口文件 index.php 中添加一条MySql类至Di注入容器：
+在应用的入口文件 index.php 中添加一条MySql类至Di注入容器：
 	
 	$di -> set('db', function(){
 		return new \Cs\db\pdo\MySql([
@@ -75,11 +76,10 @@
 			'password'=>'cspeed'
 		]);
 	});
-	/* 经过上面的设置后，在CSpeed框架中就可以使用模型操作数据库啦 */
+
+经过上面的设置后，在CSpeed框架中就可以使用模型操作数据库：
 	
-	/* 具体的使用示例如下： */
-	/* 模型文件 */
-	User.php
+具体的使用示例如下：模型文件：User.php
 	
 	class User extends \Cs\mvc\Model
 	{
@@ -91,9 +91,10 @@
 		}
 	}
 	
-	/* 控制器Index.php的indexAction方法中： */
+控制器Index.php的indexAction方法中： 
 	
-	// 1、新增记录
+1、新增记录
+
 	$user = new User();
 	$user->age = 25;
 	$user->name = "Josin";
@@ -102,21 +103,22 @@
 	
 	$user->save(); // 返回的结果是影响的行数
 	
-	// 2、修改记录
+2、修改记录
+
 	$user = User::find()->where(['id' => 2]);
 	
 	$user->age = 24;
 	$user->mobile = '10000';
 	$user->save(); // 返回影响的行数
 	
-	// 3、删除记录
+3、删除记录
+
 	$user = User::find()->where(['id' => 2]);
 	$user->delete(); // 返回影响的行数
 	
-	// 4、查询记录
-	$info = User::find()->where(['price' => '8888])->all();
+4、查询记录
 
-
+	$info = User::find()->where(['price' => '8888.88‘])->all();
 
 ## 开发环境 ##
 	
@@ -124,7 +126,7 @@
 
 	扩展只支持PHP7.x以上版本，低于PHP7.x以下的版本请先升级PHP版本
 
-	在WEB应用模式下，扩展通过解析 PATH_INFO 参数信息进行路由转发，请先确保 WEB服务器支持 PATH_INFO 模式；
+	在WEB应用模式下，扩展通过解析 PATH_INFO 参数信息进行路由转发，请先确保 WEB服务器支持 PATH_INFO 模式
 	并且需要隐藏index.php，否则系统不生效,无法完成路由解析。
 
 	推荐的Nginx配置：
@@ -161,10 +163,15 @@
 	
 	6、重启服务器Apache或者Nginx的PHP-FPM
 	
-经过以上步骤后，可以通过在phpinfo()中查看cspeed扩展
-或者使用如下函数检测：
+经过以上步骤后，可以通过在
+	
+	phpinfo()
+	
+中查看cspeed扩展是否安装或者使用如下函数检测：
+
 	extension_loaded('cspeed');
-    如果函数返回true则表示安装成功.
+	
+如果函数返回true则表示安装成功.
     
 ----------
 
@@ -189,9 +196,11 @@ public 目录下 index.php 内容如下：
 	$app = new \Cs\App();
 
 	$app->run();
-	/* 超简单的框架已经完成，只需要上面两行代码就可完成一个MVC框架 */
+
+超简单的框架已经完成，只需要上面两行代码就可完成一个MVC框架
 	
-	/* 注意App类构造函数可选参数Di类对象，如： */
+注意App类构造函数可选参数Di类对象，如：
+
 	$di = new \Cs\di\Di();
 	
 	$di->set('view', function(){
@@ -199,10 +208,10 @@ public 目录下 index.php 内容如下：
 		$view->setModuleDir('index');
 		return $view;
 	});
-	/*那么可以将此对象传入App构造函数中*/
+	
 	$app = new \Cs\App($di);
 	
-	/* 当进行了上面的步骤后，在控制器中可以使用$this-get('view')来获取设置的对象，以达到对象复用的目的 */
+当进行了上面的步骤后，在控制器中可以使用$this->get('view')来获取设置的对象，以达到对象复用的目的
 	
 
 在 public 同级的controllers目录下创建一个 Index.php 文件,内容如下：
@@ -249,26 +258,31 @@ WEB应用路由规则：
 
 public 目录下的 index.php 内容如下：
 
+当实例化一个 \Cs\App 类后，系统自动进行 autoload， autoload 的机制参见下面介绍
 	index.php
 	
-	/* 当实例化一个 \Cs\App 类后，系统自动进行 autoload， autoload的机制参见下面介绍 */
 	$app = new \Cs\App();	
 
-	/**
-	 * 方法的第一个参数支持正则匹配，第二个参数是一个Closure闭包函数
-	 * 第一个参数支持使用替代符 ： {name} 与 {id}, 其中 {name} 表示匹配字母数字横线并且首字母不是数字的字符串；
-	 *  {id}表示匹配任何数字，注意当使用了替代符的时候，匿名函数包含有一个参数：
-	 *  $match 来一一对应与匹配的替代符，如下面的正则匹配 URL “/index/cspeed-v1/18”的话：
-	 *  $app->get('/index/{name}/{id}$', function($match){
-	 * 
-	 *  });
-	 *  那么 $match[1] 则表示 cspeed-v1 $match[2]表示为18，依次类推
-	 */
+方法的第一个参数支持正则匹配，第二个参数是一个Closure闭包函数
+第一个参数支持使用替代符 ：** {name} **与 **{id}**
+**{name} **：表示匹配字母数字横线并且首字母不是数字的字符串
+**{id}**：表示匹配任何数字
+注意当使用了替代符的时候，匿名函数包含有一个参数：
+$match 来一一对应与匹配的替代符
+如下面的正则匹配 URL “/index/cspeed-v1/18”的话：
+
+	$app->get('/index/{name}/{id}$', function($match){
+
+	});
+	
+那么 $match[1] 则表示 cspeed-v1 $match[2]表示为18，依次类推
+
 	$app->get('/index$', function(){
 		echo '<h1>Hello CSpeed</h1>';
 	});
 
-	/* CSpeeed支持常见的请求方法，除了上面的 GET 外，还支持 POST、PUT、DELETE、OPTIONS、HEAD，具体见 API 文档 */
+CSpeeed支持常见的请求方法，除了上面的 GET 外，还支持 POST、PUT、DELETE、OPTIONS、HEAD，具体见 API 文档
+
 	$app->post('/goods/index/2$', function(){
 		/* Your code here. */
 	});
@@ -330,25 +344,29 @@ public 目录下的 index.php 内容如下：
 	
 	$view = new \Cs\mvc\View();
 
-	/* 方法包含两个参数，
-	 * 第一个参数为：需要渲染的视图的文件名
-	 * 第二个参数为：需要在视图中使用的变量，传入一个数组或者不传入
-	 */
+方法包含两个参数，
+第一个参数为：需要渲染的视图的文件名
+第二个参数为：需要在视图中使用的变量，传入一个数组或者不传入
+
 	$view->render('index', ['name'=>'CSpeed', 'version'=>'v2.1.8']);
 	
-	/* 如果需要添加单个变量到视图模块中，可以使用 setVar 方法 */
+如果需要添加单个变量到视图模块中，可以使用 setVar 方法
+
 	$view->setVar('addVar', ['a', 'b' ,'c', 'd']);
 
-	/* 如果需要或者视图的渲染效果但是并不输入使用 getRender方法，参数与 render 方法一致 */
+如果需要或者视图的渲染效果但是并不输出使用 getRender方法，参数与 render 方法一致
+
 	$viewResult = $view->getRender('index', ['name'=>'CSpeed', 'version'=>'v2.1.8']);
 
-	/* 默认的渲染视图后缀为 phtml，可以通过 setSuffix 方法进行更改 */
+默认的渲染视图后缀为 phtml，可以通过 setSuffix 方法进行更改
+
 	$view->setSuffix('ppht');
 
-	/* 默认视图文件夹保存在 public 目录同级的 views 目录下, 可以通过 setViewDir 进行更改, 目录不能以 "/" 结尾 */
+默认视图文件夹保存在 public 目录同级的 views 目录下, 可以通过 setViewDir 进行更改, 目录不能以 "/" 结尾
 	$view->setViewDir('../views');
 	
-	/*视图内渲染*/
+视图内渲染
+
 	$view->partial('layouts/head', ['a', 'b', 'c']);
 
 ## 数据库连接 ##
@@ -361,28 +379,34 @@ public 目录下的 index.php 内容如下：
 		'password'  =>    '3333'
 	]);
 	
-	/* 查询一条记录 */
+查询一条记录
+
 	$mysql->select(['id', 'price', 'name'])->from('www_product')
   		  ->where(['id' => 88'])->find();
 	 
-	/* 查询满足条件的所有记录 */
+查询满足条件的所有记录
+
 	$mysql->select(['id', 'price', 'name'])->from('www_product')->findAll();
         
-	/* 执行原生SQL查询 */
+执行原生SQL查询
 	$mysql->query(" SELECT * FROM www_product  ");
 	$results = $mysql->execute(); 
         
-	/* 执行预处理 */
+执行预处理
+
 	$mysql->query(' INSERT INTO www_product (id, price, name) VALUES (:id, :price, :name) ',
  	               [':id' => 33, ':price'=>3.33, ":name"=>"Apple"]);
 	$mysql->exeucte();
-	/* 获取刚刚插入的数据ID */
+	
+获取刚刚插入的数据ID
+
 	$id = $mysql->lastInsertId();
 
 ## 模型 ##
 	
-	/* 使用模型前需要先向CSpeed引擎注入对应的模块 */
-	index.php 入口文件:
+使用模型前需要先向CSpeed引擎注入对应的模块：
+
+	index.php ：
 	
 	$di -> set('db', function(){
 		return new \Cs\db\pdo\MySql([
@@ -392,43 +416,53 @@ public 目录下的 index.php 内容如下：
 		]);
 	});
 	
-	/* 在控制器中或者CSpeed项目的其余地方 */
-	User模型：
-		class User extends \Cs\mvc\Model
-		{
-			// 此处没有重写tableName方法，故操作的数据表是： user	
-		}
-		
-	【增加记录】：
-		$user = new User();
-		$user->name = 'cspeed';
-		$user->version = 'v1.2.1';
-		$user->save();
-		
-	【更新记录】:
-		$user = User::find()->where('id = 1');
-		$user->name = 'CSpeed';
-		$user->version = 'v1.2.2';
-		$user->save();
-		
-	【删除记录】：
-		$user = User::find()->where(['id'=>1]);
-		$user->delete();
-		
-	【查询记录】：
-		// 一条记录
-		$info = User::find()->where(['id'=>3])
-					  ->andWhere('name="CSpeed"')->one();
-		// 所有的记录：
-		$infos = User::find()->all();
+在控制器中或者CSpeed项目的其余地方
+
+	User模型：User.php
 	
-	如果需要启用事务：请使用：
-		$this->get('db')->begin(); // 启用事务
-		$this->get('db')->rollback(); // 回滚事务
-		$this->get('db')->commit(); // 提交事务
-	上面示例：
-		$this->get('db')：
-	是使用的注入容器的方法，其中的db对应于$di->set('db', function(){}); 中的 db。
+	class User extends \Cs\mvc\Model
+	{
+            // 此处没有重写tableName方法，故操作的数据表是： user	
+	}
+		
+【增加记录】：
+
+	$user = new User();
+	$user->name = 'cspeed';
+	$user->version = 'v1.2.1';
+	$user->save();
+		
+【更新记录】:
+
+	$user = User::find()->where('id = 1');
+	$user->name = 'CSpeed';
+	$user->version = 'v1.2.2';
+	$user->save();
+		
+【删除记录】：
+
+	$user = User::find()->where(['id'=>1]);
+	$user->delete();
+		
+【查询记录】：
+
+	// 一条记录
+	$info = User::find()->where(['id'=>3])
+				  ->andWhere('name="CSpeed"')->one();
+	// 所有的记录：
+	$infos = User::find()->all();
+	
+如果需要启用事务：请使用：
+
+	$this->get('db')->begin(); // 启用事务
+	$this->get('db')->rollback(); // 回滚事务
+	$this->get('db')->commit(); // 提交事务
+	
+上面示例：
+
+	$this->get('db')：
+
+是使用的注入容器的方法，其中的db对应于$di->set('db', function(){}); 中的 db。
 
 ## 测试结果 ##
 	
