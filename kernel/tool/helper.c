@@ -34,6 +34,8 @@
 #include "zend_language_scanner.h"
 #include <zend_language_parser.h>
 
+#include "zend_smart_str.h"             /* Use the smart_str */
+
 #include <string.h>
 
 char *cspeed_get_cwd()                    /*{{{ Return the current directory */
@@ -140,7 +142,7 @@ void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, zval *arg3, int cal
     }
 }/* }}} */
 
-zval *cspeed_parse_ini_file(char *file_name, char *node_name, char *node_key, zend_bool parse_section)/*{{{ parse the INI file, with the given key and node */
+void cspeed_parse_ini_file(char *file_name, char *node_name, char *node_key, zend_bool parse_section, zval *retval)/*{{{ parse the INI file, with the given key and node */
 {
     zend_file_handle fh;
     zend_ini_parser_cb_t ini_parser_cb;
@@ -162,35 +164,75 @@ zval *cspeed_parse_ini_file(char *file_name, char *node_name, char *node_key, ze
     array_init(&ini_array_value);
     if (zend_parse_ini_file(&fh, 0, (int)ZEND_INI_SCANNER_NORMAL, ini_parser_cb, &ini_array_value) == FAILURE) {
         zval_dtor(&ini_array_value);
-        return NULL;
+        ZVAL_NULL(&ini_array_value);
     } else {
         /* To find the key and the node value from the data */
         if (node_name != NULL) {
             zval *node_value = zend_hash_find(Z_ARRVAL_P(&ini_array_value), zend_string_init(CSPEED_STRL(node_name), 0));
             if (node_key == NULL) {
                 Z_TRY_ADDREF_P(node_value);
-                return node_value;
+                ZVAL_COPY_VALUE(retval, node_value);
             } else {
                 zval *key_value = zend_hash_find(Z_ARRVAL_P(node_value), zend_string_init(CSPEED_STRL(node_key), 0));
-                return key_value;
+                ZVAL_COPY_VALUE(retval, key_value);
             }
         } else if ( ( node_name == NULL ) && ( node_key != NULL ) ) {
             zval *key_value = zend_hash_find(Z_ARRVAL_P(&ini_array_value), zend_string_init(CSPEED_STRL(node_key), 0));
-            return key_value;
+            ZVAL_COPY_VALUE(retval, key_value);
         } else {
             Z_TRY_ADDREF_P(&ini_array_value);
-            return &ini_array_value;
+            ZVAL_COPY_VALUE(retval, &ini_array_value);
         }
     }
 }
 
+void cspeed_build_equal_string(zval *array, char *begin_str, zval *result)/*{{{ Building the WHERE|HAVING strings */
+{
+    zend_string *val_key;
+    zval *var_value;
+    smart_str where_str = {0};
+    smart_str_appends(&where_str, begin_str);
+    ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(array), val_key, var_value) {
+        if (isalpha(*(ZSTR_VAL(val_key)))) {
+            smart_str_appendc(&where_str, '`');
+            smart_str_appends(&where_str, ZSTR_VAL(val_key));
+            smart_str_appends(&where_str, "`='");
+            if (Z_TYPE_P(var_value) == IS_LONG){
+                smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, "%d", Z_LVAL_P(var_value))));
+            } else if (Z_TYPE_P(var_value) == IS_STRING) {
+                smart_str_appends(&where_str, Z_STRVAL_P(var_value));
+            }
+            smart_str_appends(&where_str, "' AND ");
+        }
+    } ZEND_HASH_FOREACH_END();
+    smart_str_0(&where_str);
+    char *temp_where_str = (char *)malloc(sizeof(char) * ZSTR_LEN(where_str.s) - 4);
+    memset(temp_where_str, 0, ZSTR_LEN(where_str.s) - 4);
+    memcpy(temp_where_str, ZSTR_VAL(where_str.s), ZSTR_LEN(where_str.s) - 5);
+    smart_str_free(&where_str);
+    ZVAL_STRING(result, temp_where_str);
+    free(temp_where_str);
+}/*}}}*/
 
-
-
-
-
-
-
+void cspeed_build_quote_string(zval *array, zval *result)/*{{{ Building the Quote string */
+{
+    zval *value;
+    smart_str field_str = {0};
+    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), value) {
+        if ( (Z_TYPE_P(value) == IS_STRING) && isalpha(*(Z_STRVAL_P(value))) ){
+            smart_str_appendc(&field_str, '`');
+            smart_str_appends(&field_str, Z_STRVAL_P(value));
+            smart_str_appends(&field_str, "`,");
+        }
+    } ZEND_HASH_FOREACH_END();
+    smart_str_0(&field_str);
+    char *temp_select_str = (char *)malloc(sizeof(char) * ZSTR_LEN(field_str.s));
+    memset(temp_select_str, 0, ZSTR_LEN(field_str.s));
+    memcpy(temp_select_str, ZSTR_VAL(field_str.s), ZSTR_LEN(field_str.s) - 1);
+    smart_str_free(&field_str);
+    ZVAL_STRING(result, temp_select_str);
+    free(temp_select_str);
+}/*}}}*/
 
 
 

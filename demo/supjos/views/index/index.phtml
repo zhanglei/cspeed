@@ -1,1 +1,11 @@
 Hello CSpeed User.
+配置文件信息：<br>
+name : <?php
+    echo \Cs\App::$app->get('mainConfig')->getConfig('name');
+?><br>
+version: <?php
+    echo \Cs\App::$app->get('mainConfig')->getConfig('version');
+?>
+<?php
+echo $version;
+?>

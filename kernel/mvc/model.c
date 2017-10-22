@@ -39,7 +39,6 @@ void initialise_the_model_object(zval *model_object, zend_long new_record, INTER
         php_error_docref(NULL, E_ERROR, "Please set the MySql class to Di container.");
         return ;
     }
-
     /* Restore the PDO object into the Class property */
     zend_update_property(cspeed_model_ce, model_object, CSPEED_STRL(CSPEED_MODEL_PDO_OBJECT), pdo_object);
 
@@ -53,7 +52,8 @@ void initialise_the_model_object(zval *model_object, zend_long new_record, INTER
     zval function_name, retval;
     ZVAL_STRING(&function_name, "tableName");
     call_user_function(NULL, model_object, &function_name, &retval, 0, NULL);
-    zend_update_property_string(cspeed_model_ce, model_object, CSPEED_STRL(CSPEED_MODEL_TABLE_NAME), Z_STRVAL(retval));
+    zend_update_property_string(cspeed_model_ce, model_object, 
+        CSPEED_STRL(CSPEED_MODEL_TABLE_NAME), Z_STRVAL(retval));
 
     /* Update the value to IS_TRUE */
     if (new_record == IS_TRUE){
@@ -69,7 +69,7 @@ char *build_insert_field_datas(zval *this)  /*{{{ Building the INSERT FIELDS AND
 
     zend_string *var_key;
     zval *var_value;
-    if (magic_datas && Z_TYPE_P(magic_datas) == IS_ARRAY  && (zend_hash_num_elements(Z_ARRVAL_P(magic_datas)) > 0) ){
+    if (magic_datas && Z_TYPE_P(magic_datas) == IS_ARRAY  && zend_hash_num_elements(Z_ARRVAL_P(magic_datas)) ){
         smart_str fields_str = {0};     /* INSERT INTO xx (id, i, t) VALUES(11, 22, 33); */
         smart_str datas_str  = {0};
         smart_str_appendc(&fields_str, '(');
@@ -110,7 +110,7 @@ char *build_update_sql(zval *this)  /*{{{*/
 
     zend_string *var_key;
     zval *var_value;
-    if (magic_datas && Z_TYPE_P(magic_datas) == IS_ARRAY  && (zend_hash_num_elements(Z_ARRVAL_P(magic_datas)) > 0) ){
+    if (magic_datas && Z_TYPE_P(magic_datas) == IS_ARRAY  && zend_hash_num_elements(Z_ARRVAL_P(magic_datas)) ){
         smart_str update_str = {0};
         ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(magic_datas), var_key, var_value) {
             smart_str_appends(&update_str, ZSTR_VAL(var_key));
@@ -136,12 +136,24 @@ char *build_update_sql(zval *this)  /*{{{*/
 
 }/*}}}*/
 
+void reset_model_sql(zval *this) /*{{{ To clear the current sql result for the next execute */
+{
+    zend_update_property_string(cspeed_model_ce, this, CSPEED_STRL(CSPEED_MODEL_WHERE_COND), "");
+    zend_update_property_string(cspeed_model_ce, this, CSPEED_STRL(CSPEED_MODEL_ORDER_BY), "");
+    zend_update_property_string(cspeed_model_ce, this, CSPEED_STRL(CSPEED_MODEL_SELECT), "");
+    zend_update_property_string(cspeed_model_ce, this, CSPEED_STRL(CSPEED_MODEL_GROUP_BY), "");
+}/*}}}*/
+
 /* {{{ All ARG-INFO for the Model class */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_cosntruct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_find, 0, 0, 1)
     ZEND_ARG_INFO(0, where_conditions)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_select, 0, 0, 1)
+    ZEND_ARG_INFO(0, fields)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_set, 0, 0, 2)
@@ -195,15 +207,19 @@ CSPEED_METHOD(Model, __set)/*{{{ proto Model::__set($name, $value) The magic fun
         return ;
     }
     if (CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(key))) {
-        zval *magic_datas = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_MAGIC_DATAS), 1, NULL);
+        zval *magic_datas = zend_read_property(cspeed_model_ce, getThis(), 
+            CSPEED_STRL(CSPEED_MODEL_MAGIC_DATAS), 1, NULL);
         if ( Z_TYPE_P(value) == IS_LONG ) {
             add_assoc_long(magic_datas, ZSTR_VAL(key), Z_LVAL_P(value));
         } else if ( Z_TYPE_P(value) == IS_STRING ) {
             add_assoc_string(magic_datas, ZSTR_VAL(key), Z_STRVAL_P(value));
         }
+    } else {
+        RETURN_FALSE
     }
     zend_string_release(key);
     zval_ptr_dtor(value);
+    RETURN_TRUE
 }/*}}}*/
 
 CSPEED_METHOD(Model, find)/*{{{ proto Model::find() To do the update() method */
@@ -228,37 +244,19 @@ CSPEED_METHOD(Model, where)/*{{{ proto Model::where()*/
     }
     if (where && (Z_TYPE_P(where) == IS_ARRAY) ){
         /*zend_string *val_key;*/
-        zend_string *val_key;
-        zval *var_value;
-        smart_str where_str = {0};
-        smart_str_appends(&where_str, " WHERE ");
-        ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(where), val_key, var_value) {
-            if (isalpha(*(ZSTR_VAL(val_key)))) {
-                smart_str_appendc(&where_str, '`');
-                smart_str_appends(&where_str, ZSTR_VAL(val_key));
-                smart_str_appends(&where_str, "`='");
-                if (Z_TYPE_P(var_value) == IS_LONG){
-                    smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, "%d", Z_LVAL_P(var_value))));
-                } else if (Z_TYPE_P(var_value) == IS_STRING) {
-                    smart_str_appends(&where_str, Z_STRVAL_P(var_value));
-                }
-                smart_str_appends(&where_str, "' AND ");
-            }
-        } ZEND_HASH_FOREACH_END();
-        smart_str_0(&where_str);
-        char *temp_where_str = (char *)malloc(sizeof(char) * ZSTR_LEN(where_str.s) - 4);
-        memset(temp_where_str, 0, ZSTR_LEN(where_str.s) - 4);
-        memcpy(temp_where_str, ZSTR_VAL(where_str.s), ZSTR_LEN(where_str.s) - 5);
-        zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_WHERE_COND), temp_where_str);
-        smart_str_free(&where_str);
-        zval_ptr_dtor(where);
-        free(temp_where_str);
+        zval result;
+        cspeed_build_equal_string(where, " WHERE ", &result);
+        zend_update_property_string(cspeed_model_ce, getThis(), 
+            CSPEED_STRL(CSPEED_MODEL_WHERE_COND), Z_STRVAL(result));
+        zval_ptr_dtor(&result);
     } else if (where && ( Z_TYPE_P(where) == IS_STRING)) {
-        zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_WHERE_COND), Z_STRVAL_P(where));
+        zend_update_property_string(cspeed_model_ce, getThis(), 
+            CSPEED_STRL(CSPEED_MODEL_WHERE_COND), ZSTR_VAL(strpprintf(0, " WHERE %s", Z_STRVAL_P(where))));
     } else {
         php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
         RETURN_FALSE
     }
+    zval_ptr_dtor(where);
     RETURN_ZVAL(getThis(), 1, NULL);
 }/*}}}*/
 
@@ -268,44 +266,25 @@ CSPEED_METHOD(Model, andWhere)/*{{{ proto Model::andWhere()*/
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &where) == FAILURE) {
         return ;
     }
+
+    zval *previous_where = zend_read_property(cspeed_model_ce, getThis(), 
+        CSPEED_STRL(CSPEED_MODEL_WHERE_COND), 1, NULL);
     if (where && (Z_TYPE_P(where) == IS_ARRAY)){
         /* Get the where condition */
-        zval *previous_where = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_WHERE_COND), 1, NULL);
-        /*zend_string *val_key;*/
-        zend_string *val_key;
-        zval *var_value;
-        smart_str where_str = {0};
-        if (Z_TYPE_P(previous_where) == IS_STRING && previous_where) {
-            smart_str_appends(&where_str, Z_STRVAL_P(previous_where));
-        }
-        smart_str_appends(&where_str, " AND ");
-        ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(where), val_key, var_value) {
-            if (isalpha(*(ZSTR_VAL(val_key)))) {
-                smart_str_appendc(&where_str, '`');
-                smart_str_appends(&where_str, ZSTR_VAL(val_key));
-                smart_str_appends(&where_str, "`='");
-                if (Z_TYPE_P(var_value) == IS_LONG){
-                    smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, "%d", Z_LVAL_P(var_value))));
-                } else if (Z_TYPE_P(var_value) == IS_STRING) {
-                    smart_str_appends(&where_str, Z_STRVAL_P(var_value));
-                }
-                smart_str_appends(&where_str, "' AND ");
-            }
-        } ZEND_HASH_FOREACH_END();
-        smart_str_0(&where_str);
-        char *temp_where_str = (char *)malloc(sizeof(char) * ZSTR_LEN(where_str.s) - 4);
-        memset(temp_where_str, 0, ZSTR_LEN(where_str.s) - 4);
-        memcpy(temp_where_str, ZSTR_VAL(where_str.s), ZSTR_LEN(where_str.s) - 5);
-        zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_WHERE_COND), temp_where_str);
-        smart_str_free(&where_str);
-        zval_ptr_dtor(where);
-        free(temp_where_str);
+        zval result;
+        cspeed_build_equal_string(where, "", &result);
+        zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_WHERE_COND), 
+            ZSTR_VAL(strpprintf(0, "%s AND %s ", Z_STRVAL_P(previous_where),  Z_STRVAL(result))));
+        zval_ptr_dtor(&result);
     } else if(where && ( Z_TYPE_P(where) == IS_STRING )){
-        zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_WHERE_COND), Z_STRVAL_P(where));
+        zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_WHERE_COND), 
+            ZSTR_VAL(strpprintf(0, "%s AND %s", Z_STRVAL_P(previous_where), Z_STRVAL_P(where)))
+        );
     } else {
         php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
         RETURN_FALSE
     }
+    zval_ptr_dtor(where);
     RETURN_ZVAL(getThis(), 1, NULL);
 }/*}}}*/
 
@@ -332,13 +311,14 @@ CSPEED_METHOD(Model, orderBy)/*{{{ proto Model::orderBy()*/
         zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_ORDER_BY), temp_order_by);
         free(temp_order_by);
         smart_str_free(&order_by_str);
-        zval_ptr_dtor(order_by);
     } else if( order_by && (Z_TYPE_P(order_by) == IS_STRING)){
-        zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_ORDER_BY), Z_STRVAL_P(order_by));
+        zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_ORDER_BY), 
+            ZSTR_VAL(strpprintf(0, " ORDER BY %s", Z_STRVAL_P(order_by))));
     } else {
         php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
         RETURN_FALSE
     }
+    zval_ptr_dtor(order_by);
     RETURN_ZVAL(getThis(), 1, NULL);
 }/*}}}*/
 
@@ -349,30 +329,20 @@ CSPEED_METHOD(Model, groupBy)/*{{{ proto Model::groupBy()*/
         return ;
     }
     if (group_by && (Z_TYPE_P(group_by) == IS_ARRAY) ){
-        zval *var_value;
-        smart_str group_by_str = {0};
-        smart_str_appends(&group_by_str, " GROUP BY ");
-        ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(group_by), var_value) {
-            if (Z_TYPE_P(var_value) == IS_STRING) {
-                smart_str_appendc(&group_by_str, '`');
-                smart_str_appends(&group_by_str, Z_STRVAL_P(var_value));
-                smart_str_appends(&group_by_str, "`,");
-            }
-        } ZEND_HASH_FOREACH_END();
-        smart_str_0(&group_by_str);
-        char *temp_group_by = (char *)malloc(sizeof(char) * (ZSTR_LEN(group_by_str.s)));
-        memset(temp_group_by, 0, ZSTR_LEN(group_by_str.s));
-        memcpy(temp_group_by, ZSTR_VAL(group_by_str.s), ZSTR_LEN(group_by_str.s) - 1);
-        zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_GROUP_BY), temp_group_by);
-        free(temp_group_by);
-        smart_str_free(&group_by_str);
-        zval_ptr_dtor(group_by);
+        zval result;
+        cspeed_build_quote_string(group_by, &result); 
+        zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_GROUP_BY), 
+            ZSTR_VAL(strpprintf(0, " GROUP BY %s", Z_STRVAL(result)))
+        );
+        zval_ptr_dtor(&result);
     } else if (group_by && (Z_TYPE_P(group_by) == IS_STRING)){
-        zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_GROUP_BY), Z_STRVAL_P(group_by));
+        zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_GROUP_BY), 
+            ZSTR_VAL(strpprintf(0, " GROUP BY %s", Z_STRVAL_P(group_by))));
     } else {
         php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
         RETURN_FALSE
     }
+    zval_ptr_dtor(group_by);
     RETURN_ZVAL(getThis(), 1, NULL);
 }/*}}}*/
 
@@ -409,21 +379,48 @@ CSPEED_METHOD(Model, one)/*{{{ proto Model::one()*/
     zval retval;
     cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
 
-    zval result;
-    cspeed_pdo_statement_fetch(&pdo_statement, &result);
+    reset_model_sql(getThis());
+    if (!output_sql_errors(&pdo_statement)){
+        zval result;
+        cspeed_pdo_statement_fetch(&pdo_statement, &result);
+        RETURN_ZVAL(&result, 1, NULL);
+    }
+    RETURN_NULL()
+}/*}}}*/
 
-    RETURN_ZVAL(&result, 1, NULL);
+CSPEED_METHOD(Model, select)    /*{{{ proto Model::select($fields)*/
+{
+    zval *fields;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &fields) == FAILURE) {
+        return ;
+    }
+    if (fields && (Z_TYPE_P(fields) == IS_ARRAY)){
+        /* Array fields */
+        zval result;
+        cspeed_build_quote_string(fields, &result); 
+        zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_SELECT), Z_STRVAL(result));
+    } else if (fields && (Z_TYPE_P(fields) == IS_STRING)){
+        /* String */
+        zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_SELECT), Z_STRVAL_P(fields));
+    } else {
+        php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
+        RETURN_FALSE
+    }
+    zval_ptr_dtor(fields);
+    RETURN_ZVAL(getThis(), 1, NULL);
+
 }/*}}}*/
 
 CSPEED_METHOD(Model, all)/*{{{ proto Model::all()*/
 {
     zval *table_name = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_TABLE_NAME), 1, NULL);
     zval *where      = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_WHERE_COND), 1, NULL);
+    zval *select     = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_SELECT), 1, NULL);
     zval *group_by   = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_GROUP_BY), 1, NULL);
     zval *order_by   = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_ORDER_BY), 1, NULL);
 
-    zend_string *raw_sql = strpprintf(0, "SELECT * FROM %s%s%s%s", Z_STRVAL_P(table_name), Z_STRVAL_P(where),
-        Z_STRVAL_P(group_by), Z_STRVAL_P(order_by));
+    zend_string *raw_sql = strpprintf(0, "SELECT %s FROM %s%s%s%s", Z_STRVAL_P(select) , 
+        Z_STRVAL_P(table_name), Z_STRVAL_P(where), Z_STRVAL_P(group_by), Z_STRVAL_P(order_by));
 
     zval *pdo_object = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_PDO_OBJECT), 1, NULL);
 
@@ -435,11 +432,14 @@ CSPEED_METHOD(Model, all)/*{{{ proto Model::all()*/
 
     zval retval;
     cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
-
-    zval result;
-    cspeed_pdo_statement_fetch_all(&pdo_statement, &result);
-
-    RETURN_ZVAL(&result, 1, NULL);
+    
+    reset_model_sql(getThis());
+    if (!output_sql_errors(&pdo_statement)){
+        zval result;
+        cspeed_pdo_statement_fetch_all(&pdo_statement, &result);
+        RETURN_ZVAL(&result, 1, NULL);
+    }
+    RETURN_NULL()
 }/*}}}*/
 
 CSPEED_METHOD(Model, save)/*{{{ proto Model::save()*/
@@ -472,10 +472,13 @@ CSPEED_METHOD(Model, save)/*{{{ proto Model::save()*/
     zval retval;
     cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
 
-    zval row_count;
-    cspeed_pdo_statement_row_count(&pdo_statement, &row_count);
-
-    RETURN_ZVAL(&row_count, 1, NULL);
+    reset_model_sql(getThis());
+    if (!output_sql_errors(&pdo_statement)){
+        zval row_count;
+        cspeed_pdo_statement_row_count(&pdo_statement, &row_count);
+        RETURN_ZVAL(&row_count, 1, NULL);
+    }
+    RETURN_FALSE
 }/*}}}*/
 
 CSPEED_METHOD(Model, delete)/*{{{ proto Model::delete()*/
@@ -493,10 +496,13 @@ CSPEED_METHOD(Model, delete)/*{{{ proto Model::delete()*/
     zval retval;
     cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
 
-    zval row_count;
-    cspeed_pdo_statement_row_count(&pdo_statement, &row_count);
-
-    RETURN_ZVAL(&row_count, 1, NULL);
+    reset_model_sql(getThis());
+    if (!output_sql_errors(&pdo_statement)){
+        zval row_count;
+        cspeed_pdo_statement_row_count(&pdo_statement, &row_count);
+        RETURN_ZVAL(&row_count, 1, NULL);
+    }
+    RETURN_FALSE
 }/*}}}*/
 
 /*{{{ All functions definitions */
@@ -504,6 +510,7 @@ static const zend_function_entry cspeed_model_functions[] = {
     CSPEED_ME(Model, __construct, arginfo_cspeed_model_cosntruct, ZEND_ACC_PUBLIC)
     CSPEED_ME(Model, __set, arginfo_cspeed_model_set, ZEND_ACC_PUBLIC)
     CSPEED_ME(Model, find, arginfo_cspeed_model_find, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+    CSPEED_ME(Model, select, arginfo_cspeed_model_select, ZEND_ACC_PUBLIC)
     CSPEED_ME(Model, tableName, arginfo_cspeed_model_table_name, ZEND_ACC_PUBLIC)
     CSPEED_ME(Model, where, arginfo_cspeed_model_where, ZEND_ACC_PUBLIC)
     CSPEED_ME(Model, andWhere, arginfo_cspeed_model_and_where, ZEND_ACC_PUBLIC)
@@ -527,10 +534,12 @@ CSPEED_INIT(model)  /*{{{ Load the module function*/
     /* Some internal properties */
     zend_declare_property_null(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_MAGIC_DATAS), ZEND_ACC_PRIVATE);
     zend_declare_property_null(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_PDO_OBJECT), ZEND_ACC_PRIVATE);
-    zend_declare_property_long(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_NEW_RECORD), IS_TRUE, ZEND_ACC_PRIVATE|ZEND_ACC_STATIC);
+    zend_declare_property_long(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_NEW_RECORD), IS_TRUE, 
+        ZEND_ACC_PRIVATE|ZEND_ACC_STATIC);
 
     zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_WHERE_COND), "", ZEND_ACC_PRIVATE);
     zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_ORDER_BY), "", ZEND_ACC_PRIVATE);
+    zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_SELECT), "", ZEND_ACC_PRIVATE);
     zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_GROUP_BY), "", ZEND_ACC_PRIVATE);
     zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_TABLE_NAME), "", ZEND_ACC_PRIVATE);
 }/*}}}*/
@@ -551,6 +560,15 @@ CSPEED_INIT(model)  /*{{{ Load the module function*/
 
 
 
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */
 
 
 

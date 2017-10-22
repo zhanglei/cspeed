@@ -80,22 +80,22 @@ void cspeed_pdo_commit(zval *pdo_object, zval *retval)/*{{{*/
     call_user_function(NULL, pdo_object, &function_name, retval, param_count, params);
 }/*}}}*/
 
-void cspeed_pdo_error_code(zval *pdo_object, zval *retval) /*{{{*/
+void cspeed_pdo_error_code(zval *pdostatement_obj, zval *retval) /*{{{*/
 {
     zval function_name;
     ZVAL_STRING(&function_name, "errorCode");
     uint32_t param_count = 0;
     zval *params = NULL;
-    call_user_function(NULL, pdo_object, &function_name, retval, param_count, params);  
+    call_user_function(NULL, pdostatement_obj, &function_name, retval, param_count, params);  
 }/*}}}*/
 
-void cspeed_pdo_error_info(zval *pdo_object, zval *retval) /*{{{*/
+void cspeed_pdo_error_info(zval *pdostatement_obj, zval *retval) /*{{{*/
 {
     zval function_name;
     ZVAL_STRING(&function_name, "errorInfo");
     uint32_t param_count = 0;
     zval *params = NULL;
-    call_user_function(NULL, pdo_object, &function_name, retval, param_count, params);  
+    call_user_function(NULL, pdostatement_obj, &function_name, retval, param_count, params);  
 }/*}}}*/
 
 void cspeed_pdo_exec(zval *pdo_object, char *sql, zval *retval) /*{{{*/

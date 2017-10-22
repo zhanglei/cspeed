@@ -73,6 +73,7 @@ if test "$PHP_CSPEED" != "no"; then
     kernel/mvc/model.c         \
     kernel/mvc/controller.c     \
     kernel/db/model_interface.c  \
+    kernel/tool/configs.c          \
     kernel/db/mysql.c,
   $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_ADD_BUILD_DIR([$ext_builddir/kernel])

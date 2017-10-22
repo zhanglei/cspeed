@@ -21,15 +21,20 @@
 #ifndef CSPEED_TOOL_HELPER_H
 #define CSPEED_TOOL_HELPER_H
 
-char *cspeed_reverse_slash_char(char *src);                                               /* Change the source string's slash to reslash */
+char *cspeed_reverse_slash_char(char *src);                                      /* Reverse all slashes to reslash */
 
-char *cspeed_get_cwd();                                                                   /* Get current directory */
+char *cspeed_get_cwd();                                                          /* Get current directory */
 
-char *title_upper_string(char *src);                                                      /* Upper case the first char */
+char *title_upper_string(char *src);                                             /* Upper case the first char */
 
-char *title_lower_string(char *src);                                                      /* Lower case the first char */
+char *title_lower_string(char *src);                                             /* Lower case the first char */
 
-zval *cspeed_parse_ini_file(char *file_name, char *node_name, char *node_key, zend_bool); /* Parsethe ini file with the given node and key */
+void cspeed_parse_ini_file(char *file_name, char *node_name, 
+                           char *node_key, zend_bool, zval *retval);    /* Parse the ini file with the given node and key */
+
+void cspeed_build_equal_string(zval *array, char *begin_str, zval *result);      /* Building the string */
+
+void cspeed_build_quote_string(zval *array, zval *result);                       /* Building the quote string */
 
 #endif
 

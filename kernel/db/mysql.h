@@ -35,6 +35,8 @@ zend_class_entry *cspeed_mysql_ce;
 #define CSPEED_MYSQL_RAW_SQL          "__cspeed_mysql_raw_sql"  /* Raw Sql */
 #define CSPEED_MYSQL_BIND_PARAMS      "__cspeed_mysql_bind_params"/* Raw Sql */
 
+zend_bool output_sql_errors(zval *pdo_statement);               /* Output the SQL error */
+
 CSPEED_INIT(mysql);
 
 #endif

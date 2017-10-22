@@ -45,11 +45,12 @@ void render_file(INTERNAL_FUNCTION_PARAMETERS, zval *ret_val, zval *view_obj)/*{
     zval *view_root = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_ROOT_DIR), 1, NULL);
     zval *view_dir  = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_DIRS), 1, NULL);
     zval *suffix    = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_SUFFIX), 1, NULL);
-    /*zend_string *real_path_file = strpprintf(0, "%s/%s/%s.%s", cspeed_get_cwd(), Z_STRVAL_P(view_dir), ZSTR_VAL(temp_file), Z_STRVAL_P(suffix));*/
-    zend_string *real_path_file = strpprintf(0, "%s/../%s/%s/%s.%s", cspeed_get_cwd(), Z_STRVAL_P(view_root), Z_STRVAL_P(view_dir), ZSTR_VAL(temp_file), Z_STRVAL_P(suffix));
+    
+    zend_string *real_path_file = strpprintf(0, "%s/../%s/%s/%s.%s", cspeed_get_cwd(), 
+        Z_STRVAL_P(view_root), Z_STRVAL_P(view_dir), ZSTR_VAL(temp_file), Z_STRVAL_P(suffix));
     
     zval *view_variables = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_VARIABLES), 1, NULL);
-    if (array_variables) {
+    if (array_variables && ( Z_TYPE_P(view_variables) == IS_ARRAY ) ) {
         zend_string *var_name;
         zval *var_value;
         ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(array_variables), var_name, var_value){
@@ -57,7 +58,7 @@ void render_file(INTERNAL_FUNCTION_PARAMETERS, zval *ret_val, zval *view_obj)/*{
         } ZEND_HASH_FOREACH_END();
     }
 
-    if (access(ZSTR_VAL(real_path_file), F_OK) == -1) {     /* Use the unix-like function to check whether the file is exists or not. */
+    if (access(ZSTR_VAL(real_path_file), F_OK) == -1) {     /* Check whether the file is exists or not. */
         php_error_docref(NULL, E_ERROR, "Template file %s not exists.", ZSTR_VAL(real_path_file));
         return ;
     } else {

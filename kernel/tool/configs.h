@@ -18,7 +18,22 @@
 
 /* $Id$ */
 
-#include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
-#include "php_cspeed.h"
+#ifndef CSPEED_TOOL_CONFIGS_H
+#define CSPEED_TOOL_CONFIGS_H
+
+zend_class_entry *cspeed_config_ce;
+
+#define CSPEED_CONFIG_VARIABLES         "__cspeed_config_variables"             /*All variables*/
+
+#endif
+
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */
