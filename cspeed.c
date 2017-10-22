@@ -67,6 +67,7 @@ PHP_MINIT_FUNCTION(cspeed)
     /* ActiveRecord model */
     model_init();
 
+    /* Config class */
     config_init();
 
 	return SUCCESS;
@@ -111,7 +112,7 @@ PHP_MINFO_FUNCTION(cspeed)
 {
 	php_info_print_table_start();
     php_info_print_table_header(2, "CSpeed support", "enabled");
-    php_info_print_table_header(2, "Author", "Josin<774542602@qq.com|www.supjos.cn>");
+    php_info_print_table_header(2, "Author", "Josin <774542602@qq.com|www.supjos.cn>");
 	php_info_print_table_header(2, "Version", PHP_CSPEED_VERSION);
 	php_info_print_table_end();
 }
