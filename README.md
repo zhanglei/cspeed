@@ -1,4 +1,4 @@
-# CSpeed PHP Micro Framework v1.2.2 #
+# CSpeed PHP Micro Framework v1.2.8 #
 
 ----------
 
