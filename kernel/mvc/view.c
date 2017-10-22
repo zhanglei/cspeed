@@ -45,8 +45,9 @@ void render_file(INTERNAL_FUNCTION_PARAMETERS, zval *ret_val, zval *view_obj)/*{
     zval *view_root = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_ROOT_DIR), 1, NULL);
     zval *view_dir  = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_DIRS), 1, NULL);
     zval *suffix    = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_SUFFIX), 1, NULL);
-    /*zend_string *real_path_file = strpprintf(0, "%s/%s/%s.%s", cspeed_get_cwd(), Z_STRVAL_P(view_dir), ZSTR_VAL(temp_file), Z_STRVAL_P(suffix));*/
-    zend_string *real_path_file = strpprintf(0, "%s/../%s/%s/%s.%s", cspeed_get_cwd(), Z_STRVAL_P(view_root), Z_STRVAL_P(view_dir), ZSTR_VAL(temp_file), Z_STRVAL_P(suffix));
+    
+    zend_string *real_path_file = strpprintf(0, "%s/../%s/%s/%s.%s", cspeed_get_cwd(), 
+        Z_STRVAL_P(view_root), Z_STRVAL_P(view_dir), ZSTR_VAL(temp_file), Z_STRVAL_P(suffix));
     
     zval *view_variables = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_VARIABLES), 1, NULL);
     if (array_variables) {

@@ -52,7 +52,8 @@ void initialise_the_model_object(zval *model_object, zend_long new_record, INTER
     zval function_name, retval;
     ZVAL_STRING(&function_name, "tableName");
     call_user_function(NULL, model_object, &function_name, &retval, 0, NULL);
-    zend_update_property_string(cspeed_model_ce, model_object, CSPEED_STRL(CSPEED_MODEL_TABLE_NAME), Z_STRVAL(retval));
+    zend_update_property_string(cspeed_model_ce, model_object, 
+        CSPEED_STRL(CSPEED_MODEL_TABLE_NAME), Z_STRVAL(retval));
 
     /* Update the value to IS_TRUE */
     if (new_record == IS_TRUE){
@@ -418,8 +419,8 @@ CSPEED_METHOD(Model, all)/*{{{ proto Model::all()*/
     zval *group_by   = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_GROUP_BY), 1, NULL);
     zval *order_by   = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_ORDER_BY), 1, NULL);
 
-    zend_string *raw_sql = strpprintf(0, "SELECT %s FROM %s%s%s%s", Z_STRVAL_P(select) , Z_STRVAL_P(table_name), Z_STRVAL_P(where),
-        Z_STRVAL_P(group_by), Z_STRVAL_P(order_by));
+    zend_string *raw_sql = strpprintf(0, "SELECT %s FROM %s%s%s%s", Z_STRVAL_P(select) , 
+        Z_STRVAL_P(table_name), Z_STRVAL_P(where), Z_STRVAL_P(group_by), Z_STRVAL_P(order_by));
 
     zval *pdo_object = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_PDO_OBJECT), 1, NULL);
 

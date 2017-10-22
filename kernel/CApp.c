@@ -44,7 +44,7 @@
 #include <unistd.h>         /* Access function */
 #include <fcntl.h>          /* Access function */
 
-int cspeed_deal_reqeust(zend_string *url, zend_fcall_info *zfi, zend_fcall_info_cache *zfic, zval *ret_val) /*{{{ Common function for the App class */
+int cspeed_deal_reqeust(zend_string *url, zend_fcall_info *zfi, zend_fcall_info_cache *zfic, zval *ret_val) /*{{{ Deal the REQUEST */
 {
     char *path_info = cspeed_request_server_str_key_val("PATH_INFO");
     if (CSPEED_STRING_NOT_EMPTY(path_info) 
@@ -106,7 +106,8 @@ void handle_request(INTERNAL_FUNCTION_PARAMETERS)/*{{{ Handle the user input fro
     zend_string *url;
     zend_fcall_info zfi;
     zend_fcall_info_cache zfic;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sf", &url, &zfi, &zfic, &zfi.param_count, &zfi.params) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sf*", &url, &zfi, &zfic, 
+        &zfi.params, &zfi.param_count) == FAILURE) {
         return ;
     }
     zval retval;
@@ -136,7 +137,7 @@ void cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCT
         memset(current_alias, 0, (slash_pos - ZSTR_VAL(class_name_with_namespace) + 1));
         memcpy(current_alias, ZSTR_VAL(class_name_with_namespace), (slash_pos - ZSTR_VAL(class_name_with_namespace)));
 
-        /* Before the steps the current_alias was ``app`` for example
+        /* Before the steps the current_alias was `app` for example
             After we get the namespace alias, we can find the global aliases to find whether the alias is exists or not.
             if exists, replace it and plus the left character to form the correctly path
          */
@@ -320,7 +321,8 @@ CSPEED_METHOD(App, setAlias)/*{{{ proto App::setAlias() */
         php_error_docref(NULL, E_ERROR, "Namespace alias must be start with @.");
         RETURN_FALSE
     }
-    zval *all_default_aliases = zend_read_property(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), 1, NULL);
+    zval *all_default_aliases = zend_read_property(cspeed_app_ce, getThis(), 
+        CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), 1, NULL);
     add_assoc_str(all_default_aliases, ZSTR_VAL(alias_name) + 1, alias_path);
 }/*}}}*/
 
@@ -342,7 +344,7 @@ CSPEED_METHOD(App, run)/*{{{ proto App::run() */
 
 /* The functions for the class CApp */
 static const zend_function_entry cspeed_app_functions[] = {
-    CSPEED_ME(App, __construct, arginfo_cspeed_construct, ZEND_ACC_PUBLIC)
+    CSPEED_ME(App, __construct,         arginfo_cspeed_construct,                   ZEND_ACC_PUBLIC)
     CSPEED_ME(App, get,                 arginfo_cspeed_get,                         ZEND_ACC_PUBLIC)
     CSPEED_ME(App, post,                arginfo_cspeed_post,                        ZEND_ACC_PUBLIC)
     CSPEED_ME(App, put,                 arginfo_cspeed_post,                        ZEND_ACC_PUBLIC)
