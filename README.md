@@ -952,9 +952,16 @@ CSpeeed支持常见的请求方法，除了上面的 GET 外，还支持 POST、
 	/* 获取所有ini文件解析后的数组数据对应的关联数据的数据值 */
 	public function getConfig($configKey);
 
+### \Cs\mvc\Router 类 ###
 
-
-
+	/*构造函数*/
+	public function __construct();
+	
+	/*添加路由规则*/
+	public function add($url, array $mvcj);
+	参数：	
+		$url :　支持正则匹配的ＵＲＬ，可以使用 {module}、{controller}、{action}　三个替代符，三个替代符均表示包含有字母、数组、横线的字符串，并且首字母不是横线与数字
+		$mvc:　包含有 module、controller、action　的键的数组，以指定引擎路由到制定的模块、控制器与方法
 
 
 
