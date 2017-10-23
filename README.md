@@ -72,56 +72,6 @@
 	/user/index与/user/index/index的路由规则是一致的问题
 	
 在新的CSpeed引擎v1.2.1版本中已经予以修复。请及时更新。
-	
-=======
-**CSpeed v1.2.2 特性**
-	
-1、新增全局静态变量：\Cs\App::$app 获取注入容器Di的示例：
-
-在入口文件index.php 文件里：
-	
-	$di = new \Cs\di\Di();
-	
-	$di->set('config', function(){
-		$config = new \Cs\tool\Config();
-		$config->loadConfig('./cspeed.ini');
-		return $config;
-	});
-	
-	$app = new \Cs\App($di);
-	$app->run();
-	
-经过上面的设置后，可以在CSpeed引擎的任何地方使用如下的方法获取Di容器注入的对象
-
-	$config = \Cs\App::$app->get('config');
-	
-用户可以使用在多模块的系统架构中使用本特性
-	
-2、新增 INI 配置文件解析类：\Cs\tool\Config
-	
-	\Cs\tool\Config 类含有三个方法：
-			
-	1、loadConfig($iniFile);
-		加载ini配置文件
-				
-	2、getConfigs();
-		获取ini配置文件解析后的数据
-		
-	3、getConfig($configKey);
-		获取ini配置文件解析后对应的关联数组的数据值.
-	
-3、优化Model、MySql性能与BUG修复。
-
-**CSpeed v1.2.1** 修复路由bug：
-
-默认的CSpeed引擎在1.2.1之前的版本，系统路由的规则如下：
-
-默认的PATH_INFO信息的第一段自动作为模块优先处理，所以导致如下的bug：
-
-	/user/index与/user/index/index的路由规则是一致的问题
-	
-在新的CSpeed引擎v1.2.1版本中已经予以修复。请及时更新。
-	
 
 v1.2.1新增方法：
 
@@ -215,34 +165,6 @@ v1.2.1新增方法：
 	    include        fastcgi_params;
     }
     
-<<<<<<< HEAD
-
-----------
-
-## CSpeed安装 ##
-   
-下载源码后，进入cspeed目录，按照以下三个步骤进行即可：
-
-	1、/usr/path_to_php/bin/phpize
-	
-	2、./congure --with-php-config=/usr/path_to_php/bin/php-config
-	
-	3、make -j8 install
-	
-	4、在编译安装成功的命令行界面会提示“Installed .... /usr/local/path_to_php/lib/php/extensions/non-debug-non-zts-2xxxx”,
-	   用户仅需要在您的 PHP 配置文件 php.ini 添加一行：extension_dir = "xxxx", 其中的xxxx就表示上面的”/usr/local/path_to_php/xxx“目录
-	5、在php.ini文件中另外新增一行： extension = cspeed.so
-	
-	6、重启服务器Apache或者Nginx的PHP-FPM
-	
-经过以上步骤后，可以通过在
-	
-	phpinfo()
-	
-中查看cspeed扩展是否安装或者使用如下函数检测：
-
-=======
-
 ----------
 
 ## CSpeed安装 ##
