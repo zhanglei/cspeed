@@ -11,7 +11,8 @@
 	$app->registerModules([
 		'backend' => '../backend'
 	]);
-	
+
+注意由于在CSpeed中一个目录对应于一个模块，故模块名必须与目录名保存一致，否则引擎报找不到模块的错误[未注册]的错误.
 在backend目录下新建一个 类文件Module.php包含有一个类 Module：
 	
 	class Module {
