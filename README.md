@@ -8,7 +8,7 @@
 
 １、新增模块初始化
 
-	$app->register([
+	$app->registerModules([
 		'backend' => '../backend'
 	]);
 	
