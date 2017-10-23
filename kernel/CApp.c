@@ -149,8 +149,7 @@ void cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCT
             memset(real_file_path, 0, real_file_path_size);
 
             strncat(real_file_path, Z_STRVAL_P(has_exists), Z_STRLEN_P(has_exists));
-            strncat(real_file_path, ZSTR_VAL(class_name_with_namespace) + (slash_pos - ZSTR_VAL(class_name_with_namespace)), 
-                ZSTR_LEN(class_name_with_namespace) - (slash_pos - ZSTR_VAL(class_name_with_namespace)));
+            strncat(real_file_path, ZSTR_VAL(class_name_with_namespace) + (slash_pos - ZSTR_VAL(class_name_with_namespace)), ZSTR_LEN(class_name_with_namespace) - (slash_pos - ZSTR_VAL(class_name_with_namespace)));
             strncat(real_file_path, ".php", strlen(".php"));
             /* Reslash all slash to reslash */
             cspeed_reverse_slash_char(real_file_path);
@@ -256,15 +255,15 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
             RETURN_FALSE
         }
         zend_update_property(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_APP_DI_OBJECT), di_object);
+        
+        /* \Cs\App::$app */
+        zend_update_static_property(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_PROPERTY), di_object);
     }
 
     /*modules*/
     zval modules;
     array_init(&modules);
     zend_update_property(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_APP_MODULES), &modules);
-
-    /* \Cs\App::$app */
-    zend_update_static_property(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_PROPERTY), di_object);
 }/*}}}*/
 
 CSPEED_METHOD(App, get)/*{{{ proto App::get() */
