@@ -36,6 +36,10 @@
 #include "kernel/net/response.h"    /* Use the Response object to response the user request */
 #include "kernel/tool/require.h"    /* Use the require tool to do the file rendering */
 #include "kernel/tool/helper.h"     /* The helper function tool */
+#include "kernel/mvc/router.h"      /* The Router class */
+
+#include "ext/pcre/php_pcre.h"
+#include "ext/standard/php_string.h"
 
 #include <unistd.h>         /* Access function */
 #include <fcntl.h>          /* Access function */
@@ -48,7 +52,10 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
         CSpeed parse the PATH_INFO info. to do the job. if your web server didn't support, the CSpeed will not support.
     */
     char *path_info = cspeed_request_server_str_key_val("PATH_INFO");
-    
+    char *back_path_info = (char *)malloc(sizeof(char) * strlen(path_info) + 1);
+    memset(back_path_info, 0, strlen(path_info)+1);
+    memcpy(back_path_info, CSPEED_STRL(path_info));
+
     char *default_module        = CSPEED_DISPATCH_DEFAULT_MODULE;
     char *default_controller    = CSPEED_DISPATCH_DEFAULT_CONTROLLER;
     char *default_action        = CSPEED_DISPATCH_DEFAULT_ACTION;
@@ -148,6 +155,89 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
             default_action = ZSTR_VAL(strpprintf(0, "%sAction", path_array[1]));
         }
     }
+
+    /* After the right regular URL parsing, do the routine setting, if setting */
+    zval *app_di_object = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_APP_DI_OBJECT), 1, NULL);
+    
+    zval *di_objects = app_di_object ? zend_read_property(cspeed_di_ce, app_di_object, CSPEED_STRL(CSPEED_DI_OBJECT), 1, NULL) : NULL;
+    zval *router_object = di_objects ? zend_hash_find(Z_ARRVAL_P(di_objects), zend_string_init(CSPEED_STRL("router"), 0)) : NULL;
+
+    zval *all_routines = router_object ?
+        zend_read_property(cspeed_router_ce, router_object, CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), 1, NULL) : NULL;
+    if (all_routines && zend_hash_num_elements(Z_ARRVAL_P(all_routines))){
+        /* If the Routine in the routine settting */
+        /* Use the preg_match to match all the URL routine */
+        zend_string *vvar_key;
+        zval *vvar_value;
+        ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(all_routines), vvar_key, vvar_value){
+            pcre_cache_entry *pce_regexp;
+            if ((pce_regexp = pcre_get_compiled_regex_cache(vvar_key)) == NULL) {
+                php_error_docref(NULL, E_ERROR, "Can't compile PCRE_Regex.");
+                return ;
+            } else {
+                zval matches, subparts;
+                ZVAL_NULL(&subparts);
+                php_pcre_match_impl(pce_regexp, CSPEED_STRL(back_path_info), &matches, &subparts, 0, 0, 0, 0);
+
+                if (!zend_hash_num_elements(Z_ARRVAL(subparts))) {
+                    zval_ptr_dtor(&subparts);
+                    /* Noting match the given url routine do the default */
+                } else {
+                    /* The given URL matches the path_info, parsing the module|controller|action of it */
+                    zend_hash_index_del(Z_ARRVAL(subparts), 0);
+                    
+                    /* Find if the given module|controller|action is given or number is given
+                     * if number, to fetch the url of the subparts
+                     */
+                    zval *module = zend_hash_find(Z_ARRVAL_P(vvar_value), zend_string_init( CSPEED_STRL("module") ,0));
+                    if (module && (Z_TYPE_P(module) == IS_LONG)) {
+                        zval *real_module = zend_hash_index_find(Z_ARRVAL(subparts), Z_LVAL_P(module));
+                        if (real_module == NULL) {
+                            php_error_docref(NULL, E_ERROR, "Can't found the offset %s module int the URL.",
+                                             Z_LVAL_P(module));
+                            return ;
+                        }
+                        Z_TRY_ADDREF_P(real_module);
+                        default_module = Z_STRVAL_P(real_module);
+                    } else if (module && (Z_TYPE_P(module) == IS_STRING)) {
+                        default_module = Z_STRVAL_P(module);
+                    }
+                    zval *controller = zend_hash_find(Z_ARRVAL_P(vvar_value), zend_string_init(CSPEED_STRL("controller"), 0));
+                    if (controller && (Z_TYPE_P(controller) == IS_LONG)){
+                        zval *real_controller = zend_hash_index_find(Z_ARRVAL(subparts), Z_LVAL_P(controller));
+                        if (real_controller == NULL){
+                            php_error_docref(NULL, E_ERROR, "Can't found the offset %d controller int the URL.",
+                                            Z_LVAL_P(controller));
+                            return ;
+                        }
+                        if (Z_TYPE_P(real_controller) == IS_STRING){
+                            Z_TRY_ADDREF_P(real_controller);
+                            default_controller = title_upper_string(Z_STRVAL_P(real_controller));
+                        }
+                    } else if (controller && (Z_TYPE_P(controller) == IS_STRING)){
+                        default_controller = title_upper_string(Z_STRVAL_P(controller));
+                    }
+                    zval *action = zend_hash_find(Z_ARRVAL_P(vvar_value), zend_string_init(CSPEED_STRL("action"), 0));
+                    if (action && (Z_TYPE_P(action) == IS_LONG)){
+                        zval *real_action = zend_hash_index_find(Z_ARRVAL(subparts), Z_LVAL_P(action));
+                        if (real_action == NULL){
+                            php_error_docref(NULL, E_ERROR, "Can't found the offset %d action in the URL.",
+                                            Z_LVAL_P(action));
+                            return ;
+                        }
+                        Z_TRY_ADDREF_P(real_action);
+                        default_action = ZSTR_VAL(strpprintf(0, "%sAction", Z_STRVAL_P(real_action)));
+                    } else if (action && (Z_TYPE_P(action) == IS_STRING )){
+                        default_action = ZSTR_VAL(strpprintf(0, "%sAction", Z_STRVAL_P(action)));
+                    }
+                    zval_ptr_dtor(&subparts);
+                }
+            }
+        } ZEND_HASH_FOREACH_END();
+        /*Free the Memory of the CSpeed malloc*/
+        free(back_path_info);
+    }
+    /* End the Routine setting */
 
     /* Combine the full path to include the file */
     zend_string *full_include_controller_path = strpprintf(0, "%s/../%s/controllers/%s.php", cspeed_get_cwd(), default_module, default_controller);

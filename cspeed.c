@@ -48,9 +48,6 @@ PHP_FUNCTION(getCSpeedVersion)
  */
 PHP_MINIT_FUNCTION(cspeed)
 {
-	/* If you have INI entries, uncomment these lines
-	REGISTER_INI_ENTRIES();
-	*/
     di_init();
     app_init();
     view_init();
@@ -69,6 +66,9 @@ PHP_MINIT_FUNCTION(cspeed)
 
     /* Config class */
     config_init();
+
+    /* Router class */
+    router_init();
 
 	return SUCCESS;
 }

@@ -1,8 +1,34 @@
-# CSpeed PHP Micro Framework v1.2.8 #
+# CSpeed PHP Micro Framework v1.3.0 #
 
 ----------
 
 ## 最新版本特性  ##
+
+**CSpeed v1.3.0 特性**
+
+1、新增自定义三级路由规则
+	model | controller | action
+	
+	【注意】：注入容器的Router对象必须命名为：'router'。
+	
+	$di->set('router', function(){
+		$router = new \Cs\mvc\Router();
+		$router->add(
+			'/index/{controller}/{action}',
+			[
+				'controller' => 1
+				'action'     => 2
+			]
+		);
+		return $router;
+	});
+	
+	$router->add();方法含有两个参数：
+	1、$url:	支持正则表达式与替代符: {module}、{controller}、{action}
+	{module}、{controller}、{action}：都是包含有字符串、数字、横线的字符串，并且首字母不是数字与横线
+	2、数组类型：指定匹配ＵＲＬ后的控制器、模块、方法的名字。引擎将自动转至对应的模块、控制器与方法
+	
+2、修复BUG、优化特性。	
 
 **CSpeed v1.2.8 特性**
 
