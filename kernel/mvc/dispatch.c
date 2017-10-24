@@ -153,11 +153,11 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
     zval *app_di_object = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_APP_DI_OBJECT), 1, NULL);
 
     zval *di_objects = ZVAL_IS_NULL(app_di_object) ? NULL : zend_read_property(cspeed_di_ce, app_di_object, 
-                                                                                CSPEED_STRL(CSPEED_DI_OBJECT), 1, NULL);
-    zval *router_object = ZVAL_IS_NULL(di_objects) ? NULL : zend_hash_find(Z_ARRVAL_P(di_objects), 
-                                                                                zend_string_init(CSPEED_STRL("router"), 0));
-    zval *all_routines = ZVAL_IS_NULL(router_object) ? NULL : zend_read_property(cspeed_router_ce, router_object, 
-                                                                                CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), 1, NULL);
+                                                                CSPEED_STRL(CSPEED_DI_OBJECT), 1, NULL);
+    zval *router_object = di_objects ? zend_hash_find(Z_ARRVAL_P(di_objects), zend_string_init(CSPEED_STRL("router"), 0)) : NULL;
+    
+    zval *all_routines = router_object ? zend_read_property(cspeed_router_ce, router_object, 
+                                                                CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), 1, NULL) : NULL;
     if (all_routines && zend_hash_num_elements(Z_ARRVAL_P(all_routines))){
         /* If the Routine in the routine settting */
         /* Use the preg_match to match all the URL routine */
