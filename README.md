@@ -1,8 +1,49 @@
-# CSpeed PHP Micro Framework v1.3.0 #
+# CSpeed PHP Micro Framework v1.3.1 #
 
 ----------
 
 ## 最新版本特性  ##
+**CSpeed v1.3.1 特性**
+
+１、CSpeed引擎路由规则调整为如下：
+
+路由全部基于三层的**模块、控制器、方法**进行路由转发：
+
+用户可以通过设置**默认模块、控制器、方法**进行转发控制：
+
+设置默认模块：
+
+	$app->setDefaultModule('home');
+
+设置默认控制器：
+	
+	$app->setDefaultController('index');
+	
+设置默认方法：
+
+	$app->setDefaultActon('index');
+	
+**注意：一旦设置默认的模块，必须使用registerModules进行模块注册.**
+CSpeed引擎默认情况下，默认的模块设置为项目inex.php入口文件的上一级目录。但是一旦指定了URL信息后，引擎将严格按照默认的三层进行路由转发，可以通过设置默认模块来禁用系统的默认路由。
+
+2、注册模块内核更新：
+
+	$app->registerModules([
+	    'home' =>   '../modules',		// 将home模块绑定到modules目录
+	    'back' =>   '../modules/back'	// 将back模块绑定到modules/back目录
+	]);
+	
+从CSpeed１.3.1开始注册模块方法内核更新：**用户可以设置模块名对应于不一致的目录名。**
+
+3、获取注入对象：
+
+从引擎CSpeed v1.3.1开始，使用：
+	
+	$this->di->get('config');
+替换之前版本的：
+	
+	$this->get('config');
+语法。
 
 **CSpeed v1.3.0 特性**
 

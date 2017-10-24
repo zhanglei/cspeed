@@ -105,8 +105,9 @@ class App
 
     /**
      * Run the WEB MVC process
+     * @param $di The di object which you want to reuse the object in CSpeed projects
      */
-    function run()
+    function run($di = null)
     {
 
     }
@@ -118,6 +119,33 @@ class App
      * registerModules(['admin', 'frontend']);
      */
     function registerModules(array $modules)
+    {
+
+    }
+
+    /**
+     * Setting the default module for the CSpeed to deal the Routine
+     * @param string $moduleName The default module name which you want to lead to.
+     */
+    function setDefaultModule($moduleName)
+    {
+
+    }
+
+    /**
+     * Setting the default controller for the CSpeed to deal the Routine
+     * @param string $controllerName The default controller name which you want to lead to.
+     */
+    function setDefaultController($controllerName)
+    {
+
+    }
+
+    /**
+     * Setting the default action for the CSpeed to deal the Routine
+     * @param string $actionName The default action name which you want to lead to.
+     */
+    function setDefaultActon($actionName)
     {
 
     }

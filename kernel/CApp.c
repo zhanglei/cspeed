@@ -215,6 +215,18 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_register_modules, 0, 0, 1)
     ZEND_ARG_INFO(0, modules)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_set_default_module, 0, 0, 1)
+    ZEND_ARG_INFO(0, module)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_set_default_controller, 0, 0, 1)
+    ZEND_ARG_INFO(0, controller)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_set_default_action, 0, 0, 1)
+    ZEND_ARG_INFO(0, action)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_set_alias, 0, 0, 2)
     ZEND_ARG_INFO(0, alias_name)
     ZEND_ARG_INFO(0, alias_path)
@@ -254,8 +266,7 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
             php_error_docref(NULL, E_ERROR, "Parameter must be instance of class derived from  Cs\\di\\Di class.");
             RETURN_FALSE
         }
-        zend_update_property(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_APP_DI_OBJECT), di_object);
-        
+        zend_update_property(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_APP_DI_OBJECT), di_object);    
         /* \Cs\App::$app */
         zend_update_static_property(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_PROPERTY), di_object);
     }
@@ -264,6 +275,11 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
     zval modules;
     array_init(&modules);
     zend_update_property(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_APP_MODULES), &modules);
+
+    zval register_moduels;
+    array_init(&register_moduels);
+    add_assoc_string(&register_moduels, "../.", "../.");
+    zend_update_property(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_APP_MODULES), &register_moduels);
 }/*}}}*/
 
 CSPEED_METHOD(App, get)/*{{{ proto App::get() */
@@ -332,7 +348,8 @@ CSPEED_METHOD(App, registerModules)/*{{{ App::registerModules(['admin', 'backend
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &modules) == FAILURE){
         return ;
     }
-    zend_update_property(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_APP_MODULES), modules);
+    zval *all_register_modules = zend_read_property(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_APP_MODULES), 1, NULL);
+    zend_hash_merge(Z_ARRVAL_P(all_register_modules), Z_ARRVAL_P(modules), (copy_ctor_func_t) zval_add_ref, 0);
 }/*}}}*/
 
 CSPEED_METHOD(App, run)/*{{{ proto App::run() */
@@ -341,6 +358,46 @@ CSPEED_METHOD(App, run)/*{{{ proto App::run() */
     request_dispatcher_url(getThis());
 }/*}}}*/
 
+CSPEED_METHOD(App, setDefaultModule) /*{{{ proto App::setDefaultModule($moduleName)*/
+{
+    zend_string *default_module;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &default_module) == FAILURE){
+        return ;
+    }
+    if (CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(default_module))){
+        zend_update_property_str(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_DEFAULT_MODULE), default_module); /*"../" first*/
+        RETURN_TRUE
+    }
+    RETURN_FALSE
+}/*}}}*/
+
+CSPEED_METHOD(App, setDefaultController) /*{{{ proto App::setDefaultController($controllerName)*/
+{
+    zend_string *default_controller;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &default_controller) == FAILURE){
+        return ;
+    }
+    if (CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(default_controller))){
+        zend_update_property_str(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_DEFAULT_CONTROLLER), 
+            strpprintf(0, "%s", title_upper_string(ZSTR_VAL(default_controller))));
+        RETURN_TRUE
+    }
+    RETURN_FALSE
+}/*}}}*/
+
+CSPEED_METHOD(App, setDefaultAction) /*{{{ proto App::setDefaultAction($actionName)*/
+{
+    zend_string *default_action;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &default_action) == FAILURE){
+        return ;
+    }
+    if (CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(default_action))){
+        zend_update_property_str(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_DEFAULT_ACTION), 
+            strpprintf(0, "%sAction", ZSTR_VAL(default_action)));
+        RETURN_TRUE
+    }
+    RETURN_FALSE
+}/*}}}*/
 
 /* The functions for the class CApp */
 static const zend_function_entry cspeed_app_functions[] = {
@@ -355,6 +412,9 @@ static const zend_function_entry cspeed_app_functions[] = {
     CSPEED_ME(App, autoload,            arginfo_cspeed_autoload,                    ZEND_ACC_PUBLIC)
     CSPEED_ME(App, registerModules,     arginfo_cspeed_register_modules,            ZEND_ACC_PUBLIC)
     CSPEED_ME(App, setAlias,            arginfo_cspeed_set_alias,                   ZEND_ACC_PUBLIC)
+    CSPEED_ME(App, setDefaultModule,    arginfo_cspeed_set_default_module,          ZEND_ACC_PUBLIC)
+    CSPEED_ME(App, setDefaultController,arginfo_cspeed_set_default_controller,      ZEND_ACC_PUBLIC)
+    CSPEED_ME(App, setDefaultAction,    arginfo_cspeed_set_default_action,          ZEND_ACC_PUBLIC)
     CSPEED_ME(App, run,                 arginfo_cspeed_run,                         ZEND_ACC_PUBLIC)
     PHP_FE_END
 };
@@ -367,10 +427,18 @@ CSPEED_INIT(app)
     INIT_NS_CLASS_ENTRY(ce, "Cs", "App", cspeed_app_functions);
     cspeed_app_ce = zend_register_internal_class(&ce);
 
-    zend_declare_property_null(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), ZEND_ACC_PRIVATE);
-    zend_declare_property_null(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_DI_OBJECT), ZEND_ACC_PRIVATE);
-    zend_declare_property_null(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_MODULES), ZEND_ACC_PRIVATE);
-    zend_declare_property_null(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_PROPERTY), ZEND_ACC_PUBLIC|ZEND_ACC_STATIC);
+    zend_declare_property_null(cspeed_app_ce,   CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES),   ZEND_ACC_PRIVATE);
+    zend_declare_property_null(cspeed_app_ce,   CSPEED_STRL(CSPEED_APP_DI_OBJECT),          ZEND_ACC_PRIVATE);
+    zend_declare_property_null(cspeed_app_ce,   CSPEED_STRL(CSPEED_APP_MODULES),            ZEND_ACC_PRIVATE);
+    zend_declare_property_null(cspeed_app_ce,   CSPEED_STRL(CSPEED_APP_PROPERTY),           ZEND_ACC_PUBLIC|ZEND_ACC_STATIC);
+    zend_declare_property_string(cspeed_app_ce, CSPEED_STRL(CSPEED_DEFAULT_MODULE), 
+        CSPEED_APP_DEFAULT_MODULE,              ZEND_ACC_PRIVATE);
+    zend_declare_property_string(cspeed_app_ce, CSPEED_STRL(CSPEED_DEFAULT_CONTROLLER), 
+        CSPEED_APP_DEFAULT_CONTROLLER,          ZEND_ACC_PRIVATE);
+    zend_declare_property_string(cspeed_app_ce, CSPEED_STRL(CSPEED_DEFAULT_ACTION), 
+        CSPEED_APP_DEFAULT_ACTION,              ZEND_ACC_PRIVATE);
+
+
 }
 /*}}}*/
 

@@ -23,6 +23,8 @@
 
 zend_class_entry *cspeed_controller_ce;
 
+#define CSPEED_DI_INSTANCE      "di"      /* To get the Di object */
+
 CSPEED_INIT(controller);
 
 #endif
