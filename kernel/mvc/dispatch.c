@@ -92,6 +92,62 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
         default_action = ZSTR_VAL(strpprintf(0, "%sAction", path_array[2]));
     }
 
+    /* All registered module */
+    zval *all_modules = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_APP_MODULES), 1, NULL);
+
+    /* To judge the module is correctly register or not */
+    /* First we must to check whether the module is registered or not */
+    if (Z_ISNULL_P(all_modules)){
+        php_error_docref(NULL, E_ERROR, "Registered module empty. You must register it first.");
+        return ;
+    }
+    /* Below are the module initialise process: */
+    /* First we must find which the given module is allowed or not */
+    zval *exists_module_file = zend_hash_find(Z_ARRVAL_P(all_modules), strpprintf(0, "%s", CSPEED_STRL(default_module)));
+    if (exists_module_file == NULL) {
+        php_error_docref(NULL, E_ERROR, "Module: %s not registered. You must register it first.", default_module);
+        return ;
+    }
+    default_module = Z_STRVAL_P(exists_module_file);
+    /* Loading the module file to do the initialise job */
+    zend_string *module_file = strpprintf(0, "%s/%s/Module.php", cspeed_get_cwd(), Z_STRVAL_P(exists_module_file));
+#if 0 
+    /* Below are the Module initialise function to force the Module.php must exists. to do the initialise job. */
+    if (access(ZSTR_VAL( module_file ), F_OK) == -1) {
+        php_error_docref(NULL, E_ERROR, "Module file :%s not found.", ZSTR_VAL(module_file));
+        return ;
+    }
+#endif
+    if (access(ZSTR_VAL( module_file ), F_OK) != -1) {
+        /*RESET the default_moudle using the registerModules() function */
+        cspeed_require_file(ZSTR_VAL(module_file), NULL, NULL, NULL);
+        zend_class_entry *module_ptr = zend_hash_find_ptr(CG(class_table), 
+            zend_string_tolower(zend_string_init(CSPEED_STRL("Module"), 0)));
+        if (module_ptr) {
+            zval module_object;
+            object_init_ex(&module_object, module_ptr);
+            if (CSPEED_METHOD_IN_OBJECT(&module_object, "initialise")){
+                zval module_initialise_function;
+                ZVAL_STRING(&module_initialise_function, "initialise");
+                zval initialise_retval;
+                call_user_function(NULL, &module_object, &module_initialise_function, &initialise_retval, 0, NULL);
+            } else {
+                php_error_docref(NULL, E_ERROR, "Module class must has the initialise method to do the initialise job.");
+                return ;
+            }
+        } else {
+            php_error_docref(NULL, E_ERROR, "Module class not found in file Module.php.");
+            return ;
+        }
+
+        zend_string *module_path_exists = strpprintf(0, "%s/%s", cspeed_get_cwd(), default_module);
+        if (access(ZSTR_VAL(module_path_exists), F_OK) == -1) {
+            php_error_docref(NULL, E_ERROR, "Module registered. But not exists in project.");
+            return ;
+        }
+        zend_string_release(module_path_exists);
+    }
+    
     /* Below are doing the router URL change */
     /* After the right regular URL parsing, do the routine setting, if setting */
     zval *app_di_object = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_APP_DI_OBJECT), 1, NULL);
@@ -176,62 +232,6 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
         free(back_path_info);
     }
     /* End the Routine setting */
-
-    /* All registered module */
-    zval *all_modules = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_APP_MODULES), 1, NULL);
-
-    /* To judge the module is correctly register or not */
-    /* First we must to check whether the module is registered or not */
-    if (Z_ISNULL_P(all_modules)){
-        php_error_docref(NULL, E_ERROR, "Registered module empty. You must register it first.");
-        return ;
-    }
-    /* Below are the module initialise process: */
-    /* First we must find which the given module is allowed or not */
-    zval *exists_module_file = zend_hash_find(Z_ARRVAL_P(all_modules), strpprintf(0, "%s", CSPEED_STRL(default_module)));
-    if (exists_module_file == NULL) {
-        php_error_docref(NULL, E_ERROR, "Module: %s not registered. You must register it first.", default_module);
-        return ;
-    }
-    default_module = Z_STRVAL_P(exists_module_file);
-    /* Loading the module file to do the initialise job */
-    zend_string *module_file = strpprintf(0, "%s/%s/Module.php", cspeed_get_cwd(), Z_STRVAL_P(exists_module_file));
-#if 0 
-    /* Below are the Module initialise function to force the Module.php must exists. to do the initialise job. */
-    if (access(ZSTR_VAL( module_file ), F_OK) == -1) {
-        php_error_docref(NULL, E_ERROR, "Module file :%s not found.", ZSTR_VAL(module_file));
-        return ;
-    }
-#endif
-    if (access(ZSTR_VAL( module_file ), F_OK) != -1) {
-        /*RESET the default_moudle using the registerModules() function */
-        cspeed_require_file(ZSTR_VAL(module_file), NULL, NULL, NULL);
-        zend_class_entry *module_ptr = zend_hash_find_ptr(CG(class_table), 
-            zend_string_tolower(zend_string_init(CSPEED_STRL("Module"), 0)));
-        if (module_ptr) {
-            zval module_object;
-            object_init_ex(&module_object, module_ptr);
-            if (CSPEED_METHOD_IN_OBJECT(&module_object, "initialise")){
-                zval module_initialise_function;
-                ZVAL_STRING(&module_initialise_function, "initialise");
-                zval initialise_retval;
-                call_user_function(NULL, &module_object, &module_initialise_function, &initialise_retval, 0, NULL);
-            } else {
-                php_error_docref(NULL, E_ERROR, "Module class must has the initialise method to do the initialise job.");
-                return ;
-            }
-        } else {
-            php_error_docref(NULL, E_ERROR, "Module class not found in file Module.php.");
-            return ;
-        }
-
-        zend_string *module_path_exists = strpprintf(0, "%s/%s", cspeed_get_cwd(), default_module);
-        if (access(ZSTR_VAL(module_path_exists), F_OK) == -1) {
-            php_error_docref(NULL, E_ERROR, "Module registered. But not exists in project.");
-            return ;
-        }
-        zend_string_release(module_path_exists);
-    }
 
     /* Combine the full path to include the file */
     zend_string *full_include_controller_path = strpprintf(0, "%s/%s/controllers/%s.php",
