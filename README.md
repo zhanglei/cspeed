@@ -21,7 +21,7 @@
 	
 设置默认方法：
 
-	$app->setDefaultActon('index');
+	$app->setDefaultAction('index');
 	
 **注意：一旦设置默认的模块，必须使用registerModules进行模块注册.**
 
