@@ -63,11 +63,9 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
     zval *app_default_controller = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_DEFAULT_CONTROLLER), 1, NULL);
     zval *app_default_action = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_DEFAULT_ACTION), 1, NULL);
 
-    char *pure_default_module;
-    char *default_module     = pure_default_module =  Z_STRVAL_P(app_default_module);
+    char *default_module     =  Z_STRVAL_P(app_default_module);
     char *default_controller =  Z_STRVAL_P(app_default_controller);
     char *default_action     =  Z_STRVAL_P(app_default_action);
-
 
     char *pure_default_controller = (char *)malloc(sizeof(char) * sizeof(strlen(default_controller) + 1));
     memset(pure_default_controller, 0, strlen(default_controller) + 1);
@@ -96,7 +94,7 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
     if ( (memcmp(default_module, CSPEED_STRL("../."))) || ( path_array[2] != NULL )){
         
         if (path_array[0] != NULL) {
-            pure_default_module = default_module = path_array[0];
+            default_module = path_array[0];
         }
         if (path_array[1] != NULL) {
             memcpy(pure_default_controller, CSPEED_STRL(path_array[1]));
@@ -264,14 +262,16 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
         if (is_change_module) {
             is_change_module = 0;
             sapi_header_line ctr = {0};
-            ctr.line_len    = spprintf(&(ctr.line), 0, "%s /%s/%s/%s", "Location:", pure_default_module, pure_default_controller, pure_default_action);
+            ctr.line_len    = spprintf(&(ctr.line), 0, "%s /%s/%s/%s", "Location:", default_module, pure_default_controller, pure_default_action);
             ctr.response_code   = 0;
             if (sapi_header_op(SAPI_HEADER_REPLACE, &ctr) == SUCCESS) {
                 efree(ctr.line);
-                php_error_docref(NULL, E_ERROR, "Current PHP didn't support SAPI.");
+                return ;
+            } else {
+                efree(ctr.line);
+                php_error_docref(NULL, E_ERROR, "Please install SAPI extension.");
                 return ;
             }
-            efree(ctr.line);
         }
     }
     /* End the Routine setting */
