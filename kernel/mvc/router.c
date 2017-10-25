@@ -64,9 +64,9 @@ CSPEED_METHOD(Router, add)/*{{{ proto Router::add($url, $matcher)*/
         add_next_index_string(&faker_pattern, "#{action}#");
 
         array_init(&real_pattern);
-        add_next_index_string(&real_pattern, "([^0-9-][a-zA-Z0-9-]+)");
-        add_next_index_string(&real_pattern, "([^0-9-][a-zA-Z0-9-]+)");
-        add_next_index_string(&real_pattern, "([^0-9-][a-zA-Z0-9-]+)");
+        add_next_index_string(&real_pattern, "([^0-9-][a-zA-Z0-9-]*)");
+        add_next_index_string(&real_pattern, "([^0-9-][a-zA-Z0-9-]*)");
+        add_next_index_string(&real_pattern, "([^0-9-][a-zA-Z0-9-]*)");
 
         /* preg_replace */
         zval subject;

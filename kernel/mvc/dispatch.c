@@ -41,6 +41,8 @@
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/php_string.h"
 
+#include "main/SAPI.h"      /* for sapi */
+
 #include <unistd.h>         /* Access function */
 #include <fcntl.h>          /* Access function */
 
@@ -61,9 +63,19 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
     zval *app_default_controller = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_DEFAULT_CONTROLLER), 1, NULL);
     zval *app_default_action = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_DEFAULT_ACTION), 1, NULL);
 
-    char *default_module     =  Z_STRVAL_P(app_default_module);
+    char *pure_default_module;
+    char *default_module     = pure_default_module =  Z_STRVAL_P(app_default_module);
     char *default_controller =  Z_STRVAL_P(app_default_controller);
     char *default_action     =  Z_STRVAL_P(app_default_action);
+
+
+    char *pure_default_controller = (char *)malloc(sizeof(char) * sizeof(strlen(default_controller) + 1));
+    memset(pure_default_controller, 0, strlen(default_controller) + 1);
+    
+    char *pure_default_action     = (char *)malloc(sizeof(char) * sizeof(strlen(default_action) + 1));
+    memset(pure_default_action, 0, strlen(default_action) + 1);
+    
+    int is_change_module = 0;
 
     char *path_array[3] = { NULL };             /* Only need three element for the `module`, `controller`, `action` */
 
@@ -79,75 +91,87 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
             result = strtok( NULL, delims);
         }
     }
+    
+    /* If the default module setting, do the module process */
+    if ( (memcmp(default_module, CSPEED_STRL("../."))) || ( path_array[2] != NULL )){
+        
+        if (path_array[0] != NULL) {
+            pure_default_module = default_module = path_array[0];
+        }
+        if (path_array[1] != NULL) {
+            memcpy(pure_default_controller, CSPEED_STRL(path_array[1]));
+            title_upper_string(path_array[1]);
+            default_controller = path_array[1];
+        }
+        if (path_array[2] != NULL) {
+            memcpy(pure_default_action, CSPEED_STRL(path_array[2]));
+            default_action = ZSTR_VAL(strpprintf(0, "%sAction", path_array[2]));
+        }
 
-    /* Setting the M|C|A to the right string */
-    if (path_array[0] != NULL) {
-        default_module = path_array[0];
-    }
-    if (path_array[1] != NULL) {
-        title_upper_string(path_array[1]);
-        default_controller = path_array[1];
-    }
-    if (path_array[2] != NULL) {
-        default_action = ZSTR_VAL(strpprintf(0, "%sAction", path_array[2]));
-    }
+        /* All registered module */
+        zval *all_modules = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_APP_MODULES), 1, NULL);
 
-    /* All registered module */
-    zval *all_modules = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_APP_MODULES), 1, NULL);
+        /* To judge the module is correctly register or not */
+        /* First we must to check whether the module is registered or not */
+        if (Z_ISNULL_P(all_modules)){
+            php_error_docref(NULL, E_ERROR, "Registered module empty. You must register it first.");
+            return ;
+        }
+        /* Below are the module initialise process: */
+        /* First we must find which the given module is allowed or not */
+        zval *exists_module_file = zend_hash_find(Z_ARRVAL_P(all_modules), strpprintf(0, "%s", CSPEED_STRL(default_module)));
+        if (exists_module_file == NULL) {
+            php_error_docref(NULL, E_ERROR, "Module: %s not registered. You must register it first.", default_module);
+            return ;
+        }
 
-    /* To judge the module is correctly register or not */
-    /* First we must to check whether the module is registered or not */
-    if (Z_ISNULL_P(all_modules)){
-        php_error_docref(NULL, E_ERROR, "Registered module empty. You must register it first.");
-        return ;
-    }
-    /* Below are the module initialise process: */
-    /* First we must find which the given module is allowed or not */
-    zval *exists_module_file = zend_hash_find(Z_ARRVAL_P(all_modules), strpprintf(0, "%s", CSPEED_STRL(default_module)));
-    if (exists_module_file == NULL) {
-        php_error_docref(NULL, E_ERROR, "Module: %s not registered. You must register it first.", default_module);
-        return ;
-    }
-    default_module = Z_STRVAL_P(exists_module_file);
-    /* Loading the module file to do the initialise job */
-    zend_string *module_file = strpprintf(0, "%s/%s/Module.php", cspeed_get_cwd(), Z_STRVAL_P(exists_module_file));
-#if 0 
-    /* Below are the Module initialise function to force the Module.php must exists. to do the initialise job. */
-    if (access(ZSTR_VAL( module_file ), F_OK) == -1) {
-        php_error_docref(NULL, E_ERROR, "Module file :%s not found.", ZSTR_VAL(module_file));
-        return ;
-    }
-#endif
-    if (access(ZSTR_VAL( module_file ), F_OK) != -1) {
-        /*RESET the default_moudle using the registerModules() function */
-        cspeed_require_file(ZSTR_VAL(module_file), NULL, NULL, NULL);
-        zend_class_entry *module_ptr = zend_hash_find_ptr(CG(class_table), 
-            zend_string_tolower(zend_string_init(CSPEED_STRL("Module"), 0)));
-        if (module_ptr) {
-            zval module_object;
-            object_init_ex(&module_object, module_ptr);
-            if (CSPEED_METHOD_IN_OBJECT(&module_object, "initialise")){
-                zval module_initialise_function;
-                ZVAL_STRING(&module_initialise_function, "initialise");
-                zval initialise_retval;
-                call_user_function(NULL, &module_object, &module_initialise_function, &initialise_retval, 0, NULL);
+        default_module = Z_STRVAL_P(exists_module_file);
+        /* Loading the module file to do the initialise job */
+        zend_string *module_file = strpprintf(0, "%s/%s/Module.php", cspeed_get_cwd(), Z_STRVAL_P(exists_module_file));
+
+        if (access(ZSTR_VAL( module_file ), F_OK) != -1) {
+            /*RESET the default_module using the registerModules() function */
+            cspeed_require_file(ZSTR_VAL(module_file), NULL, NULL, NULL);
+            zend_class_entry *module_ptr = zend_hash_find_ptr(CG(class_table), 
+                zend_string_tolower(zend_string_init(CSPEED_STRL("Module"), 0)));
+            if (module_ptr) {
+                zval module_object;
+                object_init_ex(&module_object, module_ptr);
+                if (CSPEED_METHOD_IN_OBJECT(&module_object, "initialise")){
+                    zval module_initialise_function;
+                    ZVAL_STRING(&module_initialise_function, "initialise");
+                    zval initialise_retval;
+                    call_user_function(NULL, &module_object, &module_initialise_function, &initialise_retval, 0, NULL);
+                } else {
+                    php_error_docref(NULL, E_ERROR, "Module class must has the initialise method to do the initialise job.");
+                    return ;
+                }
             } else {
-                php_error_docref(NULL, E_ERROR, "Module class must has the initialise method to do the initialise job.");
+                php_error_docref(NULL, E_ERROR, "Module class not found in file Module.php.");
                 return ;
             }
-        } else {
-            php_error_docref(NULL, E_ERROR, "Module class not found in file Module.php.");
-            return ;
-        }
 
-        zend_string *module_path_exists = strpprintf(0, "%s/%s", cspeed_get_cwd(), default_module);
-        if (access(ZSTR_VAL(module_path_exists), F_OK) == -1) {
-            php_error_docref(NULL, E_ERROR, "Module registered. But not exists in project.");
-            return ;
+            zend_string *module_path_exists = strpprintf(0, "%s/%s", cspeed_get_cwd(), default_module);
+            if (access(ZSTR_VAL(module_path_exists), F_OK) == -1) {
+                php_error_docref(NULL, E_ERROR, "Module registered. But not exists in project.");
+                return ;
+            }
+            zend_string_release(module_path_exists);
         }
-        zend_string_release(module_path_exists);
+    } else {
+        /* When not setting the default module, run the default process */
+        if (path_array[0] != NULL) {
+            memcpy(pure_default_controller, CSPEED_STRL(path_array[0]));
+            title_upper_string(path_array[0]);
+            default_controller = path_array[0];
+        }
+        if (path_array[1] != NULL) {
+            memcpy(pure_default_action, CSPEED_STRL(path_array[1]));
+            default_action = ZSTR_VAL(strpprintf(0, "%sAction", path_array[1]));
+        }
+        /* End the default module process */
     }
-    
+
     /* Below are doing the router URL change */
     /* After the right regular URL parsing, do the routine setting, if setting */
     zval *app_di_object = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_APP_DI_OBJECT), 1, NULL);
@@ -171,6 +195,7 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
             } else {
                 zval matches, subparts;
                 ZVAL_NULL(&subparts);
+
                 php_pcre_match_impl(pce_regexp, CSPEED_STRL(back_path_info), &matches, &subparts, 0, 0, 0, 0);
 
                 if (!zend_hash_num_elements(Z_ARRVAL(subparts))) {
@@ -179,7 +204,7 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
                 } else {
                     /* The given URL matches the path_info, parsing the module|controller|action of it */
                     zend_hash_index_del(Z_ARRVAL(subparts), 0);
-                    
+
                     /* Find if the given module|controller|action is given or number is given
                      * if number, to fetch the url of the subparts
                      */
@@ -192,8 +217,14 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
                             return ;
                         }
                         Z_TRY_ADDREF_P(real_module);
+                        if (memcmp(Z_STRVAL_P(real_module), CSPEED_STRL(default_module)) != 0) {
+                            is_change_module = 1;
+                        }
                         default_module = Z_STRVAL_P(real_module);
                     } else if (module && (Z_TYPE_P(module) == IS_STRING)) {
+                        if (memcmp(Z_STRVAL_P(module), CSPEED_STRL(default_module)) != 0) {
+                            is_change_module = 1;
+                        }
                         default_module = Z_STRVAL_P(module);
                     }
                     zval *controller = zend_hash_find(Z_ARRVAL_P(vvar_value), zend_string_init(CSPEED_STRL("controller"), 0));
@@ -229,9 +260,24 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
             }
         } ZEND_HASH_FOREACH_END();
         /*Free the Memory of the CSpeed malloc*/
-        free(back_path_info);
+        /* If the Module change, Loading the changed Module.php, Only the controller and action changed, not need to redirect */
+        if (is_change_module) {
+            is_change_module = 0;
+            sapi_header_line ctr = {0};
+            ctr.line_len    = spprintf(&(ctr.line), 0, "%s /%s/%s/%s", "Location:", pure_default_module, pure_default_controller, pure_default_action);
+            ctr.response_code   = 0;
+            if (sapi_header_op(SAPI_HEADER_REPLACE, &ctr) == SUCCESS) {
+                efree(ctr.line);
+                php_error_docref(NULL, E_ERROR, "Current PHP didn't support SAPI.");
+                return ;
+            }
+            efree(ctr.line);
+        }
     }
     /* End the Routine setting */
+    free(back_path_info);
+    free(pure_default_controller);
+    free(pure_default_action);
 
     /* Combine the full path to include the file */
     zend_string *full_include_controller_path = strpprintf(0, "%s/%s/controllers/%s.php",
@@ -286,7 +332,6 @@ void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the
         php_error_docref(NULL, E_ERROR, "Controller class: %s not exists the include file.", default_controller);
         return ;
     }
-
 }/*}}}*/
 
 

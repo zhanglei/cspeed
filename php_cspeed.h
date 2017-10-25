@@ -24,7 +24,7 @@
 extern zend_module_entry cspeed_module_entry;
 #define phpext_cspeed_ptr &cspeed_module_entry
 
-#define PHP_CSPEED_VERSION "1.3.1"
+#define PHP_CSPEED_VERSION "1.3.8"
 
 #ifdef PHP_WIN32
 #	define PHP_CSPEED_API __declspec(dllexport)
