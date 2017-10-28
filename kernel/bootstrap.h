@@ -18,24 +18,11 @@
 
 /* $Id$ */
 
-#ifndef CSPEED_DISPATCH_H
-#define CSPEED_DISPATCH_H
+#ifndef CSPEED_BOOTSTRAP_H
+#define CSPEED_BOOTSTRAP_H
 
-void dispather_url();                 /* Dispatcher the URL from the PATH_INFO */
+zend_class_entry *cspeed_bootstrap_ce;                                    /* The \Cs\Bootstrap interface */
+
+CSPEED_INIT(bootstrap);                                                   /* The bootstrap_init() function */
 
 #endif
-
-
-
-
-
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

@@ -36,6 +36,7 @@ void cspeed_build_equal_string(zval *array, char *begin_str, zval *result);     
 
 void cspeed_build_quote_string(zval *array, zval *result);                       /* Building the quote string */
 
+int check_file_exists(char *file_path);                                          /* Check whether the file is exists or not. */
 #endif
 
 

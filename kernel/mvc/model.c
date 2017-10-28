@@ -26,7 +26,7 @@
 #include "kernel/tool/helper.h"
 #include "kernel/mvc/model.h"
 
-#include "kernel/db/mysql.h"            /* Use the common PDO object from MySql class */
+#include "kernel/db/mysql.h"
 
 #include "zend_smart_str.h"             /* Use the smart_str */
 
@@ -34,12 +34,16 @@ void initialise_the_model_object(zval *model_object, zend_long new_record, INTER
 {
     /* Fetch the PDO object from the given Di class */
     zval *pdo_object = zend_read_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1);
+#if 0
+    zval *pdo_object = CSPEED_G(new_db_pdo_object);
+#endif
 
-    if (ZVAL_IS_NULL(pdo_object)) {
+    if (pdo_object == NULL) {
         php_error_docref(NULL, E_ERROR, "Please set the MySql class to Di container.");
         return ;
     }
     /* Restore the PDO object into the Class property */
+    zval_add_ref(pdo_object);
     zend_update_property(cspeed_model_ce, model_object, CSPEED_STRL(CSPEED_MODEL_PDO_OBJECT), pdo_object);
 
     /* Initialiase the properties to the proper value format */

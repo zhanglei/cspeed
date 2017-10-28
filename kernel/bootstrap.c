@@ -18,24 +18,30 @@
 
 /* $Id$ */
 
-#ifndef CSPEED_DISPATCH_H
-#define CSPEED_DISPATCH_H
-
-void dispather_url();                 /* Dispatcher the URL from the PATH_INFO */
-
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
+#include "php.h"
+#include "php_ini.h"
+#include "ext/standard/info.h"
+#include "php_cspeed.h"
 
+#include "bootstrap.h"
 
+/*{{{ All ARG_INFO */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_bootstrap_construct, 0, 0, 0)
+ZEND_END_ARG_INFO()
+/*}}}*/
 
+static const zend_function_entry cspeed_bootstrap_functions[] = { /*{{{ All methods of the interface */
 
+    PHP_FE_END
+};/*}}}*/
 
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */
+CSPEED_INIT(bootstrap)  /*{{{ The initialise module function */
+{
+    zend_class_entry ce;
+    INIT_NS_CLASS_ENTRY(ce, "Cs", "Bootstrap", NULL);
+    cspeed_bootstrap_ce = zend_register_internal_interface(&ce);
+}/*}}}*/

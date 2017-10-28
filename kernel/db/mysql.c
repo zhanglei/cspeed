@@ -77,7 +77,7 @@ zend_bool output_sql_errors(zval *pdo_statement)  /*{{{ Return the SQL running e
 }/*}}}*/
 
 /*{{{*/
-ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_mysql_construct, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_mysql_construct, 0, 0, 0)
     ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
@@ -146,37 +146,41 @@ ZEND_END_ARG_INFO()
 /*}}}*/
 
 CSPEED_METHOD(MySql, __construct)/*{{{ proto MySql::__construct(array $options = [])*/
-{
-    zval *options;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &options) == FAILURE) {
+{    
+    if (CSPEED_G(db_master_type) == NULL) {
+        php_error_docref(NULL, E_ERROR, "PDO need a valid DB connection type.");
+        RETURN_FALSE
+    }
+    if (CSPEED_G(db_master_dbname) == NULL) {
+        php_error_docref(NULL, E_ERROR, "PDO need a valid connection dbname.");
+        RETURN_FALSE
+    }
+    if (CSPEED_G(db_master_username) == NULL) {
+        php_error_docref(NULL, E_ERROR, "PDO need a valid username.");
+        RETURN_FALSE
+    }
+    if (CSPEED_G(db_master_password) == NULL) {
+        php_error_docref(NULL, E_ERROR, "PDO need a valid password.");
+        RETURN_FALSE
+    }
+    zval *pdo_options = NULL;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a", &pdo_options) == FAILURE){
         return ;
     }
-    zval *dsn = zend_hash_find(Z_ARRVAL_P(options), zend_string_init(CSPEED_STRL("dsn"), 0));
-    if (dsn == NULL) {
-        php_error_docref(NULL, E_ERROR, "Parameter need a dsn key.");
-        RETURN_FALSE
-    }
-    zval *username = zend_hash_find(Z_ARRVAL_P(options), zend_string_init(CSPEED_STRL("username"), 0));
-    if (username == NULL) {
-        php_error_docref(NULL, E_ERROR, "Parameter need a username key.");
-        RETURN_FALSE
-    }
-    zval *password = zend_hash_find(Z_ARRVAL_P(options), zend_string_init(CSPEED_STRL("password"), 0));
-    if (password == NULL) {
-        php_error_docref(NULL, E_ERROR, "Parameter need a password key.");
-        RETURN_FALSE
-    }
-    zval *pdo_options = zend_hash_find(Z_ARRVAL_P(options), zend_string_init(CSPEED_STRL("options"), 0));
+    /* mysql:host=localhost;port=3306;dbname=xxxx */
+    zend_string *dsn = strpprintf(0, "%s:host=%s;port=%s;dbname=%s", ZSTR_VAL(CSPEED_G(db_master_type)), 
+                       CSPEED_G(db_master_host) ? ZSTR_VAL(CSPEED_G(db_master_host)) : "localhost",
+                       CSPEED_G(db_master_port) ? ZSTR_VAL(CSPEED_G(db_master_port)) : "3306",
+                                                  ZSTR_VAL(CSPEED_G(db_master_dbname))
+     );
     zval pdo_object;
     if (pdo_options == NULL) {
-        cspeed_pdo_construct(&pdo_object, Z_STRVAL_P(dsn), Z_STRVAL_P(username), Z_STRVAL_P(password), NULL);
+        cspeed_pdo_construct(&pdo_object, ZSTR_VAL(dsn), ZSTR_VAL(CSPEED_G(db_master_username)), ZSTR_VAL(CSPEED_G(db_master_password)), NULL);
     } else if ( pdo_options && (Z_TYPE_P(pdo_options) == IS_ARRAY) ) {
-        cspeed_pdo_construct(&pdo_object, Z_STRVAL_P(dsn), Z_STRVAL_P(username), Z_STRVAL_P(password), pdo_options);
+        cspeed_pdo_construct(&pdo_object, ZSTR_VAL(dsn), ZSTR_VAL(CSPEED_G(db_master_username)), ZSTR_VAL(CSPEED_G(db_master_password)), pdo_options);
     }
     /* Store the getting pdo object into the property */
     zend_update_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), &pdo_object);
-    zval_ptr_dtor(options);
-    zval_ptr_dtor(&pdo_object);
 }/*}}}*/
 
 CSPEED_METHOD(MySql, select)/*{{{ proto MySql::select($fields)*/
@@ -377,7 +381,10 @@ CSPEED_METHOD(MySql, query)/*{{{ proto MySql::query($rawsql)*/
 
 CSPEED_METHOD(MySql, execute)/*{{{ proto MySql::execute($rawsql)*/
 {
+#if 0
     zval *pdo_object = zend_read_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1);
+#endif
+    zval *pdo_object = CSPEED_G(new_db_pdo_object);
     zval *sql_property = zend_read_property(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_RAW_SQL), 1, NULL);
     zval *param_property = zend_read_property(cspeed_mysql_ce, getThis(), CSPEED_STRL(CSPEED_MYSQL_BIND_PARAMS), 1, NULL);
 
@@ -401,7 +408,10 @@ CSPEED_METHOD(MySql, execute)/*{{{ proto MySql::execute($rawsql)*/
 
 CSPEED_METHOD(MySql, begin)/*{{{ proto MySql::begin()*/
 {
+#if 0
     zval *pdo_object = zend_read_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1);
+#endif
+    zval *pdo_object = CSPEED_G(new_db_pdo_object);
 
     zval retval;
     cspeed_pdo_begin_transaction(pdo_object, &retval);
@@ -410,7 +420,10 @@ CSPEED_METHOD(MySql, begin)/*{{{ proto MySql::begin()*/
 
 CSPEED_METHOD(MySql, rollback)/*{{{ proto MySql::rollback()*/
 {
+#if 0
     zval *pdo_object = zend_read_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1);
+#endif
+    zval *pdo_object = CSPEED_G(new_db_pdo_object);
 
     zval retval;
     cspeed_pdo_roll_back(pdo_object, &retval);
@@ -419,7 +432,10 @@ CSPEED_METHOD(MySql, rollback)/*{{{ proto MySql::rollback()*/
 
 CSPEED_METHOD(MySql, commit)/*{{{ proto MySql::commit()*/
 {
+#if 0
     zval *pdo_object = zend_read_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1);
+#endif 
+    zval *pdo_object = CSPEED_G(new_db_pdo_object);
 
     zval retval;
     cspeed_pdo_commit(pdo_object, &retval);
@@ -428,7 +444,10 @@ CSPEED_METHOD(MySql, commit)/*{{{ proto MySql::commit()*/
 
 CSPEED_METHOD(MySql, lastInsertId)/*{{{ proto MySql::lastInsertId()*/
 {
+#if 0
     zval *pdo_object = zend_read_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1);
+#endif
+    zval *pdo_object = CSPEED_G(new_db_pdo_object);
 
     zval retval;
     cspeed_pdo_last_insert_id(pdo_object, NULL, &retval);
@@ -437,7 +456,10 @@ CSPEED_METHOD(MySql, lastInsertId)/*{{{ proto MySql::lastInsertId()*/
 
 CSPEED_METHOD(MySql, rowCount)/*{{{ proto MySql::rowCount()*/
 {
+#if 0
     zval *pdo_object = zend_read_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1);
+#endif
+    zval *pdo_object = CSPEED_G(new_db_pdo_object);
 
     zval retval;
     cspeed_pdo_statement_row_count(pdo_object, &retval);
@@ -446,7 +468,10 @@ CSPEED_METHOD(MySql, rowCount)/*{{{ proto MySql::rowCount()*/
 
 CSPEED_METHOD(MySql, find)/*{{{ proto MySql::find()*/
 {
+#if 0
     zval *pdo_object = zend_read_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1);
+#endif
+    zval *pdo_object = CSPEED_G(new_db_pdo_object);
 
     zval pdo_statement;
     cspeed_pdo_prepare(pdo_object, get_build_sql(getThis()), &pdo_statement);
@@ -468,7 +493,10 @@ CSPEED_METHOD(MySql, find)/*{{{ proto MySql::find()*/
 
 CSPEED_METHOD(MySql, findAll)/*{{{ proto MySql::findAll()*/
 {
+#if 0
     zval *pdo_object = zend_read_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1);
+#endif 
+    zval *pdo_object = CSPEED_G(new_db_pdo_object);
 
     zval pdo_statement;
     cspeed_pdo_prepare(pdo_object, get_build_sql(getThis()), &pdo_statement);
@@ -519,7 +547,7 @@ CSPEED_INIT(mysql)/*{{{*/
     /* Implements from the ModelInterface */
     zend_class_implements(cspeed_mysql_ce, 1, cspeed_model_interface_ce);
 
-    zend_declare_property_null(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), ZEND_ACC_PUBLIC|ZEND_ACC_STATIC);
+    /* All propertyies */
     zend_declare_property_string(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_SELECT), "", ZEND_ACC_PROTECTED);
     zend_declare_property_string(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_FROM), "", ZEND_ACC_PROTECTED);
     zend_declare_property_string(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_WHERE), "", ZEND_ACC_PROTECTED);
@@ -529,6 +557,7 @@ CSPEED_INIT(mysql)/*{{{*/
     zend_declare_property_string(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_LIMIT), "", ZEND_ACC_PROTECTED);
     zend_declare_property_string(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_RAW_SQL), "", ZEND_ACC_PROTECTED);
     zend_declare_property_null(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_BIND_PARAMS), ZEND_ACC_PROTECTED);
+    zend_declare_property_null(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), ZEND_ACC_PUBLIC|ZEND_ACC_STATIC);
 }/*}}}*/
 
 

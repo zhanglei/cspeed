@@ -44,12 +44,17 @@ ZEND_END_ARG_INFO()
 
 /*}}}*/
 
-CSPEED_METHOD(Di, __construct)  /*{{{ proto Di::construct() */
+void initialise_di_object_properties(zval *di_object)/*{{{ Initialise the Di object's properties */
 {
     zval objects;
     array_init(&objects);
-    zend_update_property(cspeed_di_ce, getThis(), CSPEED_STRL(CSPEED_DI_OBJECT), &objects);
+    zend_update_property(cspeed_di_ce, di_object, CSPEED_STRL(CSPEED_DI_OBJECT), &objects);
     zval_ptr_dtor(&objects);
+}/*}}}*/
+
+CSPEED_METHOD(Di, __construct)  /*{{{ proto Di::construct() */
+{
+    initialise_di_object_properties(getThis());
 }/*}}}*/
 
 CSPEED_METHOD(Di, set) /*{{{ proto Di::set($key, function(){return new stdClass();}) */

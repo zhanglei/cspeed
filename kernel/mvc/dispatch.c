@@ -27,8 +27,8 @@
 #include "ext/standard/info.h"
 #include "php_cspeed.h"
 
-#include "kernel/CApp.h"           /* The view object */
-#include "kernel/di/di.h"           /* The view object */
+#include "kernel/CApp.h"            /* The App object */
+#include "kernel/di/di.h"           /* The Di object */
 #include "kernel/mvc/view.h"        /* The view object */
 #include "kernel/mvc/dispatch.h"
 #include "kernel/mvc/controller.h"  /* Use the controller features */
@@ -41,302 +41,271 @@
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/php_string.h"
 
-#include "main/SAPI.h"      /* for sapi */
+#include "main/SAPI.h"          /* for sapi */
 
-#include <unistd.h>         /* Access function */
-#include <fcntl.h>          /* Access function */
-
-void request_dispatcher_url(zval *capp_object)      /*{{{ This method handle the URL request and dispatcher it to differnt controller' action */
+void auto_render_view_file(zend_class_entry *controller_ptr, zval *controller_obj, zval *view_object)/*{{{ Renderin the file automatically */
 {
-    /* The parameter capp_object was the CApp class object, which you can use it to load the User setting from the php-level */
-
-    /* NOTE THAT: 
-        CSpeed parse the PATH_INFO info. to do the job. if your web server didn't support, the CSpeed will not support.
-    */
-    char *path_info = cspeed_request_server_str_key_val("PATH_INFO");
-    char *back_path_info = (char *)malloc(sizeof(char) * strlen(path_info) + 1);
-    memset(back_path_info, 0, strlen(path_info)+1);
-    memcpy(back_path_info, CSPEED_STRL(path_info));
-
-    /* Try to get the default module|controller|action from the User-level */
-    zval *app_default_module = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_DEFAULT_MODULE), 1, NULL);
-    zval *app_default_controller = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_DEFAULT_CONTROLLER), 1, NULL);
-    zval *app_default_action = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_DEFAULT_ACTION), 1, NULL);
-
-    char *default_module     =  Z_STRVAL_P(app_default_module);
-    char *default_controller =  Z_STRVAL_P(app_default_controller);
-    char *default_action     =  Z_STRVAL_P(app_default_action);
-
-    char *pure_default_controller = (char *)malloc(sizeof(char) * sizeof(strlen(default_controller) + 1));
-    memset(pure_default_controller, 0, strlen(default_controller) + 1);
-    
-    char *pure_default_action     = (char *)malloc(sizeof(char) * sizeof(strlen(default_action) + 1));
-    memset(pure_default_action, 0, strlen(default_action) + 1);
-    
-    int is_change_module = 0;
-
-    char *path_array[3] = { NULL };             /* Only need three element for the `module`, `controller`, `action` */
-
-    if (CSPEED_STRING_NOT_EMPTY(path_info)){
-        char delims[] = "/";
-        char *result = NULL;
-        result = strtok( path_info + 1, delims );
-        int i;
-        for (i = 0; result != NULL; ++i)
-        {
-            if (i > 2 ) { break; }
-            path_array[i] = result;
-            result = strtok( NULL, delims);
-        }
-    }
-    
-    /* If the default module setting, do the module process */
-    if ( (memcmp(default_module, CSPEED_STRL("../."))) || ( path_array[2] != NULL )){
-        
-        if (path_array[0] != NULL) {
-            default_module = path_array[0];
-        }
-        if (path_array[1] != NULL) {
-            memcpy(pure_default_controller, CSPEED_STRL(path_array[1]));
-            title_upper_string(path_array[1]);
-            default_controller = path_array[1];
-        }
-        if (path_array[2] != NULL) {
-            memcpy(pure_default_action, CSPEED_STRL(path_array[2]));
-            default_action = ZSTR_VAL(strpprintf(0, "%sAction", path_array[2]));
-        }
-
-        /* All registered module */
-        zval *all_modules = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_APP_MODULES), 1, NULL);
-
-        /* To judge the module is correctly register or not */
-        /* First we must to check whether the module is registered or not */
-        if (Z_ISNULL_P(all_modules)){
-            php_error_docref(NULL, E_ERROR, "Registered module empty. You must register it first.");
-            return ;
-        }
-        /* Below are the module initialise process: */
-        /* First we must find which the given module is allowed or not */
-        zval *exists_module_file = zend_hash_find(Z_ARRVAL_P(all_modules), strpprintf(0, "%s", CSPEED_STRL(default_module)));
-        if (exists_module_file == NULL) {
-            php_error_docref(NULL, E_ERROR, "Module: %s not registered. You must register it first.", default_module);
-            return ;
-        }
-
-        default_module = Z_STRVAL_P(exists_module_file);
-        /* Loading the module file to do the initialise job */
-        zend_string *module_file = strpprintf(0, "%s/%s/Module.php", cspeed_get_cwd(), Z_STRVAL_P(exists_module_file));
-
-        if (access(ZSTR_VAL( module_file ), F_OK) != -1) {
-            /*RESET the default_module using the registerModules() function */
-            cspeed_require_file(ZSTR_VAL(module_file), NULL, NULL, NULL);
-            zend_class_entry *module_ptr = zend_hash_find_ptr(CG(class_table), 
-                zend_string_tolower(zend_string_init(CSPEED_STRL("Module"), 0)));
-            if (module_ptr) {
-                zval module_object;
-                object_init_ex(&module_object, module_ptr);
-                if (CSPEED_METHOD_IN_OBJECT(&module_object, "initialise")){
-                    zval module_initialise_function;
-                    ZVAL_STRING(&module_initialise_function, "initialise");
-                    zval initialise_retval;
-                    call_user_function(NULL, &module_object, &module_initialise_function, &initialise_retval, 0, NULL);
-                } else {
-                    php_error_docref(NULL, E_ERROR, "Module class must has the initialise method to do the initialise job.");
-                    return ;
-                }
-            } else {
-                php_error_docref(NULL, E_ERROR, "Module class not found in file Module.php.");
-                return ;
-            }
-
-            zend_string *module_path_exists = strpprintf(0, "%s/%s", cspeed_get_cwd(), default_module);
-            if (access(ZSTR_VAL(module_path_exists), F_OK) == -1) {
-                php_error_docref(NULL, E_ERROR, "Module registered. But not exists in project.");
-                return ;
-            }
-            zend_string_release(module_path_exists);
-        }
+    if ( strncasecmp(CORE_VIEW_AUTO_RENDER, CSPEED_STRL( ZSTR_VAL( CSPEED_G(core_view_auto_render) ) ) ) == 0 ) {
+        /* First, create the view object */
+        object_init_ex(view_object, cspeed_view_ce);
+        /* Initialise the view properties */
+        initialise_view_object_properties(view_object);
+        /* attach the CSpeed created view object to the Controller engine. */
+        zend_update_property(controller_ptr, controller_obj, CSPEED_STRL(CSPEED_VIEW_INSTANCE), view_object);
     } else {
-        /* When not setting the default module, run the default process */
-        if (path_array[0] != NULL) {
-            memcpy(pure_default_controller, CSPEED_STRL(path_array[0]));
-            title_upper_string(path_array[0]);
-            default_controller = path_array[0];
-        }
-        if (path_array[1] != NULL) {
-            memcpy(pure_default_action, CSPEED_STRL(path_array[1]));
-            default_action = ZSTR_VAL(strpprintf(0, "%sAction", path_array[1]));
-        }
-        /* End the default module process */
-    }
-
-    /* Below are doing the router URL change */
-    /* After the right regular URL parsing, do the routine setting, if setting */
-    zval *app_di_object = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_APP_DI_OBJECT), 1, NULL);
-
-    zval *di_objects = ZVAL_IS_NULL(app_di_object) ? NULL : zend_read_property(cspeed_di_ce, app_di_object, 
-                                                                CSPEED_STRL(CSPEED_DI_OBJECT), 1, NULL);
-    zval *router_object = di_objects ? zend_hash_find(Z_ARRVAL_P(di_objects), zend_string_init(CSPEED_STRL("router"), 0)) : NULL;
-    
-    zval *all_routines = router_object ? zend_read_property(cspeed_router_ce, router_object, 
-                                                                CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), 1, NULL) : NULL;
-    if (all_routines && zend_hash_num_elements(Z_ARRVAL_P(all_routines))){
-        /* If the Routine in the routine settting */
-        /* Use the preg_match to match all the URL routine */
-        zend_string *vvar_key;
-        zval *vvar_value;
-        ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(all_routines), vvar_key, vvar_value){
-            pcre_cache_entry *pce_regexp;
-            if ((pce_regexp = pcre_get_compiled_regex_cache(vvar_key)) == NULL) {
-                php_error_docref(NULL, E_ERROR, "Can't compile PCRE_Regex.");
-                return ;
-            } else {
-                zval matches, subparts;
-                ZVAL_NULL(&subparts);
-
-                php_pcre_match_impl(pce_regexp, CSPEED_STRL(back_path_info), &matches, &subparts, 0, 0, 0, 0);
-
-                if (!zend_hash_num_elements(Z_ARRVAL(subparts))) {
-                    zval_ptr_dtor(&subparts);
-                    /* Noting match the given url routine do the default */
-                } else {
-                    /* The given URL matches the path_info, parsing the module|controller|action of it */
-                    zend_hash_index_del(Z_ARRVAL(subparts), 0);
-
-                    /* Find if the given module|controller|action is given or number is given
-                     * if number, to fetch the url of the subparts
-                     */
-                    zval *module = zend_hash_find(Z_ARRVAL_P(vvar_value), zend_string_init( CSPEED_STRL("module") ,0));
-                    if (module && (Z_TYPE_P(module) == IS_LONG)) {
-                        zval *real_module = zend_hash_index_find(Z_ARRVAL(subparts), Z_LVAL_P(module));
-                        if (real_module == NULL) {
-                            php_error_docref(NULL, E_ERROR, "Can't found the offset %s module int the URL.",
-                                             Z_LVAL_P(module));
-                            return ;
-                        }
-                        Z_TRY_ADDREF_P(real_module);
-                        if (memcmp(Z_STRVAL_P(real_module), CSPEED_STRL(default_module)) != 0) {
-                            is_change_module = 1;
-                        }
-                        default_module = Z_STRVAL_P(real_module);
-                    } else if (module && (Z_TYPE_P(module) == IS_STRING)) {
-                        if (memcmp(Z_STRVAL_P(module), CSPEED_STRL(default_module)) != 0) {
-                            is_change_module = 1;
-                        }
-                        default_module = Z_STRVAL_P(module);
-                    }
-                    zval *controller = zend_hash_find(Z_ARRVAL_P(vvar_value), zend_string_init(CSPEED_STRL("controller"), 0));
-                    if (controller && (Z_TYPE_P(controller) == IS_LONG)){
-                        zval *real_controller = zend_hash_index_find(Z_ARRVAL(subparts), Z_LVAL_P(controller));
-                        if (real_controller == NULL){
-                            php_error_docref(NULL, E_ERROR, "Can't found the offset %d controller int the URL.",
-                                            Z_LVAL_P(controller));
-                            return ;
-                        }
-                        if (Z_TYPE_P(real_controller) == IS_STRING){
-                            Z_TRY_ADDREF_P(real_controller);
-                            default_controller = title_upper_string(Z_STRVAL_P(real_controller));
-                        }
-                    } else if (controller && (Z_TYPE_P(controller) == IS_STRING)){
-                        default_controller = title_upper_string(Z_STRVAL_P(controller));
-                    }
-                    zval *action = zend_hash_find(Z_ARRVAL_P(vvar_value), zend_string_init(CSPEED_STRL("action"), 0));
-                    if (action && (Z_TYPE_P(action) == IS_LONG)){
-                        zval *real_action = zend_hash_index_find(Z_ARRVAL(subparts), Z_LVAL_P(action));
-                        if (real_action == NULL){
-                            php_error_docref(NULL, E_ERROR, "Can't found the offset %d action in the URL.",
-                                            Z_LVAL_P(action));
-                            return ;
-                        }
-                        Z_TRY_ADDREF_P(real_action);
-                        default_action = ZSTR_VAL(strpprintf(0, "%sAction", Z_STRVAL_P(real_action)));
-                    } else if (action && (Z_TYPE_P(action) == IS_STRING )){
-                        default_action = ZSTR_VAL(strpprintf(0, "%sAction", Z_STRVAL_P(action)));
-                    }
-                    zval_ptr_dtor(&subparts);
-                }
-            }
-        } ZEND_HASH_FOREACH_END();
-        /*Free the Memory of the CSpeed malloc*/
-        /* If the Module change, Loading the changed Module.php, Only the controller and action changed, not need to redirect */
-        if (is_change_module) {
-            is_change_module = 0;
-            sapi_header_line ctr = {0};
-            ctr.line_len    = spprintf(&(ctr.line), 0, "%s /%s/%s/%s", "Location:", default_module, pure_default_controller, pure_default_action);
-            ctr.response_code   = 0;
-            if (sapi_header_op(SAPI_HEADER_REPLACE, &ctr) == SUCCESS) {
-                efree(ctr.line);
-                return ;
-            } else {
-                efree(ctr.line);
-                php_error_docref(NULL, E_ERROR, "Please install SAPI extension.");
-                return ;
-            }
-        }
-    }
-    /* End the Routine setting */
-    free(back_path_info);
-    free(pure_default_controller);
-    free(pure_default_action);
-
-    /* Combine the full path to include the file */
-    zend_string *full_include_controller_path = strpprintf(0, "%s/%s/controllers/%s.php",
-        cspeed_get_cwd(), default_module, default_controller);
-    if (access(ZSTR_VAL(full_include_controller_path), F_OK) == -1) {
-        php_error_docref(NULL, E_ERROR, "Controller file :%s not found.", ZSTR_VAL(full_include_controller_path));
-        return ;
-    }
-    cspeed_require_file(ZSTR_VAL(full_include_controller_path), NULL, NULL, NULL);
-    zend_string_release(full_include_controller_path);
-    /* After loading the controller file, find the loading file */
-    zend_class_entry *controller_ptr = zend_hash_find_ptr(CG(class_table), zend_string_tolower(
-        zend_string_init(CSPEED_STRL(default_controller), 0)));
-    if (controller_ptr) {
-        /*Add the view into the controller*/
-        zval view_object;
-        object_init_ex(&view_object, cspeed_view_ce);
-        zval object_variables;
-        array_init(&object_variables);
-        zend_update_property(cspeed_view_ce, &view_object, CSPEED_STRL(CSPEED_VIEW_VARIABLES), &object_variables);
-        zend_update_property_string(cspeed_view_ce, &view_object, CSPEED_STRL(CSPEED_VIEW_ROOT_DIR), default_module);
-        zend_update_property_string(cspeed_view_ce, &view_object, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_MODULE_ID), default_module);
-        zend_update_property_string(cspeed_view_ce, &view_object, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_CONTROLLER_ID), default_controller);
-        zend_update_property_string(cspeed_view_ce, &view_object, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_ACTION_ID), default_action);
-        zend_declare_property_null(controller_ptr, CSPEED_STRL("view"), ZEND_ACC_PUBLIC);
-        /*}}}*/
-
-        zval controller_obj;
-        object_init_ex(&controller_obj, controller_ptr);
-        if (instanceof_function(controller_ptr, cspeed_controller_ce)) {
-            zval *di_objects = zend_read_property(cspeed_app_ce, capp_object, CSPEED_STRL(CSPEED_APP_DI_OBJECT), 1, NULL); /* Di */
-            if (!ZVAL_IS_NULL(di_objects) && (Z_TYPE_P(di_objects) == IS_OBJECT)) {
-                zend_update_property(controller_ptr, &controller_obj, CSPEED_STRL(CSPEED_DI_INSTANCE), di_objects);
-            }
-        }
-
-        zend_update_property(controller_ptr, &controller_obj, CSPEED_STRL("view"), &view_object);
-        if (CSPEED_METHOD_IN_OBJECT(&controller_obj, default_action)){
-            /* After creating the controller object, you can do some initialise thing before calling the need action */
-
-            /* Adding the other code before */
-            zval function_name, retval_ptr;
-            ZVAL_STRING(&function_name, default_action);
-            uint32_t param_count = 0;
-            zval *params = NULL;
-            call_user_function(NULL, &controller_obj, &function_name, &retval_ptr, param_count, params);
-        } else {
-            php_error_docref(NULL, E_ERROR, "Controller %s didn't has the %s method.", default_controller, default_action);
-            return ;
-        }
-    } else {
-        php_error_docref(NULL, E_ERROR, "Controller class: %s not exists the include file.", default_controller);
-        return ;
+        ZVAL_NULL(view_object);
     }
 }/*}}}*/
 
+void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain the right Model|Controller|Action */
+{   
+    /* In ZTS, the web directory are not right. fix it. */
+    char path[MAXPATHLEN];
 
+    zend_ulong index; zval *value;
 
+    /* The web directory */
+    char *root_dir          = ZSTR_VAL(CSPEED_G(core_application));
+    
+    /* Get the default value from the engine. */
+    zend_string *default_module    = CSPEED_G(core_router_default_module);
+    zend_string *default_controller= CSPEED_G(core_router_default_controller);
+    zend_string *default_action    = CSPEED_G(core_router_default_action);
 
+    /* The module path */
+    zend_string *temp_module_path = NULL, *temp_controller_path = NULL;
+
+    /* To check wheather the module is exists */
+    zval *temp_mca_value;
+    if (UNEXPECTED((temp_mca_value = zend_hash_index_find(Z_ARRVAL_P(path_info_array), 1)) != NULL)) {
+        CSPEED_G(core_router_default_module) = zend_string_dup(Z_STR_P(temp_mca_value), 0);
+        default_module = zend_string_copy(Z_STR_P(temp_mca_value));
+    }
+
+    /* To check wheather the module is allowed or not. */
+    int is_allowed = 0;
+    if (zend_hash_num_elements(CSPEED_G(core_router_modules))) {
+        zval *allowed_module;
+        ZEND_HASH_FOREACH_VAL(CSPEED_G(core_router_modules), allowed_module){
+            if (memcmp(Z_STRVAL_P(allowed_module), CSPEED_STRL( ZSTR_VAL(default_module) )) == 0) {
+                is_allowed = 1;
+                break;
+            }
+        } ZEND_HASH_FOREACH_END();
+    }
+    if (is_allowed == 0){
+        php_error_docref(NULL, E_ERROR, "Module: `%s` are not allowed to access.", ZSTR_VAL(default_module));
+        return ;
+    }
+
+    /* After the module is allowed. to parsing the module is exists or not. */
+    temp_module_path = strpprintf(0, "%s/%s/modules/%s", cspeed_get_cwd(path), root_dir, ZSTR_VAL(default_module));
+    if (check_file_exists(ZSTR_VAL(temp_module_path))) {
+        zend_hash_index_del(Z_ARRVAL_P(path_info_array), 1);
+    } else {
+        php_error_docref(NULL, E_ERROR, "Module: `%s` not exists.", ZSTR_VAL(default_module));
+        return ;
+    }
+
+    if (UNEXPECTED((temp_mca_value = zend_hash_index_find(Z_ARRVAL_P(path_info_array), 2)) != NULL)) {
+        default_controller = zend_string_copy(Z_STR_P(temp_mca_value));
+        CSPEED_G(core_router_default_controller) = zend_string_dup(Z_STR_P(temp_mca_value), 0);
+        zend_hash_index_del(Z_ARRVAL_P(path_info_array), 2);
+    }
+    title_upper_string(ZSTR_VAL(default_controller));
+    temp_controller_path = strpprintf(0, "%s/controllers/%s.php", ZSTR_VAL(temp_module_path), ZSTR_VAL(default_controller));
+    if (check_file_exists(ZSTR_VAL(temp_controller_path))) {
+        cspeed_require_file(ZSTR_VAL(temp_controller_path), NULL, NULL, NULL);
+    } else {
+        php_error_docref(NULL, E_ERROR, "Controller file: `%s.php` not found.", ZSTR_VAL(default_controller));
+        return ;
+    }
+    /* After require the class from the controller file. create the controller object and do the initialise process */
+    zval controller_obj;
+    zend_class_entry *controller_ptr = zend_hash_find_ptr(EG(class_table), zend_string_tolower(default_controller));
+    if (controller_ptr) {
+        if (!instanceof_function(controller_ptr, cspeed_controller_ce)){
+            php_error_docref(NULL, E_ERROR, "Controller class must extends from \\Cs\\mvc\\Controller class.");
+        }
+        object_init_ex(&controller_obj, controller_ptr);
+    } else {
+        php_error_docref(NULL, E_ERROR, "Controller class :`%s` not found.", ZSTR_VAL(default_controller));
+    }
+
+    /* Parsing the action in PATH_INFO */
+    if (UNEXPECTED( (temp_mca_value = zend_hash_index_find(Z_ARRVAL_P(path_info_array), 3)) != NULL )) {
+        default_action = zend_string_copy(Z_STR_P(temp_mca_value));
+        CSPEED_G(core_router_default_action) = zend_string_dup(Z_STR_P(temp_mca_value), 0);
+        zend_hash_index_del(Z_ARRVAL_P(path_info_array), 3);
+    }
+
+    /* After create the controller object, put the value of the related properties */
+    if (CSPEED_G(di_object)){
+        zval di_object;
+        ZVAL_OBJ(&di_object, CSPEED_G(di_object));
+        zend_update_property(controller_ptr, &controller_obj, CSPEED_STRL(CSPEED_DI_INSTANCE), &di_object);
+    } else {
+        zend_update_property_null(controller_ptr, &controller_obj, CSPEED_STRL(CSPEED_DI_INSTANCE));
+    }
+    if (CSPEED_G(router_object)){
+        zval router_object;
+        ZVAL_OBJ(&router_object, CSPEED_G(router_object));
+        zend_update_property(controller_ptr, &controller_obj, CSPEED_STRL(CSPEED_ROUTER_INSTANCE), &router_object);
+    } else {
+        zend_update_property_null(controller_ptr, &controller_obj, CSPEED_STRL(CSPEED_ROUTER_INSTANCE));
+    }
+    zend_update_property_null(controller_ptr, &controller_obj, CSPEED_STRL(CSPEED_VIEW_INSTANCE));
+
+    /* To obtain the real value from the PATH-INFO */
+    zval key_sets, value_sets;
+    array_init(&key_sets);
+    array_init(&value_sets);
+    ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(path_info_array), index, value){
+        if ( (index != 0) && (index % 2 == 0) ){    /* Key name*/
+            add_next_index_zval(&key_sets, value);
+        }
+        if ( (index != 0) && (index % 2 != 0) ) {   /* Key value */
+            add_next_index_zval(&value_sets, value);
+        }
+    } ZEND_HASH_FOREACH_END();
+    /* Set the value into the $_GET global variables.*/
+    zval *global_get_variables = cspeed_request_get(NULL);
+    zend_ulong key_index; zval *key_name;
+    ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL(key_sets), key_index, key_name){
+        zval *real_key_value = zend_hash_index_find(Z_ARRVAL(value_sets), key_index);
+        if (real_key_value) {
+            zend_string *key;
+            if (Z_TYPE_P(key_name) == IS_LONG) {
+                key = strpprintf(0, "%d", Z_LVAL_P(key_name));
+            } else if ( Z_TYPE_P(key_name) == IS_STRING) {
+                key = Z_STR_P(key_name);
+            } else {
+                continue;
+            }
+            add_assoc_zval(global_get_variables, ZSTR_VAL(key), real_key_value);
+        }
+    } ZEND_HASH_FOREACH_END();
+
+    /* Auto render the view file */
+    zval view_object;
+    auto_render_view_file(controller_ptr, &controller_obj, &view_object);
+
+    zend_string *before_action = zend_string_init(CSPEED_STRL("__beforeAction"), 0);
+    zval z_before_action, retval;
+    ZVAL_STRING(&z_before_action, "__beforeAction");
+    if (CSPEED_METHOD_IN_OBJECT(&controller_obj, ZSTR_VAL(before_action))){
+        call_user_function(NULL, &controller_obj, &z_before_action, &retval, 0, NULL );
+    }
+
+    /* After adding the value into $_GET run the controller's action */
+    zend_string *action_append_action = strpprintf(0, "%sAction", ZSTR_VAL(default_action));
+    if (CSPEED_METHOD_IN_OBJECT(&controller_obj, ZSTR_VAL(action_append_action))) {
+        zval function_name, retval_ptr;
+        ZVAL_STRING(&function_name, ZSTR_VAL(action_append_action));
+        call_user_function(NULL, &controller_obj, &function_name, &retval_ptr, 0, NULL);
+    } else {
+        zend_string_release(action_append_action);
+        php_error_docref(NULL, E_ERROR, "Controller class has not the :`%s` method.", ZSTR_VAL(action_append_action));
+        return ;
+    }
+    /**/
+    if (!ZVAL_IS_NULL(&view_object)) {
+        zval ret_val;
+        render_view_file(&view_object, strpprintf(0, "%s/%s", ZSTR_VAL(CSPEED_G(core_router_default_controller)), 
+                ZSTR_VAL(CSPEED_G(core_router_default_action))), NULL, &ret_val);
+    }
+
+    /* Do the after_action work */
+    zend_string *after_action  = zend_string_init(CSPEED_STRL("__afterAction"), 0);
+    zval z_after_action;
+    ZVAL_STRING(&z_after_action, "__afterAction");
+    if (CSPEED_METHOD_IN_OBJECT(&controller_obj, ZSTR_VAL(after_action))){
+        call_user_function(NULL, &controller_obj, &z_after_action, &retval, 0, NULL);
+    }
+
+    /* Release the unused memory */
+    zval_ptr_dtor(&controller_obj);
+
+    /* Release the not need memory */
+    zend_string_release(temp_module_path);
+    zend_string_release(temp_controller_path);
+    zend_string_release(action_append_action);
+    zend_string_release(default_module);
+    zend_string_release(default_controller);
+    zend_string_release(default_action);
+}/*}}}*/
+
+void dispather_url()    /* {{{ Dispatcher the URL */
+{
+    /* PATH_INFO */
+    char *path_info = cspeed_request_server_str_key_val("PATH_INFO");
+
+    /* To get the PATH_INFO array */
+    zval path_info_array;
+    array_init(&path_info_array);
+    php_explode(zend_string_init(CSPEED_STRL("/"), 0), zend_string_init(CSPEED_STRL(path_info), 0),
+                &path_info_array, ZEND_LONG_MAX);
+
+    /* After parsing the PATH_INFO. to find the matched URL, if not. do the default process */
+    zval router_zval_object;
+    zend_object *router_object = CSPEED_G(router_object);
+
+    /*If NULL, to do the default process */
+    if (router_object) {
+
+        ZVAL_OBJ(&router_zval_object, router_object);
+        /* Foreach all routines, to find the matched URL and redirect to it */
+        zval *all_routines = zend_read_property(cspeed_router_ce, &router_zval_object, 
+            CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), 1, NULL);
+        
+        zend_string *pcre_url;zval *value;
+        ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(all_routines), pcre_url, value){
+            if ( CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(pcre_url)) && (Z_TYPE_P(value) == IS_STRING) ){
+                /* Do the PREG_REPLACE */
+                pcre_cache_entry *pce_regexp;
+                if ((pce_regexp = pcre_get_compiled_regex_cache(pcre_url)) != NULL) {
+                    zval matches, subparts;
+                    ZVAL_NULL(&subparts);
+                    php_pcre_match_impl(pce_regexp, CSPEED_STRL(path_info), &matches, &subparts, 0, 0, 0, 0);
+                    if (zend_hash_num_elements(Z_ARRVAL(subparts))) {
+#if 0
+                        zend_hash_index_del(Z_ARRVAL(subparts), 0);
+                        zval matching_url;
+                        php_implode(zend_string_init(CSPEED_STRL("/"), 0), &subparts, &matching_url);
+                        zend_printf("url: [%s]<br>", Z_STRVAL(matching_url));
+#endif                        
+                        zval function_name, retval, url_pattern, url_subject;
+                        ZVAL_STRING(&function_name, "preg_replace");
+                        ZVAL_STRING(&url_pattern, ZSTR_VAL(pcre_url));
+                        ZVAL_STRING(&url_subject,   path_info);
+                        zval params[] = { url_pattern, *value, url_subject };
+                        call_user_function(EG(function_table), NULL, &function_name, &retval, 3, params);
+                        zval_ptr_dtor(&function_name);
+                        zval_ptr_dtor(&url_pattern);
+                        zval_ptr_dtor(&url_subject);
+                        /* Start redirecting */
+                        sapi_header_line ctr = {0};
+                        ctr.line_len    = spprintf(&(ctr.line), 0, "%s %s", "Location:", Z_STRVAL(retval));
+                        ctr.response_code   = 0;
+                        if (sapi_header_op(SAPI_HEADER_REPLACE, &ctr) == SUCCESS) {
+                            zval_ptr_dtor(&retval);
+                            efree(ctr.line);
+                            return ;
+                        } else {
+                            zval_ptr_dtor(&retval);
+                            efree(ctr.line);
+                            php_error_docref(NULL, E_ERROR, "Please install SAPI extension.");
+                            return ;
+                        }
+                    }
+                }
+            }
+        } ZEND_HASH_FOREACH_END();
+    }
+
+    /*After Parsing the Router URL rules, parsing the PATH_INFO TO the Right Model|Controller|Action */
+    parse_path_info(&path_info_array);
+}
 
 
 

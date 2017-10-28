@@ -37,12 +37,7 @@ ZEND_END_ARG_INFO()
 
 CSPEED_METHOD(Controller, __construct)/*{{{ proto Controller::__construct() */
 {
-#if 0
-    zval objects;
-    array_init(&objects);
-    zend_update_property(cspeed_controller_ce, getThis(), CSPEED_STRL(CSPEED_DI_OBJECT), &objects);
-    zval_ptr_dtor(&objects);
-#endif
+    
 }/*}}}*/
 
 static const zend_function_entry cspeed_controller_functions[] = { /*{{{*/
@@ -57,9 +52,8 @@ CSPEED_INIT(controller) /*{{{*/
     cspeed_controller_ce = zend_register_internal_class(&ce);
 
     zend_declare_property_null(cspeed_di_ce, CSPEED_STRL(CSPEED_DI_INSTANCE), ZEND_ACC_PUBLIC);
-#if 0
-    zend_class_implements(cspeed_controller_ce, 1, cspeed_di_ce);
-#endif
+    zend_declare_property_null(cspeed_di_ce, CSPEED_STRL(CSPEED_VIEW_INSTANCE), ZEND_ACC_PUBLIC);
+    zend_declare_property_null(cspeed_di_ce, CSPEED_STRL(CSPEED_ROUTER_INSTANCE), ZEND_ACC_PUBLIC);
 }/*}}}*/
 
 

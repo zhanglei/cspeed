@@ -24,7 +24,7 @@
 extern zend_module_entry cspeed_module_entry;
 #define phpext_cspeed_ptr &cspeed_module_entry
 
-#define PHP_CSPEED_VERSION "1.3.8"
+#define PHP_CSPEED_VERSION "2.0.0"
 
 #ifdef PHP_WIN32
 #	define PHP_CSPEED_API __declspec(dllexport)
@@ -43,7 +43,32 @@ extern zend_module_entry cspeed_module_entry;
 	and END macros here:
 */
 ZEND_BEGIN_MODULE_GLOBALS(cspeed)
-  zend_array  global_config;
+    /* Below are the core configs */
+    zend_string   *core_application;
+    zend_string   *core_bootstrap;
+    zend_string   *core_bootstrap_method_string;
+    HashTable     *core_router_modules; /* HashTable */
+    zend_string   *core_router_default_module;
+    zend_string   *core_router_default_controller;
+    zend_string   *core_router_default_action;
+    zend_string   *core_view_ext;
+    zend_string   *core_view_auto_render;
+
+    /* Below are the DB configs */
+    zend_string   *db_master_type;
+    zend_string   *db_master_host;
+    zend_string   *db_master_port;
+    zend_string   *db_master_dbname;
+    zend_string   *db_master_username;
+    zend_string   *db_master_password;
+
+    /* Below are the global object Di & Router */
+    zend_object   *di_object;
+    zend_object   *router_object;
+
+    /* Below are the extension configs */
+    HashTable     *db_connections;
+    zval          *new_db_pdo_object;   /* The newest db connection. */
 ZEND_END_MODULE_GLOBALS(cspeed)
 
 /* Always refer to the globals in your function as CSPEED_G(variable).
@@ -62,18 +87,50 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define TRUE                          1
 #define FALSE                         0
 
-#define CSPEED_METHOD                 PHP_METHOD
-#define CSPEED_ME                     PHP_ME
-#define CSPEED_MINT_FUNCTION          PHP_MINIT_FUNCTION
+/* Define the CSpeed system config */
+#define CORE_CONFIG_APPLICATION_NAME            "core.application"
+#define CORE_CONFIG_BOOTSTRAP_NAME              "core.bootstrap"
+#define CORE_CONFIG_BOOTSTRAP_METHOD_NAME       "core.bootstrap.method.string"
+#define CORE_CONFIG_MODULES_NAME                "core.router.modules"
+#define CORE_CONFIG_DEFAULT_MODULE_NAME         "core.router.default.module"
+#define CORE_CONFIG_DEFAULT_CONTROLLER_NAME     "core.router.default.controller"
+#define CORE_CONFIG_DEFAULT_ACTION_NAME         "core.router.default.action"
+#define CORE_CONFIG_VIEW_EXT_NAME               "core.view.ext"
+#define CORE_CONFIG_VIEW_AUTO_RENDER            "core.view.auto_render"
 
-#define CSPEED_INIT(function_name)    void function_name##_init()
+/* Db configs */
+#define CORE_CONFIG_DB_TYPE                     "db.master.type"
+#define CORE_CONFIG_DB_HOST                     "db.master.host"
+#define CORE_CONFIG_DB_PORT                     "db.master.port"
+#define CORE_CONFIG_DB_DB_NAME                  "db.master.dbname"
+#define CORE_CONFIG_DB_USERNAME                 "db.master.username"
+#define CORE_CONFIG_DB_PASSWORD                 "db.master.password"
 
-#define CSPEED_STRL(str)              (str), strlen(str)
+/* Below are some default setting of the CSpeed engine */
+#define CORE_APPLICATION                        "../app"
+#define CORE_BOOTSTRAP                          "../app/bootstrap.php"
+#define CORE_ROUTER_MODULES                     "home"
+#define CORE_ROUTER_DEFAULT_MODULE              "home"
+#define CORE_ROUTER_DEFAULT_CONTROLLER          "index"
+#define CORE_ROUTER_DEFAULT_ACTION              "index"
+#define CORE_VIEW_EXT                           "html"
+#define CORE_VIEW_AUTO_RENDER                   "1"
+#define CORE_BOOSTRAP_METHOD_STRING             "__init"
+#define CORE_BOOTSTRAP_CLASS_NAME               "Bootstrap"
 
+/* Some macros for the CSpeed engine */
+#define CSPEED_FN(function_name)        function_name##Action
+#define CSPEED_METHOD                   PHP_METHOD
+#define CSPEED_ME                       PHP_ME
+#define CSPEED_MINT_FUNCTION            PHP_MINIT_FUNCTION
+#define CSPEED_INIT(function_name)      void function_name##_init()
+#define CSPEED_STRL(str)                (str), strlen(str)
 #define CSPEED_METHOD_IN_OBJECT(object, method_name) ( ( Z_OBJ_HT_P(object)->get_method(&Z_OBJ_P(object),\
- zend_string_init(CSPEED_STRL(method_name), 0), NULL)) != NULL ) /* Judge whether the method is in object */
+                                        zend_string_init(CSPEED_STRL(method_name), 0), NULL)) != NULL )
 
-#define CSPEED_STRING_NOT_EMPTY(char)     ((*char) != '\0')        /* Judge the string not empty */
+#define CSPEED_STRING_NOT_EMPTY(char)     ((*char) != '\0')
+
+extern ZEND_DECLARE_MODULE_GLOBALS(cspeed);
 
 #endif	/* PHP_CSPEED_H */
 

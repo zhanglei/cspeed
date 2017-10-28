@@ -25,6 +25,8 @@ zend_class_entry *cspeed_router_ce;                                           /*
 
 #define CSPEED_ROUTER_ALL_ROUTINES              "__cspeed_all_routines"       /* All routines for the Router */
 
+void initialise_router_object_properties(zval *router_object);                /* Initialise the Router propertes */
+
 CSPEED_INIT(router);                                                          /* The module init class */
 
 #endif

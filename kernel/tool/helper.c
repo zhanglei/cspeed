@@ -27,6 +27,7 @@
 #include "ext/standard/info.h"
 #include "php_cspeed.h"
 #include "kernel/tool/helper.h"
+#include "ext/standard/php_dir.h"
 #include "ext/standard/basic_functions.h"
 
 #include "zend.h"
@@ -36,14 +37,26 @@
 
 #include "zend_smart_str.h"             /* Use the smart_str */
 
-#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
 
-char *cspeed_get_cwd()                    /*{{{ Return the current directory */
+char *cspeed_get_cwd(char *path)                    /*{{{ Return the current directory */
 {
-    zval cwd, function_name;
-    ZVAL_STRING(&function_name, "getcwd");
-    call_user_function(CG(function_table), NULL, &function_name, &cwd, 0, NULL);
-    return Z_STRVAL(cwd);
+#if 0
+    char path[MAXPATHLEN];
+#endif
+    char *ret=NULL;
+
+    #if HAVE_GETCWD
+        ret = VCWD_GETCWD(path, MAXPATHLEN);
+    #elif HAVE_GETWD
+        ret = VCWD_GETWD(path);
+    #endif
+    if (ret){
+        return path;
+    } else {
+        return ".";
+    }
 }/*}}}*/
 
 
@@ -169,16 +182,30 @@ void cspeed_parse_ini_file(char *file_name, char *node_name, char *node_key, zen
         /* To find the key and the node value from the data */
         if (node_name != NULL) {
             zval *node_value = zend_hash_find(Z_ARRVAL_P(&ini_array_value), zend_string_init(CSPEED_STRL(node_name), 0));
-            if (node_key == NULL) {
-                Z_TRY_ADDREF_P(node_value);
-                ZVAL_COPY_VALUE(retval, node_value);
+            if (node_value == NULL) {
+                ZVAL_NULL(retval);
             } else {
-                zval *key_value = zend_hash_find(Z_ARRVAL_P(node_value), zend_string_init(CSPEED_STRL(node_key), 0));
-                ZVAL_COPY_VALUE(retval, key_value);
+                if (node_key == NULL) {
+                    Z_TRY_ADDREF_P(node_value);
+                    ZVAL_COPY_VALUE(retval, node_value);
+                } else {
+                    zval *key_value = zend_hash_find(Z_ARRVAL_P(node_value), zend_string_init(CSPEED_STRL(node_key), 0));
+                    if (key_value == NULL) {
+                        ZVAL_NULL(retval);
+                    } else {
+                        Z_TRY_ADDREF_P(key_value);
+                        ZVAL_COPY_VALUE(retval, key_value);
+                    }
+                }
             }
         } else if ( ( node_name == NULL ) && ( node_key != NULL ) ) {
             zval *key_value = zend_hash_find(Z_ARRVAL_P(&ini_array_value), zend_string_init(CSPEED_STRL(node_key), 0));
-            ZVAL_COPY_VALUE(retval, key_value);
+            if (key_value == NULL) {
+                ZVAL_NULL(retval);
+            } else {
+                Z_TRY_ADDREF_P(key_value);
+                ZVAL_COPY_VALUE(retval, key_value);
+            }
         } else {
             Z_TRY_ADDREF_P(&ini_array_value);
             ZVAL_COPY_VALUE(retval, &ini_array_value);
@@ -234,7 +261,13 @@ void cspeed_build_quote_string(zval *array, zval *result)/*{{{ Building the Quot
     free(temp_select_str);
 }/*}}}*/
 
-
+int check_file_exists(char *file_path) /* Checking wheather the given file is exists or not. */
+{
+    if (access(file_path, F_OK) == -1) {
+        return FALSE;
+    }
+    return TRUE;
+}
 
 /*
  * Local variables:

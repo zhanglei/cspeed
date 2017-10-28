@@ -72,7 +72,7 @@ void cspeed_require_file(const char * file_name, zval *variables, zval *called_o
     }
     
     if (return_view && php_output_start_user(NULL, 0, PHP_OUTPUT_HANDLER_STDFLAGS) == FAILURE) {
-        php_error_docref("ref.outcontrol", E_WARNING, "Failed to call ob_start()");
+        php_error_docref(NULL, E_WARNING, "Failed to call ob_start().");
         return ;
     }
 
@@ -86,7 +86,7 @@ void cspeed_require_file(const char * file_name, zval *variables, zval *called_o
     if (return_view) { /* Store the data into the return_view zval struct and discard the data in the output */
         if (php_output_get_contents(return_view) == FAILURE) {
             php_output_end();
-            php_error_docref(NULL, E_WARNING, "Can't fetch the ob_data");
+            php_error_docref(NULL, E_WARNING, "Can't fetch the ob_data.");
             return ;
         }
         if (php_output_discard() != SUCCESS ) {

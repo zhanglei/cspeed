@@ -25,6 +25,8 @@ zend_class_entry *cspeed_di_ce;                             /* The Di class */
 
 #define CSPEED_DI_OBJECT          "__cspeed_di_objects"     /* The object sets */
 
+void initialise_di_object_properties(zval *di_object);      /* Initialise the Di object properties */
+
 CSPEED_INIT(di);
 
 #endif

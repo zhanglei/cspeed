@@ -61,7 +61,8 @@ CSPEED_METHOD(Config, loadConfig)/*{{{ proto Config::loadConfig()*/
         return ;
     }
     
-    zend_string *real_inifile_path = strpprintf(0, "%s/%s", cspeed_get_cwd(), ZSTR_VAL(file));
+    char path[MAXPATHLEN];
+    zend_string *real_inifile_path = strpprintf(0, "%s/%s", cspeed_get_cwd(path), ZSTR_VAL(file));
     if (access(ZSTR_VAL(real_inifile_path), F_OK) != -1) {
         zval ini_values;
         cspeed_parse_ini_file(ZSTR_VAL(real_inifile_path), NULL, NULL, 1, &ini_values);

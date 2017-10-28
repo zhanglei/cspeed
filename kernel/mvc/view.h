@@ -23,15 +23,17 @@
 
 zend_class_entry *cspeed_view_ce;                                         /* The class View */
 
-#define CSPEED_VIEW_VARIABLES                 "__cspeed_view_variables"   /* The variables the view has */
-#define CSPEED_VIEW_SUFFIX                    "__cspeed_view_suffix"      /* The view template file's suffix */
-#define CSPEED_VIEW_SUFFIX_V                  "phtml"                     /* The view template file's suffix */
+void initialise_view_object_properties(zval *view_object);                /* Initialise the need properties */
+
+void render_view_file(zval *, zend_string *, zval *, zval *);             /* Render the view file */
+
 #define CSPEED_VIEW_DIRS_V                    "views"                     /* The view directory */
-#define CSPEED_VIEW_DIRS                      "__cspeed_view_dir"         /* The view directory to find the view file */
 #define CSPEED_VIEW_CONTROLLER_MODULE_ID      "module_id"                 /* The current Module name */
 #define CSPEED_VIEW_CONTROLLER_CONTROLLER_ID  "controller_id"             /* The current Controller name */
 #define CSPEED_VIEW_CONTROLLER_ACTION_ID      "action_id"                 /* The current Action Id */
-
+#define CSPEED_VIEW_DIRS                      "__cspeed_view_dir"         /* The view directory to find the view file */
+#define CSPEED_VIEW_SUFFIX                    "__cspeed_view_suffix"      /* The view template file's suffix */
+#define CSPEED_VIEW_VARIABLES                 "__cspeed_view_variables"   /* The variables the view has */
 #define CSPEED_VIEW_ROOT_DIR                  "__cspeed_view_root_dir"    /* The parent root dir of the view file location */
 CSPEED_INIT(view);                                                        /* Init function declare */
 

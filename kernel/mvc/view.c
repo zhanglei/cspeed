@@ -27,28 +27,22 @@
 #include "ext/standard/info.h"
 #include "php_cspeed.h"
 
-#include "kernel/CApp.h"
 #include "kernel/mvc/view.h"
 #include "kernel/tool/helper.h"
 #include "kernel/tool/require.h"
-#include "kernel/mvc/dispatch.h"
 
-#include <unistd.h>         /* Access function */
-#include <fcntl.h>          /* Access function */
-
-void render_file(INTERNAL_FUNCTION_PARAMETERS, zval *ret_val, zval *view_obj)/*{{{ Common function to instead of the render file, used in View::render() & View::getRender() */
+void render_view_file(zval *view_obj, zend_string *temp_file, zval *array_variables, zval *ret_val)
 {
-    zend_string *temp_file;
-    zval *array_variables = NULL;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|a", &temp_file, &array_variables) == FAILURE) {
-        return ;
-    }
-    zval *view_root = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_ROOT_DIR), 1, NULL);
+    /* Fix the ZTS path problem */
+    char path[MAXPATHLEN];
+    cspeed_get_cwd(path);
+
     zval *view_dir  = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_DIRS), 1, NULL);
     zval *suffix    = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_SUFFIX), 1, NULL);
     
-    zend_string *real_path_file = strpprintf(0, "%s/%s/%s/%s.%s", cspeed_get_cwd(), 
-        Z_STRVAL_P(view_root), Z_STRVAL_P(view_dir), ZSTR_VAL(temp_file), Z_STRVAL_P(suffix));
+    zend_string *real_path_file = strpprintf(0, "%s/%s/modules/%s/%s/%s.%s", path, ZSTR_VAL(CSPEED_G(core_application)), 
+                    ZSTR_VAL(CSPEED_G(core_router_default_module)), 
+                    Z_STRVAL_P(view_dir), ZSTR_VAL(temp_file), ZSTR_VAL(CSPEED_G(core_view_ext)));
     
     zval *view_variables = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_VARIABLES), 1, NULL);
     if (array_variables && ( Z_TYPE_P(view_variables) == IS_ARRAY ) ) {
@@ -59,12 +53,23 @@ void render_file(INTERNAL_FUNCTION_PARAMETERS, zval *ret_val, zval *view_obj)/*{
         } ZEND_HASH_FOREACH_END();
     }
 
-    if (access(ZSTR_VAL(real_path_file), F_OK) == -1) {     /* Check whether the file is exists or not. */
-        php_error_docref(NULL, E_ERROR, "Template file %s not exists.", ZSTR_VAL(real_path_file));
-        return ;
-    } else {
+    if ( check_file_exists(ZSTR_VAL(real_path_file)) ){
+        /* Require the View file */
         cspeed_require_file(ZSTR_VAL(real_path_file), view_variables, view_obj, ret_val);
+    } else {
+        php_error_docref(NULL, E_ERROR, "View file: `%s` not found.", ZSTR_VAL(real_path_file));
+        return ;
     }
+}
+
+void render_file(INTERNAL_FUNCTION_PARAMETERS, zval *ret_val, zval *view_obj)/*{{{ View::render() & View::getRender() & View::partial() */
+{
+    zend_string *temp_file;
+    zval *array_variables = NULL;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|a", &temp_file, &array_variables) == FAILURE) {
+        return ;
+    }
+    render_view_file(view_obj, temp_file, array_variables, ret_val);
 }/*}}}*/
 
 /* {{{ ARG-INFO */
@@ -99,18 +104,24 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_view_set_view_dir, 0, 0, 1)
     ZEND_ARG_INFO(0, view_dir)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_view_set_module_dir, 0, 0, 1)
-    ZEND_ARG_INFO(0, root_dir)
-ZEND_END_ARG_INFO()
-
 /*}}}*/
 
-CSPEED_METHOD(View, __construct)    /*{{{ proto View::__construct() */
+void initialise_view_object_properties(zval *view_object)
 {
     zval view_variables;
     array_init(&view_variables);
-    zend_update_property(cspeed_view_ce, getThis(), CSPEED_STRL(CSPEED_VIEW_VARIABLES), &view_variables);
+    zend_update_property(cspeed_view_ce, view_object, CSPEED_STRL(CSPEED_VIEW_VARIABLES), &view_variables);
+    zval_ptr_dtor(&view_variables);
+
+    zend_update_property_str(cspeed_view_ce, view_object, CSPEED_STRL(CSPEED_VIEW_SUFFIX),                  CSPEED_G(core_view_ext));
+    zend_update_property_str(cspeed_view_ce, view_object, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_MODULE_ID),    CSPEED_G(core_router_default_module));
+    zend_update_property_str(cspeed_view_ce, view_object, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_CONTROLLER_ID),CSPEED_G(core_router_default_controller));
+    zend_update_property_str(cspeed_view_ce, view_object, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_ACTION_ID),    CSPEED_G(core_router_default_action));
+}
+
+CSPEED_METHOD(View, __construct)    /*{{{ proto View::__construct() */
+{
+    initialise_view_object_properties(getThis());
 }/*}}}*/
 
 CSPEED_METHOD(View, render)         /*{{{ proto View::render($file, $variables) */
@@ -152,17 +163,6 @@ CSPEED_METHOD(View, setVar)         /*{{{ proto View::setVar($var_name, $var_val
     add_assoc_zval(view_variables, ZSTR_VAL(var_name), var_value );
 }/*}}}*/
 
-CSPEED_METHOD(View, setModuleDir)         /*{{{ proto View::setModuleDir($var_name) */
-{
-    zend_string *root_dir;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &root_dir) == FAILURE) {
-        return ;
-    }
-    if (CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(root_dir))){
-        zend_update_property_str(cspeed_view_ce, getThis(), CSPEED_STRL(CSPEED_VIEW_ROOT_DIR), root_dir);
-    }
-}/*}}}*/
-
 CSPEED_METHOD(View, setViewDir)         /*{{{ proto View::setViewDir($dirname) */
 {
     zend_string *view_dir;
@@ -170,7 +170,6 @@ CSPEED_METHOD(View, setViewDir)         /*{{{ proto View::setViewDir($dirname) *
       return ;
     }
     zend_update_property_str(cspeed_view_ce, getThis(), CSPEED_STRL(CSPEED_VIEW_DIRS), view_dir);
-    
 }/*}}}*/
 
 static const zend_function_entry cspeed_view_functions[] = { /*{{{ All methods the View class had */
@@ -180,7 +179,6 @@ static const zend_function_entry cspeed_view_functions[] = { /*{{{ All methods t
     CSPEED_ME(View, setVar,         arginfo_view_set_var,          ZEND_ACC_PUBLIC)
     CSPEED_ME(View, getRender,      arginfo_view_get_render,       ZEND_ACC_PUBLIC)
     CSPEED_ME(View, setViewDir,     arginfo_view_set_view_dir,     ZEND_ACC_PUBLIC)
-    CSPEED_ME(View, setModuleDir,   arginfo_view_set_module_dir,   ZEND_ACC_PUBLIC)
     CSPEED_ME(View, partial,        arginfo_view_partial,          ZEND_ACC_PUBLIC)
 
     PHP_FE_END
@@ -192,11 +190,9 @@ CSPEED_INIT(view) /*{{{ Initialise function to initialise the view components */
     INIT_NS_CLASS_ENTRY(ce, "Cs\\mvc", "View", cspeed_view_functions);
     cspeed_view_ce = zend_register_internal_class(&ce);
 
-    zend_declare_property_null(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_VARIABLES), ZEND_ACC_PROTECTED);
-    zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_SUFFIX), CSPEED_VIEW_SUFFIX_V, ZEND_ACC_PROTECTED);
+    zend_declare_property_null(cspeed_view_ce,   CSPEED_STRL(CSPEED_VIEW_VARIABLES), ZEND_ACC_PROTECTED);
+    zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_SUFFIX), "", ZEND_ACC_PROTECTED);
     zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_DIRS), CSPEED_VIEW_DIRS_V, ZEND_ACC_PROTECTED);
-    zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_ROOT_DIR), 
-        CSPEED_APP_DEFAULT_MODULE, ZEND_ACC_PROTECTED);
     zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_MODULE_ID), "", ZEND_ACC_PUBLIC);
     zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_CONTROLLER_ID), "", ZEND_ACC_PUBLIC);
     zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_ACTION_ID), "", ZEND_ACC_PUBLIC);

@@ -29,8 +29,6 @@
 
 #include "kernel/tool/helper.h"
 
-#include "kernel/db/pdo.h"
-
 ZEND_DECLARE_MODULE_GLOBALS(cspeed)
 
 /* True global resources - no need for thread safety here */
@@ -48,6 +46,12 @@ PHP_FUNCTION(getCSpeedVersion)
  */
 PHP_MINIT_FUNCTION(cspeed)
 {
+#if defined(COMPILE_DL_CSPEED) && defined(ZTS)
+    /* Allocate the memory for the system to use, only for ZTS */
+    ZEND_INIT_MODULE_GLOBALS(cspeed, NULL, NULL);
+#endif
+
+    /* Initialise the all core class for the CSpeed engine */
     di_init();
     app_init();
     view_init();
@@ -70,7 +74,11 @@ PHP_MINIT_FUNCTION(cspeed)
     /* Router class */
     router_init();
 
-	return SUCCESS;
+    /* Bootstrap interface */
+    bootstrap_init();
+
+    /* After initialise, return SUCCESS means OK */
+    return SUCCESS;
 }
 /* }}} */
 
@@ -78,10 +86,10 @@ PHP_MINIT_FUNCTION(cspeed)
  */
 PHP_MSHUTDOWN_FUNCTION(cspeed)
 {
-	/* uncomment this line if you have INI entries
-	UNREGISTER_INI_ENTRIES();
-	*/
-	return SUCCESS;
+    /* uncomment this line if you have INI entries
+    UNREGISTER_INI_ENTRIES();
+    */
+    return SUCCESS;
 }
 /* }}} */
 
@@ -91,9 +99,10 @@ PHP_MSHUTDOWN_FUNCTION(cspeed)
 PHP_RINIT_FUNCTION(cspeed)
 {
 #if defined(COMPILE_DL_CSPEED) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE();
+    ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-	return SUCCESS;
+
+    return SUCCESS;
 }
 /* }}} */
 
@@ -102,7 +111,8 @@ PHP_RINIT_FUNCTION(cspeed)
  */
 PHP_RSHUTDOWN_FUNCTION(cspeed)
 {
-	return SUCCESS;
+    /* Return SUCCESS */
+    return SUCCESS;
 }
 /* }}} */
 
@@ -110,11 +120,11 @@ PHP_RSHUTDOWN_FUNCTION(cspeed)
  */
 PHP_MINFO_FUNCTION(cspeed)
 {
-	php_info_print_table_start();
+    php_info_print_table_start();
     php_info_print_table_header(2, "CSpeed support", "enabled");
     php_info_print_table_header(2, "Author", "Josin <774542602@qq.com|www.supjos.cn>");
-	php_info_print_table_header(2, "Version", PHP_CSPEED_VERSION);
-	php_info_print_table_end();
+    php_info_print_table_header(2, "Version", PHP_CSPEED_VERSION);
+    php_info_print_table_end();
 }
 /* }}} */
 
@@ -123,24 +133,24 @@ PHP_MINFO_FUNCTION(cspeed)
  * Every user visible function must have an entry in cspeed_functions[].
  */
 const zend_function_entry cspeed_functions[] = {
-	PHP_FE(getCSpeedVersion,	NULL)		/* For testing, remove later. */
-	PHP_FE_END	/* Must be the last line in cspeed_functions[] */
+    PHP_FE(getCSpeedVersion,    NULL)       /* For testing, remove later. */
+    PHP_FE_END  /* Must be the last line in cspeed_functions[] */
 };
 /* }}} */
 
 /* {{{ cspeed_module_entry
  */
 zend_module_entry cspeed_module_entry = {
-	STANDARD_MODULE_HEADER,
-	"cspeed",
-	cspeed_functions,
-	PHP_MINIT(cspeed),
-	PHP_MSHUTDOWN(cspeed),
-	PHP_RINIT(cspeed),		/* Replace with NULL if there's nothing to do at request start */
-	PHP_RSHUTDOWN(cspeed),	/* Replace with NULL if there's nothing to do at request end */
-	PHP_MINFO(cspeed),
-	PHP_CSPEED_VERSION,
-	STANDARD_MODULE_PROPERTIES
+    STANDARD_MODULE_HEADER,
+    "cspeed",
+    cspeed_functions,
+    PHP_MINIT(cspeed),
+    PHP_MSHUTDOWN(cspeed),
+    PHP_RINIT(cspeed),      /* Replace with NULL if there's nothing to do at request start */
+    PHP_RSHUTDOWN(cspeed),  /* Replace with NULL if there's nothing to do at request end */
+    PHP_MINFO(cspeed),
+    PHP_CSPEED_VERSION,
+    STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
