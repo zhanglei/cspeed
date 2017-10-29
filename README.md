@@ -1,8 +1,8 @@
-#CSpeed v2.0.0 手册#
+# CSpeed v2.0.0 手册 #
 
-##安装指南##
+## 安装指南 ##
 
-CSpeed扩展目前在**Github**与**码云**平台均有代码存储库，用户只需下载源码然后安装如下方法安装即可：
+CSpeed扩展目前在 **Github** 与 **码云** 平台均有代码存储库，用户只需下载源码然后安装如下方法安装即可：
 
 Github:
 	
@@ -30,7 +30,7 @@ Github:
 	
 	４、systemctl restart php-fpm 或者 systemctl restart httpd
 
-##典型项目结构##
+## 典型项目结构 ##
 
      +--cspeed                                      入口文件
         +--app                                      项目目录
@@ -63,7 +63,7 @@ Github:
                 +---js                              JS资源
                 +---img                             图片资源
 
-##简单的示例##
+## 简单的示例 ##
 
 １、WEB示例
 
@@ -83,7 +83,7 @@ Github:
     
 **RESTful API** 项目只需要添加对应的请求方法即可。
 
-##CSpeed引擎INI配置项##
+## CSpeed引擎INI配置项 ##
 
 	[core]
 	core.application                = '../app'               ; WEB目录
@@ -114,7 +114,7 @@ Github:
 	core.router.default.action      =  index                 ; 默认方法
 	core.view.ext                   =  xhtml                 ; 视图文件后缀
 
-##典型的Bootstrap初始化类##
+## 典型的Bootstrap初始化类 ##
 
 	class Bootstrap implements \Cs\Bootstrap
 	{
@@ -143,7 +143,7 @@ Github:
 	    }
 	}
 
-##典型的控制器结构##
+## 典型的控制器结构 ##
 
 	<?php
 
@@ -174,7 +174,7 @@ Github:
 	    }
 	}
 
-##典型的模型结构##
+## 典型的模型结构 ##
 
 	<?php
 
@@ -189,9 +189,9 @@ Github:
 	}
 
 
-##API索引##
+## API索引 ##
 
-###Cs\App###
+### Cs\App ###
 
     /**
      * 构造函数.
@@ -271,11 +271,11 @@ Github:
      */
     function options($url, $closure)
 
-###Cs\Bootstrap###
+### Cs\Bootstrap ###
 
     预留接口
     
-###Cs\db\ModelInterface###
+### Cs\db\ModelInterface ###
 
     /**
      * SELECT
@@ -340,7 +340,7 @@ Github:
      */
     function execute();
     
-###Cs\db\pdo\Adapter###
+### Cs\db\pdo\Adapter ###
 
     /**
      * PDO构造函数.
@@ -446,7 +446,7 @@ Github:
      */
     function findAll()
 
-###Cs\di\Di###
+### Cs\di\Di ###
 
     /**
      * Di 构造函数
@@ -465,7 +465,7 @@ Github:
      */
     function set($key, $closure)
 
-###Cs\mvc\Controller###
+### Cs\mvc\Controller ###
 
     /**
      * @var $di \Cs\di\Di　Di容器对象
@@ -482,7 +482,7 @@ Github:
      */
     public $router;
 
-###Cs\mvc\Model###
+### Cs\mvc\Model ###
 
      * Model 模型构造函数.
      */
@@ -549,7 +549,7 @@ Github:
      */
     function delete()
 
-###Cs\mvc\View###
+### Cs\mvc\View ###
 
     /**
      * View 构造函数.
@@ -596,7 +596,7 @@ Github:
      */
     function partial($templateFileName, $variables)
 
-###Cs\net\Request###
+### Cs\net\Request ###
 
     /**
      *获取 HTTP_HOST 信息
@@ -703,7 +703,7 @@ Github:
      */
     function getPost()
 
-###Cs\net\Response###
+### Cs\net\Response ###
 
     /**
      * Response 构造函数.
@@ -748,7 +748,7 @@ Github:
      */
     function redirect($url)
 
-###Cs\tool\Config###
+### Cs\tool\Config ###
 
     /**
      * 构造函数.
