@@ -54,7 +54,7 @@ Github:
                         |---Index.php               Index控制器
                     +---views                       视图目录
                         +---index                   Index控制器的视图目录
-                            |---index.phtml          Index控制器的index方法的视图文件
+                            |---index.phtml         Index控制器的index方法的视图文件
             +---bootstrap.php                       框架的初始化类Bootstrap
         +--public                                   入口目录
             |---index.php                           入口文件
