@@ -46,9 +46,10 @@ PHP_FUNCTION(getCSpeedVersion)
  */
 PHP_MINIT_FUNCTION(cspeed)
 {
+#if defined(COMPILE_DL_CSPEED) && defined(ZTS)
     /* Allocate the memory for the system to use, only for ZTS */
     ZEND_INIT_MODULE_GLOBALS(cspeed, NULL, NULL);
-
+#endif
     /* Initialise the all core class for the CSpeed engine */
     di_init();
     app_init();
