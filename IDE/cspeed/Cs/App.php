@@ -113,13 +113,6 @@ class App
     }
 
     /**
-     * @return App
-     */
-    static function getApp(): \Cs\App
-    {
-    }
-
-    /**
      * @return $this
      */
     function bootstrap()

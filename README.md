@@ -75,7 +75,7 @@ Github:
 
 ２、API示例
 
-    $app = \Cs\App::getApp();
+    $app = new \Cs\App("../app/config/core.ini");
     
     $app->get('/hello/cspeed/:any:', function($any){
         echo "<div style='text-align:center;'>Hello CSpeed User, The any value is : $any.</div>";

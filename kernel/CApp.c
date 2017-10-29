@@ -222,9 +222,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_bootstrap, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_get_app, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_run, 0, 0, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
@@ -478,16 +475,6 @@ CSPEED_METHOD(App, setAlias)/*{{{ proto App::setAlias() */
     add_assoc_str(all_default_aliases, ZSTR_VAL(alias_name) + 1, alias_path);
 }/*}}}*/
 
-CSPEED_METHOD(App, getApp)/*{{{ proto App::getApp()*/
-{
-    zval app_object;
-    object_init_ex(&app_object, cspeed_app_ce);
-    char path[MAXPATHLEN];
-    cspeed_get_cwd(path);
-    initialise_app_object(&app_object, path);
-    RETURN_ZVAL(&app_object, 1, 0);
-}/*}}}*/
-
 CSPEED_METHOD(App, run)/*{{{ proto App::run() */
 {
     dispather_url();
@@ -568,7 +555,6 @@ static const zend_function_entry cspeed_app_functions[] = {
     CSPEED_ME(App, options,             arginfo_cspeed_options,                     ZEND_ACC_PUBLIC)
     CSPEED_ME(App, autoload,            arginfo_cspeed_autoload,                    ZEND_ACC_PUBLIC)
     CSPEED_ME(App, setAlias,            arginfo_cspeed_set_alias,                   ZEND_ACC_PUBLIC)
-    CSPEED_ME(App, getApp,              arginfo_cspeed_get_app,                     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
     CSPEED_ME(App, run,                 arginfo_cspeed_run,                         ZEND_ACC_PUBLIC)
     CSPEED_ME(App, bootstrap,           arginfo_cspeed_bootstrap,                   ZEND_ACC_PUBLIC)
     PHP_FE_END
