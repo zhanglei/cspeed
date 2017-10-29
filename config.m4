@@ -76,7 +76,7 @@ if test "$PHP_CSPEED" != "no"; then
     kernel/tool/configs.c         \
     kernel/bootstrap.c             \
     kernel/mvc/router.c             \
-    kernel/db/mysql.c,
+    kernel/db/adapter.c,
   $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_ADD_BUILD_DIR([$ext_builddir/kernel])
   PHP_ADD_BUILD_DIR([$ext_builddir/kernel/db])
