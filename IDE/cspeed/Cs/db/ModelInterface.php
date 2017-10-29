@@ -13,10 +13,10 @@ interface ModelInterface
 {
     /**
      * SELECT
-     * @param array $fields   The fields which you want to SELECT from the DB
+     * @param array|string $fields   The fields which you want to SELECT from the DB
      * @return \Cs\db\ModelInterface
      */
-    function select(array $fields);
+    function select($fields);
 
     /**
      * FROM
@@ -27,31 +27,31 @@ interface ModelInterface
 
     /**
      * WHERE
-     * @param array $whereCondition    The WHERE condition you may filter data
+     * @param array|string $whereCondition    The WHERE condition you may filter data
      * @return ModelInterface
      */
-    function where(array $whereCondition);
+    function where( $whereCondition);
 
     /**
      * GROUP BY
-     * @param array $groupBy          Which columns you want to GROUP BY
+     * @param array|string $groupBy          Which columns you want to GROUP BY
      * @return ModelInterface
      */
-    function groupBy(array $groupBy);
+    function groupBy( $groupBy);
 
     /**
      * HAVING
-     * @param array $having           THE HAVING conditon you may want to filter
+     * @param array|string $having           THE HAVING conditon you may want to filter
      * @return ModelInterface
      */
-    function having(array $having);
+    function having($having);
 
     /**
      * ORDER BY
-     * @param array $orderBy           The ORDER BY condition
+     * @param array|string $orderBy           The ORDER BY condition
      * @return ModelInterface
      */
-    function orderBy(array $orderBy);
+    function orderBy($orderBy);
 
     /**
      * LIMIT

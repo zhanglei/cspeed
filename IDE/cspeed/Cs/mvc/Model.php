@@ -46,41 +46,50 @@ class Model
     }
 
     /**
-     * Do the WHERE operation
-     * @param array $where
+     * @param array|string $fields
      * @return $this
      */
-    function where(array $where)
+    function select($fields)
+    {
+        return $this;
+    }
+
+    /**
+     * Do the WHERE operation
+     * @param array|string $where
+     * @return $this
+     */
+    function where($where)
     {
         return $this;
     }
 
     /**
      * Do the APPEND WHERE
-     * @param array $where
+     * @param array|string $where
      * @return $this
      */
-    function andWhere(array $where)
+    function andWhere($where)
     {
         return $this;
     }
 
     /**
      * ORDER BY
-     * @param array $orderBy
+     * @param array|string $orderBy
      * @return $this
      */
-    function orderBy(array $orderBy)
+    function orderBy($orderBy)
     {
        return $this;
     }
 
     /**
      * GROUP BY
-     * @param array $groupBy
+     * @param array|string $groupBy
      * @return $this
      */
-    function groupBy(array $groupBy)
+    function groupBy($groupBy)
     {
         return $this;
     }

@@ -105,48 +105,25 @@ class App
 
     /**
      * Run the WEB MVC process
-     * @param $di The di object which you want to reuse the object in CSpeed projects
      */
-    function run($di = null)
+    function run()
     {
 
     }
 
     /**
-     * Register the needed modules, to let the CSpeed only parsing the given module.
-     * $param array $modules  The module which you allowed to parse.
-     * for example :
-     * registerModules(['admin', 'frontend']);
+     * @return App
      */
-    function registerModules(array $modules)
+    static function getApp(): \Cs\App
     {
-
     }
 
     /**
-     * Setting the default module for the CSpeed to deal the Routine
-     * @param string $moduleName The default module name which you want to lead to.
+     * @return $this
      */
-    function setDefaultModule($moduleName)
+    function bootstrap()
     {
-
+        return $this;
     }
 
-    /**
-     * Setting the default controller for the CSpeed to deal the Routine
-     * @param string $controllerName The default controller name which you want to lead to.
-     */
-    function setDefaultController($controllerName)
-    {
-
-    }
-
-    /**
-     * Setting the default action for the CSpeed to deal the Routine
-     * @param string $actionName The default action name which you want to lead to.
-     */
-    function setDefaultActon($actionName)
-    {
-
-    }
 }

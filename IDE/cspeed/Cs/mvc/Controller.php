@@ -8,9 +8,21 @@
 
 namespace Cs\mvc;
 
-use Cs\di\Di;
-
-class Controller extends Di
+class Controller
 {
 
+    /**
+     * @var $di \Cs\di\Di
+     */
+    public $di;
+
+    /**
+     * @var $view \Cs\mvc\View
+     */
+    public $view;
+
+    /**
+     * @var $router \Cs\mvc\Router
+     */
+    public $router;
 }

@@ -26,14 +26,14 @@
 #include "kernel/tool/helper.h"
 #include "kernel/mvc/model.h"
 
-#include "kernel/db/mysql.h"
+#include "kernel/db/adapter.h"
 
 #include "zend_smart_str.h"             /* Use the smart_str */
 
 void initialise_the_model_object(zval *model_object, zend_long new_record, INTERNAL_FUNCTION_PARAMETERS)/*{{{*/
 {
     /* Fetch the PDO object from the given Di class */
-    zval *pdo_object = zend_read_static_property(cspeed_mysql_ce, CSPEED_STRL(CSPEED_MYSQL_PDO_OBJECT), 1);
+    zval *pdo_object = zend_read_static_property(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_PDO_OBJECT), 1);
 #if 0
     zval *pdo_object = CSPEED_G(new_db_pdo_object);
 #endif
@@ -138,6 +138,18 @@ char *build_update_sql(zval *this)  /*{{{*/
         return "";
     }
 
+}/*}}}*/
+
+void build_delete_sql(zval *this)/* {{{ Build the DELETE where condition */
+{
+    zval *magic_datas = zend_read_property(cspeed_model_ce, this, CSPEED_STRL(CSPEED_MODEL_MAGIC_DATAS), 1, NULL);
+    if (magic_datas && Z_TYPE_P(magic_datas) == IS_ARRAY  && zend_hash_num_elements(Z_ARRVAL_P(magic_datas)) ){
+        zval result;
+        cspeed_build_equal_string(magic_datas, " WHERE ", &result);
+        zend_update_property_string(cspeed_model_ce, this, 
+            CSPEED_STRL(CSPEED_MODEL_WHERE_COND), Z_STRVAL(result));
+        zval_ptr_dtor(&result);
+    }
 }/*}}}*/
 
 void reset_model_sql(zval *this) /*{{{ To clear the current sql result for the next execute */
@@ -371,18 +383,13 @@ CSPEED_METHOD(Model, one)/*{{{ proto Model::one()*/
 
     zend_string *raw_sql = strpprintf(0, "SELECT * FROM %s%s%s%s LIMIT 1", Z_STRVAL_P(table_name), Z_STRVAL_P(where),
         Z_STRVAL_P(group_by), Z_STRVAL_P(order_by));
-
     zval *pdo_object = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_PDO_OBJECT), 1, NULL);
-
     zval pdo_statement;
     cspeed_pdo_prepare(pdo_object, ZSTR_VAL(raw_sql), &pdo_statement);
-    
     zval ret;
     cspeed_pdo_statement_set_fetch_mode(&pdo_statement, 2, &ret);
-
     zval retval;
     cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
-
     reset_model_sql(getThis());
     if (!output_sql_errors(&pdo_statement)){
         zval result;
@@ -425,18 +432,13 @@ CSPEED_METHOD(Model, all)/*{{{ proto Model::all()*/
 
     zend_string *raw_sql = strpprintf(0, "SELECT %s FROM %s%s%s%s", Z_STRVAL_P(select) , 
         Z_STRVAL_P(table_name), Z_STRVAL_P(where), Z_STRVAL_P(group_by), Z_STRVAL_P(order_by));
-
     zval *pdo_object = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_PDO_OBJECT), 1, NULL);
-
     zval pdo_statement;
     cspeed_pdo_prepare(pdo_object, ZSTR_VAL(raw_sql), &pdo_statement);
-    
     zval ret;
     cspeed_pdo_statement_set_fetch_mode(&pdo_statement, 2, &ret);
-
     zval retval;
     cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
-    
     reset_model_sql(getThis());
     if (!output_sql_errors(&pdo_statement)){
         zval result;
@@ -469,13 +471,10 @@ CSPEED_METHOD(Model, save)/*{{{ proto Model::save()*/
         );
     }
     zval *pdo_object = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_PDO_OBJECT), 1, NULL);
-
     zval pdo_statement;
     cspeed_pdo_prepare(pdo_object, ZSTR_VAL(execute_sql), &pdo_statement);
-    
     zval retval;
     cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
-
     reset_model_sql(getThis());
     if (!output_sql_errors(&pdo_statement)){
         zval row_count;
@@ -487,19 +486,17 @@ CSPEED_METHOD(Model, save)/*{{{ proto Model::save()*/
 
 CSPEED_METHOD(Model, delete)/*{{{ proto Model::delete()*/
 {
+    /* If the magic datas exsits, do the concate-process first */
+    build_delete_sql(getThis());
+    /* After the concate process do the real step */
     zval *where      = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_WHERE_COND), 1, NULL);
     zval *table_name = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_TABLE_NAME), 1, NULL);
-
     zend_string *execute_sql = strpprintf(0, "DELETE FROM %s%s", Z_STRVAL_P(table_name), Z_STRVAL_P(where));
-
     zval *pdo_object = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_PDO_OBJECT), 1, NULL);
-
     zval pdo_statement;
     cspeed_pdo_prepare(pdo_object, ZSTR_VAL(execute_sql), &pdo_statement);
-    
     zval retval;
     cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
-
     reset_model_sql(getThis());
     if (!output_sql_errors(&pdo_statement)){
         zval row_count;
@@ -543,7 +540,7 @@ CSPEED_INIT(model)  /*{{{ Load the module function*/
 
     zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_WHERE_COND), "", ZEND_ACC_PRIVATE);
     zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_ORDER_BY), "", ZEND_ACC_PRIVATE);
-    zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_SELECT), "", ZEND_ACC_PRIVATE);
+    zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_SELECT), "*", ZEND_ACC_PRIVATE);
     zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_GROUP_BY), "", ZEND_ACC_PRIVATE);
     zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_TABLE_NAME), "", ZEND_ACC_PRIVATE);
 }/*}}}*/
