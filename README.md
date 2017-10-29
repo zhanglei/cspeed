@@ -2,7 +2,7 @@
 
 ----------
 
-#### CSpeed v2.0.0 新架构 ####
+####CSpeed v2.0.0 新架构####
 
 **一个简单的WEB应用入口：**
 	
@@ -35,7 +35,7 @@
 	core.router.default.controller  =  Index                 ; 默认控制器
 	core.router.default.action      =  index                 ; 默认方法
 	core.view.ext                   =  phtml                 ; 视图文件后缀
-	core.view.auto_render           =  1                     ; 是否自动渲染视图，１：自动渲染、０：不渲染
+	core.view.auto.render           =  1                     ; 是否自动渲染视图，１：自动渲染、０：不渲染
 
 
 	[db]

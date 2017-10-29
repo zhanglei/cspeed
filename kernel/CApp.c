@@ -222,9 +222,33 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_bootstrap, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_get_app, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_run, 0, 0, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
+
+void initialise_app_object(zval *app_object, char *path)
+{
+    /* In the constructor initialise the aliases with the default alias named `app` */
+    zval *default_aliases = zend_read_property(cspeed_app_ce, app_object, CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), 1, NULL);
+    zval all_aliases;
+    array_init(&all_aliases);
+    add_assoc_str(&all_aliases, "app", strpprintf(0, "%s/%s", path, ZSTR_VAL(CSPEED_G(core_application))));
+    zend_update_property(cspeed_app_ce, app_object, CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), &all_aliases);
+
+    /* Setting the default loader */
+    zval function_name, retval, callback;
+    ZVAL_STRING(&function_name, "spl_autoload_register");
+    array_init(&callback);
+    add_next_index_zval(&callback, app_object);
+    add_next_index_string(&callback, "autoload");
+    uint32_t param_count = 1;
+    zval params[] = { callback };
+    call_user_function(CG(function_table), NULL, &function_name, &retval, param_count, params);
+    zval_ptr_dtor(&retval);
+}
 
 /* CApp class's methods */
 CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
@@ -390,24 +414,8 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
         php_error_docref(NULL, E_ERROR, "Parameters must be a valid string.");
         RETURN_FALSE
     }
-
-    /* In the constructor initialise the aliases with the default alias named `app` */
-    zval *default_aliases = zend_read_property(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), 1, NULL);
-    zval all_aliases;
-    array_init(&all_aliases);
-    add_assoc_str(&all_aliases, "app", strpprintf(0, "%s/%s", path, ZSTR_VAL(CSPEED_G(core_application))));
-    zend_update_property(cspeed_app_ce, getThis(), CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), &all_aliases);
-
-    /* Setting the default loader */
-    zval function_name, retval, callback;
-    ZVAL_STRING(&function_name, "spl_autoload_register");
-    array_init(&callback);
-    add_next_index_zval(&callback, getThis());
-    add_next_index_string(&callback, "autoload");
-    uint32_t param_count = 1;
-    zval params[] = { callback };
-    call_user_function(CG(function_table), NULL, &function_name, &retval, param_count, params);
-    zval_ptr_dtor(&retval);
+    /* Initialise the standard app object */
+    initialise_app_object(getThis(), path);
 }/*}}}*/
 
 CSPEED_METHOD(App, get)/*{{{ proto App::get() */
@@ -468,6 +476,16 @@ CSPEED_METHOD(App, setAlias)/*{{{ proto App::setAlias() */
     zval *all_default_aliases = zend_read_property(cspeed_app_ce, getThis(), 
         CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), 1, NULL);
     add_assoc_str(all_default_aliases, ZSTR_VAL(alias_name) + 1, alias_path);
+}/*}}}*/
+
+CSPEED_METHOD(App, getApp)/*{{{ proto App::getApp()*/
+{
+    zval app_object;
+    object_init_ex(&app_object, cspeed_app_ce);
+    char path[MAXPATHLEN];
+    cspeed_get_cwd(path);
+    initialise_app_object(&app_object, path);
+    RETURN_ZVAL(&app_object, 1, 0);
 }/*}}}*/
 
 CSPEED_METHOD(App, run)/*{{{ proto App::run() */
@@ -550,6 +568,7 @@ static const zend_function_entry cspeed_app_functions[] = {
     CSPEED_ME(App, options,             arginfo_cspeed_options,                     ZEND_ACC_PUBLIC)
     CSPEED_ME(App, autoload,            arginfo_cspeed_autoload,                    ZEND_ACC_PUBLIC)
     CSPEED_ME(App, setAlias,            arginfo_cspeed_set_alias,                   ZEND_ACC_PUBLIC)
+    CSPEED_ME(App, getApp,              arginfo_cspeed_get_app,                     ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
     CSPEED_ME(App, run,                 arginfo_cspeed_run,                         ZEND_ACC_PUBLIC)
     CSPEED_ME(App, bootstrap,           arginfo_cspeed_bootstrap,                   ZEND_ACC_PUBLIC)
     PHP_FE_END
@@ -564,8 +583,6 @@ CSPEED_INIT(app)
     cspeed_app_ce = zend_register_internal_class(&ce);
 
     zend_declare_property_null(cspeed_app_ce,   CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES),   ZEND_ACC_PRIVATE);
-    zend_declare_property_null(cspeed_app_ce,   CSPEED_STRL(CSPEED_APP_PROPERTY),           ZEND_ACC_PUBLIC|ZEND_ACC_STATIC);
-
 }
 /*}}}*/
 

@@ -25,8 +25,6 @@ zend_class_entry *cspeed_app_ce;                                        /* The g
 
 #define CSPEED_APP_AUTOLOAD_ALIASES     "__cspeed_app_aliases"          /* The aliases which let the system to locate the file */
 
-#define CSPEED_APP_PROPERTY             "app"                           /* The app property */
-
 CSPEED_INIT(app);                                                       /* The init function for the CApp class */
 
 

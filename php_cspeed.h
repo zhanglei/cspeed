@@ -96,7 +96,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define CORE_CONFIG_DEFAULT_CONTROLLER_NAME     "core.router.default.controller"
 #define CORE_CONFIG_DEFAULT_ACTION_NAME         "core.router.default.action"
 #define CORE_CONFIG_VIEW_EXT_NAME               "core.view.ext"
-#define CORE_CONFIG_VIEW_AUTO_RENDER            "core.view.auto_render"
+#define CORE_CONFIG_VIEW_AUTO_RENDER            "core.view.auto.render"
 
 /* Db configs */
 #define CORE_CONFIG_DB_TYPE                     "db.master.type"
