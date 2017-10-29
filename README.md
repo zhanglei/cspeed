@@ -1,52 +1,110 @@
-# CSpeed v2.0.0 高性能扩展框架－只为追求极致的速度
+#CSpeed v2.0.0 手册#
 
-***
+##安装指南##
 
-#### CSpeed v2.0.0 新架构 ####
+CSpeed扩展目前在**Github**与**码云**平台均有代码存储库，用户只需下载源码然后安装如下方法安装即可：
 
-**一个简单的WEB应用入口：**
+Github:
 	
-        $app = new \Cs\App("../app/config/core.ini", "dev");
-        
-        $app->bootstrap()->run();
-        
-通过INI配置文件初始化框架
-第一个参数为配置文件的相对路径
-第二个参数为配置文件的节点，详细的配置文件见下方
+	https://github.com/liqiongfan/cspeed
+	
+码云：
 
-        $app = new \Cs\App("../app/config/core.ini", "dev");
-        
-运行初始化然后开始进行URL解析:
+	https://gitee.com/josinli/cspeed
 
-        $app->bootstrap()->run();
-        
-如果不需要初始化过程的话，可以只运行 run 方法：
+安装步骤：
 
-        $app->run();
-        
-**配置文件详细如下：**
+	1、/usr/local/php_to_path/bin/phpize
+	
+	２、./configure --with-php-config=/usr/local/php_to_path/bin/php-config
+	
+	３、make install 
+	
+编译完成后在　**php.ini**　配置文件添加如下内容：
+	
+	extension_dir = "/usr/local/php-7.1.8-nts/lib/php/extensions/no-debug-non-zts-20160303/"
+	
+	extension=cspeed.so
+
+然后重启 Nginx 的 **PHP-FPM** 或者 **Apache**：
+	
+	４、systemctl restart php-fpm 或者 systemctl restart httpd
+
+##典型项目结构##
+
+     +--cspeed                                      入口文件
+        +--app                                      项目目录
+            +---config                              配置目录
+                |---core.ini                        配置文件
+            +---models                              通用模型目录
+                |---User.php                        User模型
+                |---Goods.php                       Goods模型
+            +---modules                             模块目录
+                +---backend                         后台模块
+                    +---controllers                 backend模块控制器目录
+                        |---Index.php               Index控制器
+                        |---About.php               About控制器
+                    +---views                       视图目录
+                        +---index                   Index控制器的视图目录
+                            |---index.phtml         Index控制器的index方法的视图文件
+                        +---about                   About控制器的视图目录
+                            |---index.phtml         About控制器的index方法的视图文件
+                +---home                            Home模块
+                    +---controllers                 Home模块控制器目录
+                        |---Index.php               Index控制器
+                    +---views                       视图目录
+                        +---index                   Index控制器的视图目录
+                            ---index.phtml          Index控制器的index方法的视图文件
+            +---bootstrap.php                       框架的初始化类Bootstrap
+        +--public                                   入口目录
+            |---index.php                           入口文件
+            +---assets                              资源目录
+                +---css                             CSS资源
+                +---js                              JS资源
+                +---img                             图片资源
+
+##简单的示例##
+
+１、WEB示例
+
+    $app = new \Cs\App("../app/config/core.ini", "dev");
+    
+    $app->bootstrap()->run();
+
+一个复杂的**WEB应用**就只需以上两行代码就可搞定。
+
+２、API示例
+
+    $app = \Cs\App::getApp();
+    
+    $app->get('/hello/cspeed/:any:', function($any){
+        echo "<div style='text-align:center;'>Hello CSpeed User, The any value is : $any.</div>";
+    });
+    
+**RESTful API** 项目只需要添加对应的请求方法即可。
+
+##CSpeed引擎INI配置项##
 
 	[core]
 	core.application                = '../app'               ; WEB目录
 	core.bootstrap                  = '../app/bootstrap.php' ; 指定bootstrap 类目录
 	core.bootstrap.method.string    = '__init'               ; 指定Bootstrap类的初始化方法的前缀 
-	core.router.modules             =  index,home            ; 注册多模块
+	core.router.modules             =  index,home,back       ; 注册多模块
 	core.router.default.module      =  index                 ; 默认模块
 	core.router.default.controller  =  Index                 ; 默认控制器
 	core.router.default.action      =  index                 ; 默认方法
 	core.view.ext                   =  phtml                 ; 视图文件后缀
-	core.view.auto.render           =  1                     ; 是否自动渲染视图，１：自动渲染、０：不渲染
-
+	core.view.auto.render           =  0                     ; 是否自动渲染视图，１：自动渲染、０：不渲染
 
 	[db]
 	db.master.type                   =  mysql                 ; 数据库类型，默认：mysql
-	db.master.host                  =  localhost             ; 数据库主机地址
+	db.master.host                   =  localhost             ; 数据库主机地址
 	db.master.port                   =  3306                  ; 数据库端口
 	db.master.dbname                 =  supjos                ; 数据库名称
 	db.master.username               =  root                  ; 数据库用户名
 	db.master.password               =  3333                  ; 数据库密码
 
-	[dev:core];这个地方表示dev环境下的core配置，　db的配置信息与此一致
+	[dev:core]
 	core.application                = '../app'               ; WEB目录
 	core.bootstrap                  = '../app/bootstrap.php' ; 指定bootstrap 类目录
 	core.bootstrap.method.string    = '__init'               ; 指定Bootstrap类的初始化方法的前缀 
@@ -55,78 +113,37 @@
 	core.router.default.controller  =  Index                 ; 默认控制器
 	core.router.default.action      =  index                 ; 默认方法
 	core.view.ext                   =  xhtml                 ; 视图文件后缀
-	
-**Bootstrap流程：**
 
-当系统运行至 bootstrap() 方法的时候，会自动在引擎内部创建两个对象：\Cs\di\Di 注入容器和 \Cs\mvc\Router 路由对象，以便客户能够在初始化阶段完成路由配置与容器的复用注入：
+##典型的Bootstrap初始化类##
 
-Bootstrap类必须实现 \Cs\Bootstrap　接口，方便后续的功能扩展与统一：
-典型的Bootstrap类如下：
-
-    <?php
-
-    class Bootstrap implements \Cs\Bootstrap
-    {
-        /**
-         * 被引擎调用的方法的前缀默认为：__init开头的所有方法，可以通过配置文件进行更改
-         */
-	    function __initRouter($di, $router)　/* 初始化路由配置 */
+	class Bootstrap implements \Cs\Bootstrap
+	{
+	    /* 初始化路由与视图 */
+	    function __initRouter($di, $router)
 	    {
-               $router->add(				/* 路由的具体参数信息见下面介绍 */
-                    '/back/:action:/:id:',
-                    '/shop/list/$1'
-                );
-                $router->add(
-                    '/shop/:controller:/:action:/:any:',
-                    '/get/\1/\2/\3'
-                 );
-                
-                $router->addFromIni('../app/router.ini');　/* 通过配置文件导入路由信息 */
+			$di->set('view', function(){
+			    return new \Cs\mvc\View();
+			});
+			$router->add(
+			    '/back/:action:/:id:',
+			    '/shop/list/$1'
+			);
+			$router->add(
+			    '/shop/:controller:/:action:/:any:',
+			    '/get/\1/\2/\3'
+			);
 	    }
 	    
-	    /* 初始化注入容器 */
-	    function __InitDb($di, $router)
+	    /* 初始化数据库连接 */
+	    function __initDb($di, $router)
 	    {
-                $di->set('db', function(){
-                    return new \Cs\db\pdo\Adapter();
-                });
+			$di->set('db', function(){
+			    return new \Cs\db\pdo\Adapter();
+			});
 	    }
 	}
 
-CSpeed引擎初始化的流程为：运行所有初始化类: Bootstrap　类的所有以特定前缀开头的方法，并且自带有两个参数分别为：\Cs\di\Di 对象　和 \Cs\mvc\Router对象。
-
-**注意：**
-	当在WEB应用中，如果设置的路由匹配成功的话，引擎将会进行重定向，后续的路由将不会处理，因为路由的匹配原则是优先原则。
-	
-	在URL中的PATH_INFO解析过后，剩余的参数将会保存到全局变量$_GET中，可以通过引擎的类 \Cs\net\Request 和\Cs\net\Response　来进行响应与应答请求，如：
-	
-	/usr/list/infos/hello/cspeed
-	
-如果匹配路由：
-	
-	/usr/list/infos
-	
-那么在上面匹配的路由的方法 infosAction()方法内可以通过：
-
- 	$_GET['hello']　＝＝>  cspeed
- 或者
- 
-	\Cs\net\Reqeust::get('hello');
-
-方法来获取值。
-
-**控制器：**
-
-一个典型的WEB应用包含有三层：**模型**、**控制器**、**视图**。
-CSpeed引擎的控制器继承自：\Cs\mvc\Controller 类，含有三个属性：
-	**di**[注入容器对象]、**router**[路由]、**view**[视图引擎]，
-
-属性是否存在：
-
-　　前两个属性只有当调用了 **bootstrap()** 方法后才会自动进行实例化，直接调用 **run()**方法类解析路由的引擎，系统不自动进行创建。**view引擎**对象只有当开启自动渲染视图的时候，才会自动创建。
-
-一个典型的控制器如下：
-
+##典型的控制器结构##
 
 	<?php
 
@@ -157,60 +174,7 @@ CSpeed引擎的控制器继承自：\Cs\mvc\Controller 类，含有三个属性�
 	    }
 	}
 
-**视图：**
-
-CSpeed框架的视图引擎由 \Cs\mvc\View类承担：负责视图渲染与视图布局功能。
-
-视图类方法如下：
-
-１、创建视图对象：
-    
-    $view = new \Cs\mvc\View();
-    
-２、设置需要渲染的模块需要使用的数据：
-
-    $view->setVar('name', 'CSpeed');
-    $view->setVar('version', 'v2.0.0');
-    
-3-1、渲染视图：
-
-    $view->render('index/index');
-    
-3-2、渲染视图的同时传入数据：
-
-    $view->render('index/index', [
-        'name'    =>    'CSpeed',
-        'version'  =>    'v2.0.0'
-    ]);
-    
-４、获取视图渲染结果但是并不输出：
-
-    $data = $view->getRender('index/index');
-    
-５、视图内渲染其余的视图布局：
-    
-    <!DOCTYPE html>
-    <?php echo $this->partial('layouts/head');  ?>
-
-    中间是需要渲染的重要内容
-       
-    <?php echo $this->partial('layouts/foot'); ?>
-
-**模型：**
-
-CSpeed框架提供两个基本类与一个接口供用户自己实现引擎无法满足的功能：
-
-典型的模型使用流程：
-
-用户在使用模型前必须先向系统注入一个数据库对象，目前CSeed引擎只实现了MySQL类，后续增加其余数据库、读写分离支持。
-
-    $di->set('db', function(){
-        return new \Cs\db\pdo\Adapter(); /* 数据库的连接信息在配置文件中给出 */
-    });
-
-**User模型: User.php**
-
-模型必须继承自类：\Cs\mvc\Model，来使用框架提供的抽象接口能力：
+##典型的模型结构##
 
 	<?php
 
@@ -224,97 +188,587 @@ CSpeed框架提供两个基本类与一个接口供用户自己实现引擎无�
 		}
 	}
 
-如果模型不重写：tableName方法的，模型操作的数据库就是模型类名小写，如上例：　user 表。
 
+##API索引##
 
-模型提供的方法详细请见源码的IDE目录。
+###Cs\App###
 
-**自动加载机制：**
+    /**
+     * 构造函数.
+     * @param string $iniConfigPath 需要加载到引擎的配置文件路径.
+     * @param string $iniNodeName  　INI配置文件节点名称
+     */
+    function __construct($iniConfigPath, $iniNodeName)
 
-CSpeed引擎在实例化一个 \Cs\App　类的对象后，自动注册一个命名别名：｀app｀指向WEB目录。
+    /**
+     * 运行框架
+     */
+    function run()
 
-如下典型的CSpeed项目的目录结构：
-
-	-shop
-	+public
-	|-----index.php                         --------------------------       入口文件
-	+app                                      -------------------------　　　应用目录
-	|----config                                --------------------------　　配置目录
-	+----modules                               ----------------------　　　　模块目录
-	|-------backend                          --------------------------　　　后台模块
-	|--------+---controllers
-	|--------+---models
-	|--------+---views
-	+------frontend                          --------------------------　　　前端模块
-	|--------+--controllers                   --------------------------　　 前端控制器
-	|--------+--models                       --------------------------　　　前端模型
-	|--------+--views                          --------------------------　　前端视图
-	|----models                               --------------------------     通用模型
-
-那么当你创建了一个包含名字空间的\app\models模型类：
-	
-    namespace app\models;
+    /**
+     * 初始化引擎
+     */
+    function bootstrap()
     
-    class User
-    {
-        function getUsers()
-        {
-            /* Your logic code. */
-        }
-    }
-
-那么当你在CSpeed引擎中，使用本类的时候：
-
-    $user = new \app\models\User();
+    /**
+     * 返回App对象
+     */
+    static function getApp()
     
-那么CSpeed引擎将自动在app目录的models下面查找User.php文件，并加载。
-如果客户需要自定义别名，可以使用：
-	
-	$app->setAlias('@server', '../service/');
+    /**
+     * 设置系统加载别名
+     * @param $aliasKey         需要加载的别名
+     * @param $aliasFullPath    别名表示的绝对路径
+     */
+    function setAlias($aliasKey, $aliasFullPath)
 
-第一个参数是需要设置的别名，必须以“@"开头，作为系统标识。第二个参数为：别名指向的路径。
+    /**
+     * 匹配 GET 请求
+     * @param $url          待匹配的URL
+     * @param $closure      匹配成功后需要执行的回调函数
+     */
+    function get($url, $closure)
 
-**典型的API应用示例：**
+    /**
+     * 匹配 POST 请求
+     * @param $url          待匹配的URL
+     * @param $closure      匹配成功后需要执行的回调函数
+     */
+    function post($url, $closure)
 
-CSpeed框架作为一款全功能型框架，除了支持常见的WEB应用项目开发外还支持API项目的开发，目前功能已完善。
+    /**
+     * 匹配 PUT 请求
+     * @param $url          待匹配的URL
+     * @param $closure      匹配成功后需要执行的回调函数
+     */
+    function put($url, $closure)
 
-典型的API示例：
+    /**
+     * 匹配 PATCH 请求
+     * @param $url          待匹配的URL
+     * @param $closure      匹配成功后需要执行的回调函数
+     */
+    function patch($url, $closure)
 
-    $app = \Cs\App::getApp();
+    /**
+     * 匹配 DELETE 请求
+     * @param $url          待匹配的URL
+     * @param $closure      匹配成功后需要执行的回调函数
+     */
+    function delete($url, $closure)
     
-    $app->get('/shop/:controller:/:id:', function($controller, $id){
-    	/* Your logical code here. */
-    });
+    /**
+     * 匹配 HEAD 请求
+     * @param $url          待匹配的URL
+     * @param $closure      匹配成功后需要执行的回调函数
+     */
+    function head($url, $closure)
 
-方法支持两个参数，第一个参数支持使用正则表达式，或者替代符，支持的替代符如下：
+    /**
+     * 匹配 OPTIONS 请求
+     * @param $url          待匹配的URL
+     * @param $closure      匹配成功后需要执行的回调函数
+     */
+    function options($url, $closure)
 
-	【:action:】：匹配字母、数字、横线、首字母不是数字与横线的字符串
-	【:any:】　：匹配除了“/"外的任何字符
-	【:controller:】同 【:action:】
-	【:id:】　　：匹配任何数字
-	【:module:】：同　【:action:】
-	
-如果第一个参数的正则表达式匹配后，会依次在第二个匿名回调函数的参数列表中，如上面的正则匹配如下的路由：
+###Cs\Bootstrap###
 
-	/shop/list/33
-	
-那么方法包含有两个参数：$controller　和 $id:
-	
-	function ($controller = 'list', $id = 33) {
-		echo $controller; // list;
-		echo $id;           // 33;
-	}
+    预留接口
+    
+###Cs\db\ModelInterface###
 
-CSpeed框架除了支持GET请求外，还支持常见的POST、OPTIONS、HEAD等。具体请见API文档。
+    /**
+     * SELECT
+     * @param array|string $fields   SELECT查询的字段
+     * @return \Cs\db\ModelInterface
+     */
+    function select($fields);
+
+    /**
+     * FROM
+     * @param string $table    查询的数据表名
+     * @return ModelInterface
+     */
+    function from($table);
+
+    /**
+     * WHERE
+     * @param array|string $whereCondition    WHERE条件
+     * @return ModelInterface
+     */
+    function where( $whereCondition);
+
+    /**
+     * GROUP BY
+     * @param array|string $groupBy          GROUP BY条件
+     * @return ModelInterface
+     */
+    function groupBy( $groupBy);
+
+    /**
+     * HAVING
+     * @param array|string $having           HAVING条件
+     * @return ModelInterface
+     */
+    function having($having);
+
+    /**
+     * ORDER BY
+     * @param array|string $orderBy           ORDER BY 条件
+     * @return ModelInterface
+     */
+    function orderBy($orderBy);
+
+    /**
+     * LIMIT
+     * @param int $count        条数
+     * @param int $offset       偏移量
+     * @return ModelInterface
+     */
+    function limit($count, $offset);
+
+    /**
+     * @param $rawSql               原生SQL语句
+     * @param array $bindParams     SQL语句绑定的预处理变量
+     * @return ModelInterface
+     */
+    function query($rawSql, array $bindParams);
+
+    /**
+     * 执行query方法的语句，并返回结果
+     * @return mixed
+     */
+    function execute();
+    
+###Cs\db\pdo\Adapter###
+
+    /**
+     * PDO构造函数.
+     * @param array $connectionOptions  可选连接参数,如： \PDO::ATTR_PERSISTENT.
+     */
+    function __construct(array $connectionOptions = [])
+
+    /**
+     * @param array|string 查询的字段
+     * @return $this|Adapter
+     */
+    function select($fields)
+
+    /**
+     * @param string $table 表名
+     * @return $this|Adapter
+     */
+    function from($table)
+    
+    /**
+     * @param array|string $whereCondition　WHERE 条件
+     * @return $this
+     */
+    function where( $whereCondition)
+
+    /**
+     * @param array|string $groupBy GROUP BY 条件
+     * @return $this
+     */
+    function groupBy($groupBy)
+
+    /**
+     * @param array|string $having HAVING 条件
+     * @return $this|Adapter
+     */
+    function having($having)
+
+    /**
+     * @param array|string $orderBy ORDER BY 条件，如： orderBy(['id DESC', 't ASC'])
+     * @return $this|Adapter
+     */
+    function orderBy($orderBy)
+
+    /**
+     * @param int $count    数目
+     * @param int $offset   偏移量
+     * @return $this|Adapter
+     */
+    function limit($count, $offset) 
+
+    /**
+     * @param string $rawSql       执行的SQL原生语句
+     * @param array $bindParams    绑定的预处理变量
+     * @return $this|Adapter
+     */
+    function query($rawSql, array $bindParams)
+    
+    /**
+     * 返回query方法的执行结果
+     * @return mixed
+     */
+    function execute()
+
+    /**
+     * @param $whereCondition    WHERE 条件
+     * @return $this|Adapter
+     */
+    function andWhere($whereCondition)
+
+    /**
+     * 开启SQL事务
+     */
+    function begin()
+
+    /**
+     * 回滚事务
+     */
+    function rollback()
+
+    /**
+     * 提交事务
+     */
+    function commit()
+
+    /**
+     * 返回最后的插入记录 ID
+     * @return mixed
+     */
+    function lastInsertId()
+
+    /**
+     * 返回影响的行数
+     */
+    function rowCount()
+
+    /**
+     * 从结果集中返回一条记录
+     */
+    function find()
+
+    /**
+     * 返回所有的结果集
+     */
+    function findAll()
+
+###Cs\di\Di###
+
+    /**
+     * Di 构造函数
+     */
+    function __construct()
+
+    /**
+     * @param $key      返回注入容器的对象的关联key
+     * @return object|mixed
+     */
+    function get($key)
+
+    /**
+     * @param $key      存入注入容器的对象对应的key索引
+     * @param $closure  回调函数，回调函数的返回值存入注入容器
+     */
+    function set($key, $closure)
+
+###Cs\mvc\Controller###
+
+    /**
+     * @var $di \Cs\di\Di　Di容器对象
+     */
+    public $di;
+
+    /**
+     * @var $view \Cs\mvc\View　View视图对象
+     */
+    public $view;
+
+    /**
+     * @var $router \Cs\mvc\Router    Router路由对象
+     */
+    public $router;
+
+###Cs\mvc\Model###
+
+     * Model 模型构造函数.
+     */
+    public function __construct()
+
+    /**
+     * 返回需要执行 UPDATE 操作的Model对象
+     * @return Model
+     */
+    static function find()
+
+    /**
+     * 返回模型需要操作的数据表名，默认操作当前模型对应的表名
+     */
+    function tableName()
+
+    /**
+     * @param array|string $fields　SELECT 条件
+     * @return $this
+     */
+    function select($fields)
+
+    /**
+     * @param array|string $where WHERE 条件
+     * @return $this
+     */
+    function where($where)
+
+    /**
+     * @param array|string $where    WHERE条件
+     * @return $this
+     */
+    function andWhere($where)
+    
+    /**
+     * @param array|string $orderBy    ORDER BY 条件
+     * @return $this
+     */
+    function orderBy($orderBy)
+
+    /**
+     * @param array|string $groupBy    GROUP BY条件
+     * @return $this
+     */
+    function groupBy($groupBy)
+
+    /**
+     *返回一条结果
+     */
+    function one()
+
+    /**
+     * 返回结果集中的所有记录
+     */
+    function all()
+
+    /**
+     * 执行 UPDATE|INSERT 操作，如果是new模型执行 INSERT 操作, find模型执行 UPDATE 操作
+     */
+    function save()
+
+    /**
+     * 执行 DELETE 操作
+     */
+    function delete()
+
+###Cs\mvc\View###
+
+    /**
+     * View 构造函数.
+     */
+    function __construct()
+
+    /**
+     * 渲染视图模板
+     * @param $templateFileName     需要渲染的文件名称，不带后缀
+     * @param $variables           需要传入模板的数据
+     */
+    function render($templateFileName, $variables)
+
+    /**
+     * 设置模板的后缀，默认后缀 phtml
+     * @param $suffixName           需要设置的模板后缀
+     */
+    function setSuffix($suffixName)
+
+    /**
+     * 向模板中添加数据
+     * @param $varName           变量名称
+     * @param $varValue            变量值
+     */
+    function setVar($varName, $varValue)
+
+    /**
+     * 获取渲染的结果
+     * @param $templateFileName     需要渲染的文件名称，不带后缀
+     * @param $variables           需要传入模板的数据
+     */
+    function getRender($templateFileName, $variables)
+
+    /**
+     * 设置视图引擎渲染的模板存储目录
+     * @param $viewDir            视图存储的目录
+     */
+    function setViewDir($viewDir)
+
+    /**
+     * 布局渲染
+     * @param $templateFileName     需要渲染的文件名称，不带后缀
+     * @param $variables           需要传入模板的数据
+     */
+    function partial($templateFileName, $variables)
+
+###Cs\net\Request###
+
+    /**
+     *获取 HTTP_HOST 信息
+     */
+    function getHttpHost()
+
+    /**
+     * 获取 HTTP USER AGENT
+     */
+    function getHttpUserAgent()
+
+    /**
+     * 获取 SERVER_NAME
+     */
+    function getServerName()
+
+    /**
+     * 获取 SERVER_ADDR
+     */
+    function getServerAddr()
+
+    /**
+     * 获取 REMOTE_PORT
+     */
+    function getRemotePort()
+
+    /**
+     * 获取 REMOTE_ADDR
+     */
+    function getRemoteAddr()
+
+    /**
+     * 获取 REQUEST_SCHEME
+     */
+    function getReqeustScheme()
+
+    /**
+     * 获取 SERVER_PROTOCOL
+     */
+    function getServerProtocol()
+
+    /**
+     * 获取 DOCUMENT_ROOT
+     */
+    function getDocumentRoot()
+
+    /**
+     * 获取 REQUEST_URI
+     */
+    function getRequestUri()
+
+    /**
+     * 获取 SCRIPT_NAME
+     */
+    function getScriptName()
+    
+    /**
+     * 获取 PATH_INFO
+     */
+    function getPathInfo()
+
+    /**
+     * 获取 QUERY_STRING
+     */
+    function getQueryString()
+
+    /**
+     * 是否 GET 请求
+     */
+    function isGet()
+
+    /**
+     * 是否 PUT 请求
+     */
+    function isPut()
+
+    /**
+     * 是否 PATCH 请求
+     */
+    function isPatch()
+
+    /**
+     * 是否 DELETE 请求
+     */
+    function isDelete()
+
+    /**
+     * 是否 HEAD 请求
+     */
+    function isHead()
+
+    /**
+     * 是否 OPTIONS 请求
+     */
+    function isOptions()
+
+    /**
+     * 获取 $_GET 数据
+     */
+    function get()
+
+    /**
+     * 获取 $_POST 数据
+     */
+    function getPost()
+
+###Cs\net\Response###
+
+    /**
+     * Response 构造函数.
+     */
+    function __construct()
+
+    /**
+     * 设置 HTTP 头
+     * 如： setHeader('Content-Type', 'application/json;charset=UTF-8');
+     * @param $headerKey        HTTP 头名称
+     * @param $headerValue      HTTP 头值
+     */
+    function setHeader($headerKey, $headerValue)
+
+    /**
+     * 删除设置的 HTTP 头信息
+     * @param $headerKey       需要删除的HTTP头的名称，函数必须在调用send()前使用
+     */
+    function unsetHeader($headerKey)
+    
+    /**
+     * 发送 HTTP 头信息与相应内容
+     */
+    function send()
+
+    /**
+     * 设置返回的响应内容为JSON格式数据
+     * @param array $jsonArray
+     */
+    function setJsonContent(array $jsonArray)
+
+    /**
+     * 原始数据格式
+     * @param $rawContent   原始数据格式
+     */
+    function setRawContent($rawContent)
+
+    /**
+     * 重定向到指定的URL
+     * 如：redirect('/index/lists') 重定向到： http://host/index/lists
+     * @param $url          要重定向的 URL
+     */
+    function redirect($url)
+
+###Cs\tool\Config###
+
+    /**
+     * 构造函数.
+     */
+    function __construct()
+
+    /**
+     *加载INI数据
+     * @param string $configFilePath    INI文件的相对路径
+     */
+    function loadConfig($configFilePath)
+
+    /**
+     * 返回INI数据，解析节点
+     */
+    function getConfigs()
+
+    /**
+     * 返回INI数据中，对应的节点数据
+     */
+    function getConfig($configKey)
 
 
-**特别感谢：ＱＱ：５１６１７２、网名：阿杰，给CSpeed提供了很多的建议与意见，当前版本绝大多数业务流程均有参考。**
-
-
-
-
-
-
-
-
-	
