@@ -60,7 +60,6 @@ CSPEED_METHOD(Config, loadConfig)/*{{{ proto Config::loadConfig()*/
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &file) == FAILURE) {
         return ;
     }
-    
     char path[MAXPATHLEN];
     zend_string *real_inifile_path = strpprintf(0, "%s/%s", cspeed_get_cwd(path), ZSTR_VAL(file));
     if (access(ZSTR_VAL(real_inifile_path), F_OK) != -1) {
@@ -70,6 +69,7 @@ CSPEED_METHOD(Config, loadConfig)/*{{{ proto Config::loadConfig()*/
         zend_update_property(cspeed_config_ce, getThis(), CSPEED_STRL(CSPEED_CONFIG_VARIABLES), &ini_values);
         zval_ptr_dtor(&ini_values);
     }
+    zend_string_release(real_inifile_path);
 }/*}}}*/
 
 CSPEED_METHOD(Config, getConfigs) /*{{{ proto Config::getConfigs() */

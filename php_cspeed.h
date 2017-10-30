@@ -114,9 +114,11 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define CORE_ROUTER_DEFAULT_CONTROLLER          "index"
 #define CORE_ROUTER_DEFAULT_ACTION              "index"
 #define CORE_VIEW_EXT                           "html"
-#define CORE_VIEW_AUTO_RENDER                   "1"
+#define CORE_VIEW_AUTO_RENDER                   "0"
 #define CORE_BOOSTRAP_METHOD_STRING             "__init"
 #define CORE_BOOTSTRAP_CLASS_NAME               "Bootstrap"
+
+#define CORE_VIEW_NEED_RENDER                   "1"
 
 /* Some macros for the CSpeed engine */
 #define CSPEED_FN(function_name)        function_name##Action

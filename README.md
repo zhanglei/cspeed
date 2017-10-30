@@ -1,8 +1,75 @@
-# CSpeed v2.0.0 手册 #
+# CSpeed v2.0.1 手册 #
+
+## 最新特性 ##
+
+修复使用 CSpeed 框架进行 API 项目时的高并发情况下的PHP崩溃的情况。
+
+	$app = new App::getApp();
+	
+	$app->get('/', function(){
+		echo "hello cspeed";
+	});
+
+此情况见于 2.0.0 版本。已在新版本中予以修复。
+
+新版本中 **getApp()** 方法是一个单例模式控制器获取方法；不再适应于创建一个 **Cs\App** 对象,
+新版本中全部更新为 构造函数形式。可以不传入任何的参数来生成一个 零 IO 消耗的 application 对象 。
+
+控制器全部更新为命名空间形式，如路由：
+
+    http://www.supjos.com/hello/cspeed/news
+    
+导向到的是 **hello** 模块中的 **Cspeed** 控制器中的 **newsAction** 方法:
+
+控制器的格式如下：
+
+左右的控制器都必须继承自 **Cs\mvc\Controller** 类：
+
+    <?php
+    
+    namespace app\modules\hello\controllers;
+    
+    class Cspeed extends \Cs\mvc\Controllers
+    {
+    	/**
+    	 * 初始化方法，如果有父类的话，则会先从顶级父类开始执行到本方法
+    	 * 来完成初始化
+    	 */
+    	function initialise()
+    	{
+    	
+    	}
+    	
+    	/**
+    	 * 执行具体的方法之前先执行的方法
+    	 * 不会执行父类的本方法
+    	 */
+    	function __beforeActoin()
+    	{
+    	
+    	}
+    	
+    	/**
+    	 * 具体的方法
+    	 */
+    	function newsActon()
+    	{
+    	
+    	}
+    	
+    	/**
+    	 * 执行具体的方法之后执行的方法
+    	 * 不会执行父类的本方法
+    	 */
+    	function __afterActon()
+    	{
+    	
+    	}
+    }
 
 ## 安装指南 ##
 
-CSpeed扩展目前在 **Github** 与 **码云** 平台均有代码存储库，用户只需下载源码然后安装如下方法安装即可：
+CSpeed扩展目前在 **Github** 与 **码云** 平台均有代码存储库，用户只需下载源码然后按照如下方法安装即可：
 
 Github:
 	
@@ -29,6 +96,59 @@ Github:
 然后重启 Nginx 的 **PHP-FPM** 或者 **Apache**：
 	
 	４、systemctl restart php-fpm 或者 systemctl restart httpd
+
+## 测试性能 ##
+
+测试命令：
+	
+	/usr/local/httpd-2.4.29/bin/ab -c100 -n100000 http://www.supjos.com/hello/cspeed/
+
+测试机器[特意开启旧的笔记本进行测试，未开启工作站]：
+
+	CPU: Intel(R) Core(TM) i5-2430M CPU @ 2.40GHz
+	硬盘：HDD 750GB 2009年
+	内存：4G Sansung
+	
+测试环境：
+	
+	nginx 1.12.1
+	php 7.1.5
+	php-fpm
+
+测试结果：
+
+	Concurrency Level:      100
+	Time taken for tests:   9.781 seconds
+	Complete requests:      100000
+	Failed requests:        0
+	Total transferred:      18500000 bytes
+	HTML transferred:       0 bytes
+	Requests per second:    10223.94 [#/sec] (mean)
+	Time per request:       9.781 [ms] (mean)
+	Time per request:       0.098 [ms] (mean, across all concurrent requests)
+	Transfer rate:          1847.10 [Kbytes/sec] received
+
+	Connection Times (ms)
+		      min  mean[+/-sd] median   max
+	Connect:        0    1   0.9      0       9
+	Processing:     1    9   1.8      9      25
+	Waiting:        1    9   1.8      9      24
+	Total:          4   10   1.3     10      28
+	WARNING: The median and mean for the initial connection time are not within a normal deviation
+		These results are probably not that reliable.
+
+	Percentage of the requests served within a certain time (ms)
+	  50%     10
+	  66%     10
+	  75%     10
+	  80%     10
+	  90%     11
+	  95%     12
+	  98%     13
+	  99%     13
+	 100%     28 (longest request)
+
+测试后单次，不产生任何IO的情况下可以达到 10223reqs/s，持平于1万左右吞吐量。解析ini文件的情况下，可达到将近9千的吞吐量.
 
 ## 典型项目结构 ##
 
@@ -71,11 +191,13 @@ Github:
     
     $app->bootstrap()->run();
 
+Cs\App类的构造函数支持传入绝对路径或者相对路径的INI文件，第二个参数是INI配置文件的解析节点，构造函数的两个参数都可以省略来进行API框架的配置达到减少IO操作的目的.
+
 一个复杂的**WEB应用**就只需以上两行代码就可搞定。
 
 ２、API示例
 
-    $app = new \Cs\App("../app/config/core.ini");
+    $app = new \Cs\App();
     
     $app->get('/hello/cspeed/:any:', function($any){
         echo "<div style='text-align:center;'>Hello CSpeed User, The any value is : $any.</div>";
@@ -213,7 +335,7 @@ Github:
     /**
      * 返回App对象
      */
-    static function getApp()
+    function getApp()
     
     /**
      * 设置系统加载别名
@@ -481,6 +603,24 @@ Github:
      * @var $router \Cs\mvc\Router    Router路由对象
      */
     public $router;
+    
+    /**
+     * 路由的初始化方法
+     * 从父类初始化到本类
+     */
+    function initialise()
+    
+    /**
+     * 在执行具体的方法之前调用
+     * 不会执行父类的本方法
+     */
+    function __beforeAction()
+    
+    /**
+     * 在执行完具体的方法之后调用
+     * 不会执行父类的本方法
+     */
+    function __afterAction()
 
 ### Cs\mvc\Model ###
 
@@ -771,4 +911,31 @@ Github:
      */
     function getConfig($configKey)
 
+### Cs\mvc\Router ###
 
+    /**
+     * Router 构造函数.
+     */
+    function __construct()
+
+    /**
+     * 添加一条记录到Router路由
+     * @param $destUrl 支持正则匹配的 URL 路由
+     * @param $toUrl   匹配路由后的重定向路由
+     */
+    function add($destUrl, $toUrl)
+
+    /**
+     * 从 INI 配置文件添加路由
+     * @param $iniFile 包含有路由的 INI 配置文件
+     */
+    function addFromIni($iniFile)
+
+    /**
+     * 从数组中添加路由
+     * @param $arrayRouters 包含有数组的路由，数组的键是待匹配的 URL，值是匹配成功后重定向的URL
+     */
+    function addFromArray($arrayRouters)
+    {
+
+    }

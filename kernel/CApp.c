@@ -70,11 +70,7 @@ int cspeed_deal_reqeust(zend_string *url, zend_fcall_info *zfi, zend_fcall_info_
         zval preg_replace_result;
         zval preg_function_name;
         ZVAL_STRING(&preg_function_name, "preg_replace");
-        zval preg_params[] = {
-            nested_pattern,
-            nested_pattern_string,
-            url_pattern
-        };
+        zval preg_params[] = { nested_pattern, nested_pattern_string, url_pattern };
         call_user_function(CG(function_table), NULL, &preg_function_name, &preg_replace_result, 3, preg_params);
 
         pcre_cache_entry *pce_regexp;
@@ -145,6 +141,7 @@ void cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCT
          */
         zval *all_app_aliases = zend_read_property(cspeed_app_ce, app_obj, CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), 1, NULL);
         zval *has_exists = zend_hash_find(Z_ARRVAL_P(all_app_aliases), zend_string_init(CSPEED_STRL(current_alias), 0));
+
         if (has_exists) {   /* Exists the need alias */
             int real_file_path_size = (Z_STRLEN_P(has_exists) + ZSTR_LEN(class_name_with_namespace) - (slash_pos - ZSTR_VAL(class_name_with_namespace)) + 5);
             char *real_file_path = (char *)malloc(sizeof(char) * real_file_path_size); /* five means the .php & space*/
@@ -172,8 +169,7 @@ void cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCT
 } /*}}}*/
 
 /* ARGINFO FOR CLASS CApp */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_construct, 0, 0, 1)
-    ZEND_ARG_INFO(0, ini_config_file)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_get, 0, 0, 2)
@@ -222,6 +218,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_bootstrap, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_get_app, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_run, 0, 0, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
@@ -250,25 +249,34 @@ void initialise_app_object(zval *app_object, char *path)
 /* CApp class's methods */
 CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
 {
+    zval *is_new_app = zend_read_static_property(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_INSTANCE), 1);
+    if (!ZVAL_IS_NULL(is_new_app)) {
+        php_error_docref(NULL, E_ERROR, "An application is running.");
+        return ;
+    }
     /* Do the Prepare job */
-    zend_string *ini_config_file, *ini_config_node_name = NULL;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|S", &ini_config_file, &ini_config_node_name) == FAILURE) {
+    zend_string *ini_config_file = NULL, *ini_config_node_name = NULL;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|SS", &ini_config_file, &ini_config_node_name) == FAILURE) {
         return ;
     }
     char path[MAXPATHLEN];
-    if (CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(ini_config_file))) {
-        zend_string *ini_real_file = strpprintf(0, "%s/%s", cspeed_get_cwd(path), ZSTR_VAL(ini_config_file));
-        if (access(ZSTR_VAL(ini_real_file), F_OK) == -1) {
+    cspeed_get_cwd(path);
+    if ( ini_config_file && CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(ini_config_file))) {
+        zend_string *ini_real_file;
+        if ( *(ZSTR_VAL(ini_config_file)) == '/' ) {
+            ini_real_file = ini_config_file;
+        } else {
+            ini_real_file = strpprintf(0, "%s/%s", path, ZSTR_VAL(ini_config_file));
+        }
+        if (!check_file_exists(ZSTR_VAL(ini_real_file))) {
             php_error_docref(NULL, E_ERROR, "Config file: `%s` not exists.", ZSTR_VAL(ini_real_file));
             RETURN_FALSE
         }
         zval configs;
-        
         zend_string *node_core_name = strpprintf(0, "%s%s%s", ini_config_node_name ? ZSTR_VAL(ini_config_node_name) : "",
                     ini_config_node_name ? ":" : "", "core" );
         zend_string *node_db_name = strpprintf(0, "%s%s%s", ini_config_node_name ? ZSTR_VAL(ini_config_node_name) : "",
                     ini_config_node_name ? ":" : "", "db" );
-        
         /* Parsing the INI file */
         cspeed_parse_ini_file(ZSTR_VAL(ini_real_file), NULL , NULL, 1, &configs);
 
@@ -276,14 +284,12 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
             php_error_docref(NULL, E_ERROR, "Configs empty.");
             RETURN_FALSE
         }
-
         if ( ( Z_TYPE(configs) == IS_ARRAY ) ) {
             zval *config_value, *core_configs;
             if ( UNEXPECTED( (core_configs = zend_hash_find(Z_ARRVAL(configs), node_core_name)) == NULL )){
                 php_error_docref(NULL, E_ERROR, "`%s` configs not found in config file.", ZSTR_VAL(node_core_name));
                 RETURN_FALSE
             }
-            
             /*core.application*/
             if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_APPLICATION_NAME))) != NULL ) ) {
@@ -292,7 +298,6 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
                 php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_APPLICATION_NAME);
                 RETURN_FALSE
             }
-
             /*core.bootstrap*/
             if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_BOOTSTRAP_NAME))) != NULL ) ) {
@@ -301,7 +306,6 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
                 php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_BOOTSTRAP_NAME);
                 RETURN_FALSE
             }
-
             /*core.bootstrap*/
             if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_BOOTSTRAP_METHOD_NAME))) != NULL ) ) {
@@ -310,7 +314,6 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
                 php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_BOOTSTRAP_METHOD_NAME);
                 RETURN_FALSE
             }
-
             /* core.router.modules */
             if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_MODULES_NAME) )) != NULL )) {
@@ -323,7 +326,6 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
                 php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_MODULES_NAME);
                 RETURN_FALSE
             }
-
             /* core.router.default.module */
             if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_DEFAULT_MODULE_NAME) )) != NULL )) {
@@ -332,7 +334,6 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
                 php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_DEFAULT_MODULE_NAME);
                 RETURN_FALSE
             }
-
             /* core.router.default.controller */
             if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_DEFAULT_CONTROLLER_NAME) )) != NULL )) {
@@ -341,7 +342,6 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
                 php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_DEFAULT_CONTROLLER_NAME);
                 RETURN_FALSE
             }
-
             /* core.router.default.action */
             if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_DEFAULT_ACTION_NAME) )) != NULL )) {
@@ -350,7 +350,6 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
                 php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_DEFAULT_ACTION_NAME);
                 RETURN_FALSE
             }
-
             /* core.view.ext */
             if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_VIEW_EXT_NAME) )) != NULL )) {
@@ -359,7 +358,6 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
                 php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_VIEW_EXT_NAME);
                 RETURN_FALSE
             }
-
             /* core.view.auto_render */
             if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_VIEW_AUTO_RENDER) )) != NULL )) {
@@ -368,12 +366,10 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
                 php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_VIEW_AUTO_RENDER);
                 RETURN_FALSE
             }
-
             if ( UNEXPECTED( (core_configs = zend_hash_find(Z_ARRVAL(configs), node_db_name )) == NULL )){
                 php_error_docref(NULL, E_ERROR, "`%s` configs not found in config file.", ZSTR_VAL(node_db_name));
                 RETURN_FALSE
             }
-
             /* Below are some optional configs to the DB engine, if have, set it to override the setting */
             if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_DB_TYPE) )) != NULL )) {
@@ -407,10 +403,11 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
             php_error_docref(NULL, E_ERROR, "Configs data type wrong.");
             RETURN_FALSE
         }
-    } else {
-        php_error_docref(NULL, E_ERROR, "Parameters must be a valid string.");
-        RETURN_FALSE
     }
+
+    /* Keep the App object */
+    zend_update_static_property(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_INSTANCE), getThis());
+
     /* Initialise the standard app object */
     initialise_app_object(getThis(), path);
 }/*}}}*/
@@ -473,6 +470,12 @@ CSPEED_METHOD(App, setAlias)/*{{{ proto App::setAlias() */
     zval *all_default_aliases = zend_read_property(cspeed_app_ce, getThis(), 
         CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), 1, NULL);
     add_assoc_str(all_default_aliases, ZSTR_VAL(alias_name) + 1, alias_path);
+}/*}}}*/
+
+CSPEED_METHOD(App, getApp)/*{{{ proto App::getApp()*/
+{
+    zval *app_object = zend_read_static_property(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_INSTANCE), 1);
+    RETURN_ZVAL(app_object, 1, 0);
 }/*}}}*/
 
 CSPEED_METHOD(App, run)/*{{{ proto App::run() */
@@ -555,6 +558,7 @@ static const zend_function_entry cspeed_app_functions[] = {
     CSPEED_ME(App, options,             arginfo_cspeed_options,                     ZEND_ACC_PUBLIC)
     CSPEED_ME(App, autoload,            arginfo_cspeed_autoload,                    ZEND_ACC_PUBLIC)
     CSPEED_ME(App, setAlias,            arginfo_cspeed_set_alias,                   ZEND_ACC_PUBLIC)
+    CSPEED_ME(App, getApp,              arginfo_cspeed_get_app,                     ZEND_ACC_PUBLIC)
     CSPEED_ME(App, run,                 arginfo_cspeed_run,                         ZEND_ACC_PUBLIC)
     CSPEED_ME(App, bootstrap,           arginfo_cspeed_bootstrap,                   ZEND_ACC_PUBLIC)
     PHP_FE_END
@@ -569,6 +573,7 @@ CSPEED_INIT(app)
     cspeed_app_ce = zend_register_internal_class(&ce);
 
     zend_declare_property_null(cspeed_app_ce,   CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES),   ZEND_ACC_PRIVATE);
+    zend_declare_property_null(cspeed_app_ce,   CSPEED_STRL(CSPEED_APP_INSTANCE),   ZEND_ACC_PRIVATE|ZEND_ACC_STATIC);
 }
 /*}}}*/
 

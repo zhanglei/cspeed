@@ -24,6 +24,8 @@
 zend_class_entry *cspeed_app_ce;                                        /* The global CApp class entry */
 
 #define CSPEED_APP_AUTOLOAD_ALIASES     "__cspeed_app_aliases"          /* The aliases which let the system to locate the file */
+#define CSPEED_APP_INSTANCE             "__app"                         /* Single App object */
+void cspeed_app_load_file(zend_string *class_name_with_namespace, zend_execute_data *, zval *, zval *app_obj);
 
 CSPEED_INIT(app);                                                       /* The init function for the CApp class */
 

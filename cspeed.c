@@ -100,7 +100,13 @@ PHP_RINIT_FUNCTION(cspeed)
 #if defined(COMPILE_DL_CSPEED) && defined(ZTS)
     ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-
+    CSPEED_G(core_application) = zend_string_init(CSPEED_STRL(CORE_APPLICATION), 0);
+    CSPEED_G(core_bootstrap) = zend_string_init(CSPEED_STRL(CORE_BOOTSTRAP), 0);
+    CSPEED_G(core_router_default_module) = zend_string_init(CSPEED_STRL(CORE_ROUTER_DEFAULT_MODULE), 0);
+    CSPEED_G(core_router_default_controller) = zend_string_init(CSPEED_STRL(CORE_ROUTER_DEFAULT_CONTROLLER), 0);
+    CSPEED_G(core_router_default_action) = zend_string_init(CSPEED_STRL(CORE_ROUTER_DEFAULT_ACTION), 0);
+    CSPEED_G(core_view_ext) = zend_string_init(CSPEED_STRL(CORE_VIEW_EXT), 0);
+    CSPEED_G(core_view_auto_render) = zend_string_init(CSPEED_STRL(CORE_VIEW_AUTO_RENDER), 0);
     return SUCCESS;
 }
 /* }}} */

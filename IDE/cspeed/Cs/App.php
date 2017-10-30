@@ -7,10 +7,10 @@ class App
 {
     /**
      * App constructor.
-     * @param string $iniConfigPath  The config file which you want to load
-     * @param string $iniNodeName    The node of the ini file
+     * @param string $iniFile The ini file which you want to load from
+     * @param string $iniFileNode The ini node which you want to load
      */
-    function __construct($iniConfigPath, $iniNodeName)
+    function __construct($iniFile, $iniFileNode)
     {
 
     }
@@ -110,6 +110,13 @@ class App
     function run()
     {
 
+    }
+
+    /**
+     * @return App
+     */
+    function getApp(): \Cs\App
+    {
     }
 
     /**
