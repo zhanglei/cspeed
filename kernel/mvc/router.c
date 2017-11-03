@@ -115,30 +115,27 @@ CSPEED_METHOD(Router, addFromIni)   /*{{{ proto Router::addFromIni($ini_file)*/
         char path[MAXPATHLEN];
         cspeed_get_cwd(path);
         zend_string *real_ini_file_path = strpprintf(0, "%s/%s", path, ZSTR_VAL(ini_file_path));
-        if (check_file_exists( ZSTR_VAL(real_ini_file_path) )) {
-            /* Do the parsing */
-            cspeed_parse_ini_file( ZSTR_VAL(real_ini_file_path) , NULL, NULL, 1, &routers_from_ini);
-            /* *** */
-            if ( ZVAL_IS_NULL(&routers_from_ini) && (Z_TYPE(routers_from_ini) != IS_ARRAY ) ){
-                php_error_docref(NULL, E_ERROR, "File : `%s` not valid.",  ZSTR_VAL(real_ini_file_path));
-                return ;
-            }
-            /* *** */
-            zval *all_routines = zend_read_property(cspeed_router_ce, getThis(), CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), 1, NULL);
-            
-            zend_string *pcre_url;zval *value;
-            ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL(routers_from_ini), pcre_url, value){
-                if ( CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(pcre_url)) && (Z_TYPE_P(value) == IS_STRING) ){
-                    zval temp_real_url;
-                    preg_faker_routine_rule(pcre_url, &temp_real_url);
-                    Z_TRY_ADDREF_P(value);
-                    add_assoc_str(all_routines, Z_STRVAL(temp_real_url), Z_STR_P(value) );
-                }
-            } ZEND_HASH_FOREACH_END();
-        } else {
-            php_error_docref(NULL, E_ERROR, "File: `%s` not exists.",  ZSTR_VAL(real_ini_file_path));
+        
+        check_file_exists( ZSTR_VAL(real_ini_file_path) );
+        /* Do the parsing */
+        cspeed_parse_ini_file( ZSTR_VAL(real_ini_file_path) , NULL, NULL, 1, &routers_from_ini);
+        /* *** */
+        if ( ZVAL_IS_NULL(&routers_from_ini) && (Z_TYPE(routers_from_ini) != IS_ARRAY ) ){
+            php_error_docref(NULL, E_ERROR, "File : `%s` not valid.",  ZSTR_VAL(real_ini_file_path));
             return ;
         }
+        /* *** */
+        zval *all_routines = zend_read_property(cspeed_router_ce, getThis(), CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), 1, NULL);
+        
+        zend_string *pcre_url;zval *value;
+        ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL(routers_from_ini), pcre_url, value){
+            if ( CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(pcre_url)) && (Z_TYPE_P(value) == IS_STRING) ){
+                zval temp_real_url;
+                preg_faker_routine_rule(pcre_url, &temp_real_url);
+                Z_TRY_ADDREF_P(value);
+                add_assoc_str(all_routines, Z_STRVAL(temp_real_url), Z_STR_P(value) );
+            }
+        } ZEND_HASH_FOREACH_END();
     } else {
         php_error_docref(NULL, E_ERROR, "Parameter must be a valid file string path.");
         return ;

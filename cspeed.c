@@ -76,6 +76,10 @@ PHP_MINIT_FUNCTION(cspeed)
     /* Bootstrap interface */
     bootstrap_init();
 
+    /* RPC class server */
+    server_init();
+    client_init();
+    
     /* After initialise, return SUCCESS means OK */
     return SUCCESS;
 }
@@ -85,9 +89,6 @@ PHP_MINIT_FUNCTION(cspeed)
  */
 PHP_MSHUTDOWN_FUNCTION(cspeed)
 {
-    /* uncomment this line if you have INI entries
-    UNREGISTER_INI_ENTRIES();
-    */
     return SUCCESS;
 }
 /* }}} */
@@ -116,6 +117,13 @@ PHP_RINIT_FUNCTION(cspeed)
  */
 PHP_RSHUTDOWN_FUNCTION(cspeed)
 {
+    zend_string_release(CSPEED_G(core_application));
+    zend_string_release(CSPEED_G(core_bootstrap));
+    zend_string_release(CSPEED_G(core_router_default_module));
+    zend_string_release(CSPEED_G(core_router_default_controller));
+    zend_string_release(CSPEED_G(core_router_default_action));
+    zend_string_release(CSPEED_G(core_view_ext));
+    zend_string_release(CSPEED_G(core_view_auto_render));
     /* Return SUCCESS */
     return SUCCESS;
 }

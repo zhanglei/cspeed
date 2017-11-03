@@ -7,10 +7,9 @@ class App
 {
     /**
      * App constructor.
-     * @param string $iniFile The ini file which you want to load from
-     * @param string $iniFileNode The ini node which you want to load
+     * @param null $diObject  The Cs\di\Di class object
      */
-    function __construct($iniFile, $iniFileNode)
+    function __construct($diObject = NULL)
     {
 
     }

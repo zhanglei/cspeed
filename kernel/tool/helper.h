@@ -30,13 +30,16 @@ char *title_upper_string(char *src);                                            
 char *title_lower_string(char *src);                                             /* Lower case the first char */
 
 void cspeed_parse_ini_file(char *file_name, char *node_name, 
-                           char *node_key, zend_bool, zval *retval);    /* Parse the ini file with the given node and key */
+                           char *node_key, zend_bool, zval *retval);             /* Parse the ini file with the given node and key */
 
 void cspeed_build_equal_string(zval *array, char *begin_str, zval *result);      /* Building the string */
 
 void cspeed_build_quote_string(zval *array, zval *result);                       /* Building the quote string */
 
 int check_file_exists(char *file_path);                                          /* Check whether the file is exists or not. */
+
+void recursive_call_parent_method(zend_class_entry *ce, char *method_name);      /* Calling the method from the top class to this */
+
 #endif
 
 

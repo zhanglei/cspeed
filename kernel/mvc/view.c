@@ -52,14 +52,8 @@ void render_view_file(zval *view_obj, zend_string *temp_file, zval *array_variab
             add_assoc_zval(view_variables, ZSTR_VAL(var_name), var_value);
         } ZEND_HASH_FOREACH_END();
     }
-
-    if ( check_file_exists(ZSTR_VAL(real_path_file)) ){
-        /* Require the View file */
-        cspeed_require_file(ZSTR_VAL(real_path_file), view_variables, view_obj, ret_val);
-    } else {
-        php_error_docref(NULL, E_ERROR, "View file: `%s` not found.", ZSTR_VAL(real_path_file));
-        return ;
-    }
+    check_file_exists(ZSTR_VAL(real_path_file));
+    cspeed_require_file(ZSTR_VAL(real_path_file), view_variables, view_obj, ret_val);
 }
 
 void render_file(INTERNAL_FUNCTION_PARAMETERS, zval *ret_val, zval *view_obj)/*{{{ View::render() & View::getRender() & View::partial() */

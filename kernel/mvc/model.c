@@ -34,9 +34,6 @@ void initialise_the_model_object(zval *model_object, zend_long new_record, INTER
 {
     /* Fetch the PDO object from the given Di class */
     zval *pdo_object = zend_read_static_property(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_PDO_OBJECT), 1);
-#if 0
-    zval *pdo_object = CSPEED_G(new_db_pdo_object);
-#endif
 
     if (pdo_object == NULL) {
         php_error_docref(NULL, E_ERROR, "Please set the MySql class to Di container.");
@@ -377,11 +374,13 @@ CSPEED_METHOD(Model, tableName) /*{{{ proto Model::tableName()*/
 CSPEED_METHOD(Model, one)/*{{{ proto Model::one()*/
 {
     zval *table_name = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_TABLE_NAME), 1, NULL);
+    zval *select     = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_SELECT), 1, NULL);
     zval *where      = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_WHERE_COND), 1, NULL);
     zval *group_by   = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_GROUP_BY), 1, NULL);
     zval *order_by   = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_ORDER_BY), 1, NULL);
 
-    zend_string *raw_sql = strpprintf(0, "SELECT * FROM %s%s%s%s LIMIT 1", Z_STRVAL_P(table_name), Z_STRVAL_P(where),
+    zend_string *raw_sql = strpprintf(0, "SELECT %s FROM %s%s%s%s LIMIT 1", Z_STRVAL_P(select), 
+        Z_STRVAL_P(table_name), Z_STRVAL_P(where),
         Z_STRVAL_P(group_by), Z_STRVAL_P(order_by));
     zval *pdo_object = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_PDO_OBJECT), 1, NULL);
     zval pdo_statement;

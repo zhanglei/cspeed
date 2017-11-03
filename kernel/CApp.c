@@ -41,6 +41,7 @@
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/php_string.h"
 
+
 int cspeed_deal_reqeust(zend_string *url, zend_fcall_info *zfi, zend_fcall_info_cache *zfic, zval *ret_val) /*{{{ Deal the REQUEST */
 {
     char *path_info = cspeed_request_server_str_key_val("PATH_INFO");
@@ -153,10 +154,8 @@ void cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCT
             /* Reslash all slash to reslash */
             cspeed_reverse_slash_char(real_file_path);
             /* check whether the file is exists or not */
-            if (access(real_file_path, F_OK) == -1) {
-                php_error_docref(NULL, E_ERROR, "File : %s not exists.", real_file_path);
-                return ;
-            }
+            check_file_exists(real_file_path);
+            /* After checking, require the file */
             cspeed_require_file(real_file_path, NULL, NULL, NULL);
             free(current_alias);
             free(real_file_path);
@@ -268,10 +267,7 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
         } else {
             ini_real_file = strpprintf(0, "%s/%s", path, ZSTR_VAL(ini_config_file));
         }
-        if (!check_file_exists(ZSTR_VAL(ini_real_file))) {
-            php_error_docref(NULL, E_ERROR, "Config file: `%s` not exists.", ZSTR_VAL(ini_real_file));
-            RETURN_FALSE
-        }
+        check_file_exists(ZSTR_VAL(ini_real_file));
         zval configs;
         zend_string *node_core_name = strpprintf(0, "%s%s%s", ini_config_node_name ? ZSTR_VAL(ini_config_node_name) : "",
                     ini_config_node_name ? ":" : "", "core" );
@@ -492,56 +488,52 @@ CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
     cspeed_get_cwd(path);
     /* To check the file and or load it or not  */
     zend_string *bootstrap_class_file = strpprintf(0, "%s/%s", path, ZSTR_VAL(CSPEED_G(core_bootstrap)));
-    if ( check_file_exists(ZSTR_VAL( bootstrap_class_file )) ){
-        cspeed_require_file(ZSTR_VAL( bootstrap_class_file ), NULL, NULL, NULL);
-        /* Found the Bootstrap class */
-        zend_class_entry *bootstrap_class_ptr = zend_hash_find_ptr(EG(class_table), 
-                        zend_string_tolower(zend_string_init(CSPEED_STRL(CORE_BOOTSTRAP_CLASS_NAME), 0)));
+    check_file_exists(ZSTR_VAL( bootstrap_class_file ));
+    cspeed_require_file(ZSTR_VAL( bootstrap_class_file ), NULL, NULL, NULL);
+    /* Found the Bootstrap class */
+    zend_class_entry *bootstrap_class_ptr = zend_hash_find_ptr(EG(class_table), 
+                    zend_string_tolower(zend_string_init(CSPEED_STRL(CORE_BOOTSTRAP_CLASS_NAME), 0)));
 
-        if (!instanceof_function(bootstrap_class_ptr, cspeed_bootstrap_ce)){
-            php_error_docref(NULL, E_ERROR, "Bootstrap class must implements interface \\Cs\\Bootstrap.");
-            RETURN_FALSE
-        }
+    if (!instanceof_function(bootstrap_class_ptr, cspeed_bootstrap_ce)){
+        php_error_docref(NULL, E_ERROR, "Bootstrap class must implements interface \\Cs\\Bootstrap.");
+        RETURN_FALSE
+    }
 
-        if (bootstrap_class_ptr) {
-            /* Initialise the Bootstrap class object */
-            zval bootstrap_object;
-            object_init_ex(&bootstrap_object, bootstrap_class_ptr);
-            /* Found all methods starts with the __init string  */
-            /* In the initialise job, you can setting the Di & Router */
-            zval di_object, router_object;
-            object_init_ex(&di_object, cspeed_di_ce);
-            initialise_di_object_properties(&di_object);
+    if (bootstrap_class_ptr) {
+        /* Initialise the Bootstrap class object */
+        zval bootstrap_object;
+        object_init_ex(&bootstrap_object, bootstrap_class_ptr);
+        /* Found all methods starts with the __init string  */
+        /* In the initialise job, you can setting the Di & Router */
+        zval di_object, router_object;
+        object_init_ex(&di_object, cspeed_di_ce);
+        initialise_di_object_properties(&di_object);
 
-            object_init_ex(&router_object, cspeed_router_ce);
-            initialise_router_object_properties(&router_object);
-            /* Begin to initialise */
-            zend_string *bootstrap_function_name;
-            ZEND_HASH_FOREACH_STR_KEY(&(bootstrap_class_ptr->function_table), bootstrap_function_name) {
-                if (strncasecmp(ZSTR_VAL(bootstrap_function_name), 
-                    CSPEED_STRL( ZSTR_VAL(CSPEED_G(core_bootstrap_method_string)) )) == 0 ) {
-                    zval temp_function_name;
-                    ZVAL_STRING(&temp_function_name, ZSTR_VAL(bootstrap_function_name));
-                    zval retval;
-                    zval params[] = { di_object, router_object };
-                    call_user_function(NULL, &bootstrap_object, &temp_function_name, &retval, 2, params);
-                    zval_ptr_dtor(&retval);
-                    zval_ptr_dtor(&temp_function_name);
-                }
-            } ZEND_HASH_FOREACH_END();
-            zval_ptr_dtor(&bootstrap_object);
-            zval_add_ref(&di_object);
-            zval_add_ref(&router_object);
-            CSPEED_G(di_object) = Z_OBJ(di_object);
-            CSPEED_G(router_object) = Z_OBJ(router_object);
-            /* Return the App class object to user, to do the next job. such as the router parsing and so on. */
-            RETURN_ZVAL(getThis(), 1, NULL);
-        } else {
-            php_error_docref(NULL, E_ERROR, "class Boostrap not exists.");
-            RETURN_FALSE
-        }
+        object_init_ex(&router_object, cspeed_router_ce);
+        initialise_router_object_properties(&router_object);
+        /* Begin to initialise */
+        zend_string *bootstrap_function_name;
+        ZEND_HASH_FOREACH_STR_KEY(&(bootstrap_class_ptr->function_table), bootstrap_function_name) {
+            if (strncasecmp(ZSTR_VAL(bootstrap_function_name), 
+                CSPEED_STRL( ZSTR_VAL(CSPEED_G(core_bootstrap_method_string)) )) == 0 ) {
+                zval temp_function_name;
+                ZVAL_STRING(&temp_function_name, ZSTR_VAL(bootstrap_function_name));
+                zval retval;
+                zval params[] = { di_object, router_object };
+                call_user_function(NULL, &bootstrap_object, &temp_function_name, &retval, 2, params);
+                zval_ptr_dtor(&retval);
+                zval_ptr_dtor(&temp_function_name);
+            }
+        } ZEND_HASH_FOREACH_END();
+        zval_ptr_dtor(&bootstrap_object);
+        zval_add_ref(&di_object);
+        zval_add_ref(&router_object);
+        CSPEED_G(di_object) = Z_OBJ(di_object);
+        CSPEED_G(router_object) = Z_OBJ(router_object);
+        /* Return the App class object to user, to do the next job. such as the router parsing and so on. */
+        RETURN_ZVAL(getThis(), 1, NULL);
     } else {
-        php_error_docref(NULL, E_ERROR, "Bootstrap file: `%s` not found.", ZSTR_VAL(CSPEED_G(core_bootstrap)));
+        php_error_docref(NULL, E_ERROR, "class Boostrap not exists.");
         RETURN_FALSE
     }
 }/*}}}*/

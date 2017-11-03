@@ -37,6 +37,7 @@
 #include "kernel/tool/require.h"    /* Use the require tool to do the file rendering */
 #include "kernel/tool/helper.h"     /* The helper function tool */
 #include "kernel/mvc/router.h"      /* The Router class */
+#include "kernel/rpc/server.h"      /* The suport of the Server class */
 
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/php_string.h"
@@ -54,24 +55,6 @@ void auto_render_view_file(zend_class_entry *controller_ptr, zval *controller_ob
         zend_update_property(controller_ptr, controller_obj, CSPEED_STRL(CSPEED_VIEW_INSTANCE), view_object);
     } else {
         ZVAL_NULL(view_object);
-    }
-}/*}}}*/
-
-void recursive_call_parent_method(zend_class_entry *ce)/*{{{ To call the Parent class's initialise method first */
-{
-    if (ce) {
-        recursive_call_parent_method(ce->parent);
-        zval parent_obj;
-        object_init_ex(&parent_obj, ce);
-        if (CSPEED_METHOD_IN_OBJECT(&parent_obj, "initialise")){
-            zval function_name, retval;
-            ZVAL_STRING(&function_name, "initialise");
-            call_user_function(NULL, &parent_obj, &function_name, &retval, 0, NULL);
-            zval_ptr_dtor(&function_name);
-            zval_ptr_dtor(&retval);
-        }
-        zval_ptr_dtor(&parent_obj);
-        ce = ce->parent;
     }
 }/*}}}*/
 
@@ -101,29 +84,26 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
     }
 
     /* To check wheather the module is allowed or not. */
-    int is_allowed = 0;
+    int is_allowed = FALSE;
     if (zend_hash_num_elements(CSPEED_G(core_router_modules))) {
         zval *allowed_module;
         ZEND_HASH_FOREACH_VAL(CSPEED_G(core_router_modules), allowed_module){
             if (memcmp(Z_STRVAL_P(allowed_module), CSPEED_STRL( ZSTR_VAL(default_module) )) == 0) {
-                is_allowed = 1;
+                is_allowed = TRUE;
                 break;
             }
         } ZEND_HASH_FOREACH_END();
     }
-    if (is_allowed == 0){
+    if (is_allowed == FALSE){
         php_error_docref(NULL, E_ERROR, "Module: `%s` are not allowed to access.", ZSTR_VAL(default_module));
         return ;
     }
 
     /* After the module is allowed. to parsing the module is exists or not. */
     temp_module_path = strpprintf(0, "%s/%s/modules/%s", cspeed_get_cwd(path), root_dir, ZSTR_VAL(default_module));
-    if (check_file_exists(ZSTR_VAL(temp_module_path))) {
-        zend_hash_index_del(Z_ARRVAL_P(path_info_array), 1);
-    } else {
-        php_error_docref(NULL, E_ERROR, "Module: `%s` not exists.", ZSTR_VAL(default_module));
-        return ;
-    }
+    
+    /* Exists or not. */
+    check_file_exists(ZSTR_VAL(temp_module_path));
 
     if (UNEXPECTED((temp_mca_value = zend_hash_index_find(Z_ARRVAL_P(path_info_array), 2)) != NULL)) {
         default_controller = zend_string_copy(Z_STR_P(temp_mca_value));
@@ -131,16 +111,6 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
         zend_hash_index_del(Z_ARRVAL_P(path_info_array), 2);
     }
     title_upper_string(ZSTR_VAL(default_controller));
-#if 0
-    /* This class not use the no-ns class to load the class file */
-    temp_controller_path = strpprintf(0, "%s/controllers/%s.php", ZSTR_VAL(temp_module_path), ZSTR_VAL(default_controller));
-    if (check_file_exists(ZSTR_VAL(temp_controller_path))) {
-        cspeed_require_file(ZSTR_VAL(temp_controller_path), NULL, NULL, NULL);
-    } else {
-        php_error_docref(NULL, E_ERROR, "Controller file: `%s.php` not found.", ZSTR_VAL(default_controller));
-        return ;
-    }
-#endif
     zend_string *ns_class_name = strpprintf(0, "app\\modules\\%s\\controllers\\%s",
         ZSTR_VAL(default_module), ZSTR_VAL(default_controller));
     zval *app_object = zend_read_static_property(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_INSTANCE), 1);
@@ -223,53 +193,52 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
     zend_class_entry *parent = controller_ptr;
 
     /* Call the Parent's methods to initialise itself */
-    recursive_call_parent_method(parent);
+    recursive_call_parent_method(parent, "initialise");
 
-    /* After running the initialise method. running the __beforeAction method */
-    if (CSPEED_METHOD_IN_OBJECT(&controller_obj, "__beforeAction")){
-        zval z_before_action, retval;
-        ZVAL_STRING(&z_before_action, "__beforeAction");
-        call_user_function(NULL, &controller_obj, &z_before_action, &retval, 0, NULL );
-        zval_ptr_dtor(&z_before_action);
-        zval_ptr_dtor(&retval);
-    }
-    /* After adding the value into $_GET run the controller's action */
-    zend_string *action_append_action = strpprintf(0, "%sAction", ZSTR_VAL(default_action));
-    if (CSPEED_METHOD_IN_OBJECT(&controller_obj, ZSTR_VAL(action_append_action))) {
-        zval function_name, retval_ptr;
-        ZVAL_STRING(&function_name, ZSTR_VAL(action_append_action));
-        call_user_function(NULL, &controller_obj, &function_name, &retval_ptr, 0, NULL);
-        zval_ptr_dtor(&function_name);
-        zval_ptr_dtor(&retval_ptr);
-    } else {
+    if (!instanceof_function(controller_ptr, cspeed_rpc_server_ce)){
+        /* After running the initialise method. running the __beforeAction method */
+        if (CSPEED_METHOD_IN_OBJECT(&controller_obj, "__beforeAction")){
+            zval z_before_action, retval;
+            ZVAL_STRING(&z_before_action, "__beforeAction");
+            call_user_function(NULL, &controller_obj, &z_before_action, &retval, 0, NULL );
+            zval_ptr_dtor(&z_before_action);
+            zval_ptr_dtor(&retval);
+        }
+        /* After adding the value into $_GET run the controller's action */
+        zend_string *action_append_action = strpprintf(0, "%sAction", ZSTR_VAL(default_action));
+        if (CSPEED_METHOD_IN_OBJECT(&controller_obj, ZSTR_VAL(action_append_action))) {
+            zval function_name, retval_ptr;
+            ZVAL_STRING(&function_name, ZSTR_VAL(action_append_action));
+            call_user_function(NULL, &controller_obj, &function_name, &retval_ptr, 0, NULL);
+            zval_ptr_dtor(&function_name);
+            zval_ptr_dtor(&retval_ptr);
+        } else {
+            zend_string_release(action_append_action);
+            php_error_docref(NULL, E_ERROR, "Controller class has not the :`%s` method.", ZSTR_VAL(action_append_action));
+            return ;
+        }
         zend_string_release(action_append_action);
-        php_error_docref(NULL, E_ERROR, "Controller class has not the :`%s` method.", ZSTR_VAL(action_append_action));
-        return ;
-    }
-    /* To auto render the view file or not. */
-    if (!ZVAL_IS_NULL(&view_object)) {
-        zval ret_val;
-        render_view_file(&view_object, strpprintf(0, "%s/%s", ZSTR_VAL(CSPEED_G(core_router_default_controller)), 
-                ZSTR_VAL(CSPEED_G(core_router_default_action))), NULL, &ret_val);
-        zval_ptr_dtor(&ret_val);
-    }
-    /* Do the after_action work */
-    if (CSPEED_METHOD_IN_OBJECT(&controller_obj, "__afterAction")){
-        zval z_after_action, retval;
-        ZVAL_STRING(&z_after_action, "__afterAction");
-        call_user_function(NULL, &controller_obj, &z_after_action, &retval, 0, NULL);
-        zval_ptr_dtor(&z_after_action);
-        zval_ptr_dtor(&retval);
+        /* To auto render the view file or not. */
+        if (!ZVAL_IS_NULL(&view_object)) {
+            zval ret_val;
+            render_view_file(&view_object, strpprintf(0, "%s/%s", ZSTR_VAL(CSPEED_G(core_router_default_controller)), 
+                    ZSTR_VAL(CSPEED_G(core_router_default_action))), NULL, &ret_val);
+            zval_ptr_dtor(&ret_val);
+        }
+        /* Do the after_action work */
+        if (CSPEED_METHOD_IN_OBJECT(&controller_obj, "__afterAction")){
+            zval z_after_action, retval;
+            ZVAL_STRING(&z_after_action, "__afterAction");
+            call_user_function(NULL, &controller_obj, &z_after_action, &retval, 0, NULL);
+            zval_ptr_dtor(&z_after_action);
+            zval_ptr_dtor(&retval);
+        }
     }
     /* Release the unused memory */
     zval_ptr_dtor(&controller_obj);
     zval_ptr_dtor(&view_object);
     /* Release the not need memory */
     zend_string_release(temp_module_path);
-#if 0
-    zend_string_release(temp_controller_path);
-#endif
-    zend_string_release(action_append_action);
     zend_string_release(default_module);
     zend_string_release(default_controller);
     zend_string_release(default_action);
@@ -308,12 +277,7 @@ void dispather_url()    /* {{{ Dispatcher the URL */
                     ZVAL_NULL(&subparts);
                     php_pcre_match_impl(pce_regexp, CSPEED_STRL(path_info), &matches, &subparts, 0, 0, 0, 0);
                     if (zend_hash_num_elements(Z_ARRVAL(subparts))) {
-#if 0
-                        zend_hash_index_del(Z_ARRVAL(subparts), 0);
-                        zval matching_url;
-                        php_implode(zend_string_init(CSPEED_STRL("/"), 0), &subparts, &matching_url);
-                        zend_printf("url: [%s]<br>", Z_STRVAL(matching_url));
-#endif                        
+                     
                         zval function_name, retval, url_pattern, url_subject;
                         ZVAL_STRING(&function_name, "preg_replace");
                         ZVAL_STRING(&url_pattern, ZSTR_VAL(pcre_url));

@@ -264,11 +264,29 @@ void cspeed_build_quote_string(zval *array, zval *result)/*{{{ Building the Quot
 int check_file_exists(char *file_path) /* Checking wheather the given file is exists or not. */
 {
     if (access(file_path, F_OK) == -1) {
+        php_error_docref(NULL, E_ERROR, "File: %s not exists.", file_path);
         return FALSE;
     }
     return TRUE;
 }
 
+void recursive_call_parent_method(zend_class_entry *ce, char *method_name)/*{{{  Parent class's method to current ce */
+{
+    if (ce) {
+        recursive_call_parent_method(ce->parent, method_name);
+        zval parent_obj;
+        object_init_ex(&parent_obj, ce);
+        if (CSPEED_METHOD_IN_OBJECT(&parent_obj, method_name)){
+            zval function_name, retval;
+            ZVAL_STRING(&function_name, method_name);
+            call_user_function(NULL, &parent_obj, &function_name, &retval, 0, NULL);
+            zval_ptr_dtor(&function_name);
+            zval_ptr_dtor(&retval);
+        }
+        zval_ptr_dtor(&parent_obj);
+        ce = ce->parent;
+    }
+}/*}}}*/
 /*
  * Local variables:
  * tab-width: 4

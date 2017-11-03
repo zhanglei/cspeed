@@ -51,7 +51,7 @@ ZEND_END_ARG_INFO()
 
 CSPEED_METHOD(Config, __construct)/*{{{ proto Config::__construct()*/
 {
-
+    
 }/*}}}*/
 
 CSPEED_METHOD(Config, loadConfig)/*{{{ proto Config::loadConfig()*/

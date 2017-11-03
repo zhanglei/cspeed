@@ -1,6 +1,67 @@
-# CSpeed v2.0.1 手册 #
+# CSpeed v2.0.3 手册 #
 
 ## 最新特性 ##
+
+1、修复模型错误，优化整体架构
+
+2、增加JSON-RPC模块，示例如下：
+
+客户端：
+
+    $client = new \Cs\rpc\Client("http://www.xxx.com/who");
+    
+    $result = $client->goods(['name' => 'apple', 'price' => '9.99']);
+    
+    /* RPC 服务端返回的JSON数据 */
+    echo $result;
+    
+服务端：
+
+CSpeed服务端JSON-RPC类Server继承于 \Cs\mvc\Controller:
+故控制器如下：
+
+    <?php
+    
+    namespace app\modules\home\controllers;
+    
+    class Goods extends \Cs\rpc\Server
+    {
+        /* RPC类控制器只运行从父类到本类的initialise 
+         * 只需要在本方法内将本对象绑定到RPC端即可
+         */
+        public function initialise()
+        {
+            $this->handle($this);
+        }
+        
+        /**
+         * RPC方法后缀为Rpc，方法包含有一个参数为客户端调用的参数
+         * 数据类型与客户端调用的类型一致
+         */
+        function listRpc($params)
+        {
+            /* 只需要将返回的数据return即可 */
+            return $params;
+        }
+    }
+
+注意： CSpeed框架的RPC模块使用Linux-libcurl库进行开发，用户需要安装libcurl 7.0.15版本以上的类库文件即可。
+
+数据调用的格式如下：
+
+客户端调用传输的格式为：
+
+    {"id":x,  "method":"xx", "params":"xx", "jsonrpc":"2.0"}
+
+服务端返回的数据格式为：
+
+    {"jsonrpc": "2.0", "result": 19, "id": 3}
+    
+如果错误则包含一个 error 错误对象：
+
+    {"jsonrpc": "2.0", "error": {"code": -32700, "message": "Invalid JSON reqeust data"}, "id": 1}
+    
+当前版本中，如果出错，则返回的JSON数据中 id 始终为 1， 如果正确则返回请求数据的 id 与之对应。
 
 修复使用 CSpeed 框架进行 API 项目时的高并发情况下的PHP崩溃的情况。
 
