@@ -53,7 +53,9 @@ void render_view_file(zval *view_obj, zend_string *temp_file, zval *array_variab
         } ZEND_HASH_FOREACH_END();
     }
     check_file_exists(ZSTR_VAL(real_path_file));
-    cspeed_require_file(ZSTR_VAL(real_path_file), view_variables, view_obj, ret_val);
+    if( cspeed_require_file(ZSTR_VAL(real_path_file), view_variables, view_obj, ret_val) == FALSE) {
+        return ;
+    }
 }
 
 void render_file(INTERNAL_FUNCTION_PARAMETERS, zval *ret_val, zval *view_obj)/*{{{ View::render() & View::getRender() & View::partial() */

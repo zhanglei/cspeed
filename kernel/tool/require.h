@@ -21,7 +21,7 @@
 #ifndef   CSPEED_TOOL_REQUIRE_H
 #define   CSPEED_TOOL_REQUIRE_H
 
-void cspeed_require_file(char *, zval *, zval *, zval *);              /* The function to requrie file */
+int cspeed_require_file(char *, zval *, zval *, zval *);              /* The function to requrie file */
 
 #endif
 

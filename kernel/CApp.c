@@ -124,12 +124,14 @@ void handle_method_request(char *method_name, INTERNAL_FUNCTION_PARAMETERS)/*{{{
     }
 } /*}}}*/
 
-void cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCTION_PARAMETERS, zval *app_obj) /*{{{ Load the file with the corresponding namespace */
+int cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCTION_PARAMETERS, zval *app_obj) /*{{{ Load the file with the corresponding namespace */
 {
     char *slash_pos = strchr(ZSTR_VAL(class_name_with_namespace), '\\');
     if (slash_pos == NULL) { /* No slash find */
         zend_string *real_file_path = strpprintf(0, "./%s", ZSTR_VAL(class_name_with_namespace));
-        cspeed_require_file(ZSTR_VAL(real_file_path), NULL, NULL, NULL);
+        if (cspeed_require_file(ZSTR_VAL(real_file_path), NULL, NULL, NULL) == FALSE){
+            return FALSE;
+        }
         zend_string_release(real_file_path);
     } else {                 /* find the slash */
         char *current_alias = (char *)malloc(sizeof(char) * (slash_pos - ZSTR_VAL(class_name_with_namespace) + 1));
@@ -156,15 +158,18 @@ void cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCT
             /* check whether the file is exists or not */
             check_file_exists(real_file_path);
             /* After checking, require the file */
-            cspeed_require_file(real_file_path, NULL, NULL, NULL);
+            if (cspeed_require_file(real_file_path, NULL, NULL, NULL) == FALSE){
+                return FALSE;
+            }
             free(current_alias);
             free(real_file_path);
         } else {            /* Not found the needing alias */
             php_error_docref(NULL, E_ERROR, "Namespace alias: %s not found. please set it first before use.", current_alias);
             free(current_alias);
-            return ;
+            return FALSE;
         }
     }
+    return TRUE;
 } /*}}}*/
 
 /* ARGINFO FOR CLASS CApp */
@@ -489,7 +494,9 @@ CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
     /* To check the file and or load it or not  */
     zend_string *bootstrap_class_file = strpprintf(0, "%s/%s", path, ZSTR_VAL(CSPEED_G(core_bootstrap)));
     check_file_exists(ZSTR_VAL( bootstrap_class_file ));
-    cspeed_require_file(ZSTR_VAL( bootstrap_class_file ), NULL, NULL, NULL);
+    if (cspeed_require_file(ZSTR_VAL( bootstrap_class_file ), NULL, NULL, NULL) == FALSE){
+        RETURN_FALSE
+    }
     /* Found the Bootstrap class */
     zend_class_entry *bootstrap_class_ptr = zend_hash_find_ptr(EG(class_table), 
                     zend_string_tolower(zend_string_init(CSPEED_STRL(CORE_BOOTSTRAP_CLASS_NAME), 0)));

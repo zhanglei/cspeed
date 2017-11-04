@@ -118,8 +118,9 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
         php_error_docref(NULL, E_ERROR, "You must create a Cs\\App object first.");
         return ;
     }
-    cspeed_app_load_file(ns_class_name, NULL, NULL, app_object);
-
+    if (cspeed_app_load_file(ns_class_name, NULL, NULL, app_object) == FALSE){
+        return ;
+    }
     /* After require the class from the controller file. create the controller object and do the initialise process */
     zval controller_obj;
     zend_class_entry *controller_ptr = zend_hash_find_ptr(EG(class_table), zend_string_tolower(ns_class_name));
