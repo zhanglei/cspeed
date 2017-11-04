@@ -48,8 +48,6 @@ int cspeed_require_file(const char * file_name, zval *variables, zval *called_ob
         zend_exception_error(EG(exception), E_ERROR);
         return FALSE;
     }
-    destroy_op_array(op_array);
-    efree_size(op_array, sizeof(zend_op_array));
     zend_execute_data *require_call = zend_vm_stack_push_call_frame(
           ZEND_CALL_NESTED_CODE | ZEND_CALL_HAS_SYMBOL_TABLE,
           (zend_function *)op_array, 
@@ -57,7 +55,6 @@ int cspeed_require_file(const char * file_name, zval *variables, zval *called_ob
           ( called_object_ptr != NULL ) ? Z_OBJCE_P(called_object_ptr) : NULL, 
           ( called_object_ptr != NULL ) ? Z_OBJ_P(called_object_ptr) : NULL
     );
-
     /* To extract the variables into the view file */
     if (variables == NULL) {
         zval empty_variables;
@@ -86,6 +83,8 @@ int cspeed_require_file(const char * file_name, zval *variables, zval *called_ob
     ZEND_ADD_CALL_FLAG(require_call, ZEND_CALL_TOP);
     zend_execute_ex(require_call);
     zend_vm_stack_free_call_frame(require_call);
+    destroy_op_array(op_array);
+    efree_size(op_array, sizeof(zend_op_array));
     if (EG(exception)) {
         zend_exception_error(EG(exception), E_ERROR);
         return FALSE;

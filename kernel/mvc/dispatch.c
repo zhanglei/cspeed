@@ -131,6 +131,7 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
         object_init_ex(&controller_obj, controller_ptr);
     } else {
         php_error_docref(NULL, E_ERROR, "Controller class :`%s` not found.", ZSTR_VAL(default_controller));
+        return ;
     }
     /* Parsing the action in PATH_INFO */
     if (UNEXPECTED( (temp_mca_value = zend_hash_index_find(Z_ARRVAL_P(path_info_array), 3)) != NULL )) {

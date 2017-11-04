@@ -124,7 +124,7 @@ void handle_method_request(char *method_name, INTERNAL_FUNCTION_PARAMETERS)/*{{{
     }
 } /*}}}*/
 
-int cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCTION_PARAMETERS, zval *app_obj) /*{{{ Load the file with the corresponding namespace */
+int cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCTION_PARAMETERS, zval *app_obj) /*{{{ Load file */
 {
     char *slash_pos = strchr(ZSTR_VAL(class_name_with_namespace), '\\');
     if (slash_pos == NULL) { /* No slash find */
