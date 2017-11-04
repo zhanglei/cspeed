@@ -45,7 +45,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_server_handle, 0, 0, 1)
 ZEND_END_ARG_INFO()
 /*}}}*/
 
-CSPEED_METHOD(Server, __construct)  /*{{{ proto Server::__construct() */
+CSPEED_METHOD(Server, __construct)/*{{{ proto Server::__construct() */
 {
 
 }/*}}}*/
@@ -95,7 +95,7 @@ CSPEED_METHOD(Server, handle)   /*{{{ proto Server::handle */
         
         if (UNEXPECTED(( value = zend_hash_str_find(Z_ARRVAL(json_data), CSPEED_STRL("method")) ) == NULL)) {
             zval_ptr_dtor(&json_data);
-            char *result = "{\"jsonrpc\":\"2.0\", \"error\":{\"message\":\"Missing the method index.\", \"code\":-32602 } \"id\":1 }";
+            char *result = "{\"jsonrpc\":\"2.0\",\"error\":{\"message\":\"Missing the method index.\",\"code\":-32602}, \"id\":1 }";
             PHPWRITE( result, strlen(result));
             RETURN_FALSE
         }
@@ -116,7 +116,7 @@ CSPEED_METHOD(Server, handle)   /*{{{ proto Server::handle */
         } else {
             zval_ptr_dtor(&temp_func);
             zval_ptr_dtor(&json_data);
-            char *result = "{\"jsonrpc\":\"2.0\", \"error\":{\"message\":\"Method not found or exists.\", \"code\":-32601 } \"id\":1 }";
+            char *result = "{\"jsonrpc\":\"2.0\",\"error\":{\"message\":\"Method not found or exists.\",\"code\":-32601 },\"id\":1 }";
             PHPWRITE(result, strlen(result));
             RETURN_FALSE
         }
