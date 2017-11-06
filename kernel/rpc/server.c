@@ -76,7 +76,7 @@ CSPEED_METHOD(Server, handle)   /*{{{ proto Server::handle */
     smart_str_free(&raw_data);
 
     if (ZVAL_IS_NULL(&json_data) || Z_TYPE(json_data) != IS_ARRAY) {
-        char *result = "{\"jsonrpc\":\"2.0\", \"error\":{\"message\":\"Invalid request JSON data.\", \"code\":-32700 } \"id\":1 }";
+        char *result = "{\"jsonrpc\":\"2.0\", \"error\":{\"message\":\"Invalid request JSON data.\", \"code\":-32700 }, \"id\":1 }";
         PHPWRITE(result, strlen(result));
         RETURN_FALSE
     }
