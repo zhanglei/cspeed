@@ -41,6 +41,8 @@
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/php_string.h"
 
+#include "kernel/tool/component.h"
+
 
 int cspeed_deal_reqeust(zend_string *url, zend_fcall_info *zfi, zend_fcall_info_cache *zfic, zval *ret_val) /*{{{ Deal the REQUEST */
 {
@@ -117,11 +119,13 @@ void handle_request(INTERNAL_FUNCTION_PARAMETERS)/*{{{ Handle the user input fro
     RETURN_FALSE
 } /*}}}*/
 
-void handle_method_request(char *method_name, INTERNAL_FUNCTION_PARAMETERS)/*{{{ Handle the request method with the given method name */
+void handle_method_request(zval *object_ptr, char *method_name, INTERNAL_FUNCTION_PARAMETERS)/*{{{ Handle the request */
 {
+    trigger_events(object_ptr, strpprintf(0, "%s", CSPEED_APP_EVENT_BEORE_REQUEST));
     if (cspeed_request_is_method(method_name)) {
         handle_request(INTERNAL_FUNCTION_PARAM_PASSTHRU);   
     }
+    trigger_events(object_ptr, strpprintf(0, "%s", CSPEED_APP_EVENT_AFTER_REQUEST));
 } /*}}}*/
 
 int cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCTION_PARAMETERS, zval *app_obj) /*{{{ Load file */
@@ -415,37 +419,37 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
 
 CSPEED_METHOD(App, get)/*{{{ proto App::get() */
 {
-    handle_method_request("GET", INTERNAL_FUNCTION_PARAM_PASSTHRU);
+    handle_method_request(getThis(), "GET", INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }/*}}}*/
 
 CSPEED_METHOD(App, post)/*{{{ proto App::post() */
 {
-    handle_method_request("POST", INTERNAL_FUNCTION_PARAM_PASSTHRU);
+    handle_method_request(getThis(), "POST", INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }/*}}}*/
 
 CSPEED_METHOD(App, put)/*{{{ proto App::put() */
 {
-    handle_method_request("PUT", INTERNAL_FUNCTION_PARAM_PASSTHRU);
+    handle_method_request(getThis(), "PUT", INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }/*}}}*/
 
 CSPEED_METHOD(App, patch)/*{{{ proto App::patch() */
 {
-    handle_method_request("PATCH", INTERNAL_FUNCTION_PARAM_PASSTHRU);
+    handle_method_request(getThis(), "PATCH", INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }/*}}}*/
 
 CSPEED_METHOD(App, delete)/*{{{ proto App::delete() */
 {
-    handle_method_request("DELETE", INTERNAL_FUNCTION_PARAM_PASSTHRU);
+    handle_method_request(getThis(), "DELETE", INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }/*}}}*/
 
 CSPEED_METHOD(App, head)/*{{{ proto App::head() */
 {
-    handle_method_request("HEAD", INTERNAL_FUNCTION_PARAM_PASSTHRU);
+    handle_method_request(getThis(), "HEAD", INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }/*}}}*/
 
 CSPEED_METHOD(App, options)/*{{{ proto App::options*/
 {
-    handle_method_request("OPTIONS", INTERNAL_FUNCTION_PARAM_PASSTHRU);
+    handle_method_request(getThis(), "OPTIONS", INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }/*}}}*/
 
 CSPEED_METHOD(App, autoload)/*{{{ proto App::autoload The cspeed framework's autoload system */
@@ -481,7 +485,9 @@ CSPEED_METHOD(App, getApp)/*{{{ proto App::getApp()*/
 
 CSPEED_METHOD(App, run)/*{{{ proto App::run() */
 {
+    trigger_events(getThis(), strpprintf(0, "%s", CSPEED_APP_EVENT_BEORE_REQUEST));
     dispather_url();
+    trigger_events(getThis(), strpprintf(0, "%s", CSPEED_APP_EVENT_AFTER_REQUEST));
 }/*}}}*/
 
 CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
@@ -571,8 +577,14 @@ CSPEED_INIT(app)
     INIT_NS_CLASS_ENTRY(ce, "Cs", "App", cspeed_app_functions);
     cspeed_app_ce = zend_register_internal_class(&ce);
 
+    /* To use the Event feature */
+    zend_do_inheritance(cspeed_app_ce, cspeed_component_ce);
+
     zend_declare_property_null(cspeed_app_ce,   CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES),   ZEND_ACC_PRIVATE);
     zend_declare_property_null(cspeed_app_ce,   CSPEED_STRL(CSPEED_APP_INSTANCE),   ZEND_ACC_PRIVATE|ZEND_ACC_STATIC);
+
+    zend_declare_class_constant_string(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_EVENT_BEORE_REQUEST), CSPEED_APP_EVENT_BEORE_REQUEST);
+    zend_declare_class_constant_string(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_EVENT_AFTER_REQUEST), CSPEED_APP_EVENT_AFTER_REQUEST);
 }
 /*}}}*/
 

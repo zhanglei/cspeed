@@ -51,6 +51,10 @@ PHP_MINIT_FUNCTION(cspeed)
     ZEND_INIT_MODULE_GLOBALS(cspeed, NULL, NULL);
 #endif
     /* Initialise the all core class for the CSpeed engine */
+    /* Event support */
+    component_init();
+
+    /* Di|App|View */
     di_init();
     app_init();
     view_init();

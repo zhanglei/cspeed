@@ -29,6 +29,7 @@
 
 #include "kernel/di/di.h"
 #include "kernel/mvc/controller.h"
+#include "kernel/tool/component.h"
 
 /*{{{*/
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_controller_construct, 0, 0, 0)
@@ -51,9 +52,15 @@ CSPEED_INIT(controller) /*{{{*/
     INIT_NS_CLASS_ENTRY(ce, "Cs\\mvc", "Controller", cspeed_controller_functions);
     cspeed_controller_ce = zend_register_internal_class(&ce);
 
-    zend_declare_property_null(cspeed_di_ce, CSPEED_STRL(CSPEED_DI_INSTANCE), ZEND_ACC_PUBLIC);
-    zend_declare_property_null(cspeed_di_ce, CSPEED_STRL(CSPEED_VIEW_INSTANCE), ZEND_ACC_PUBLIC);
-    zend_declare_property_null(cspeed_di_ce, CSPEED_STRL(CSPEED_ROUTER_INSTANCE), ZEND_ACC_PUBLIC);
+    /* Event feature */
+    zend_do_inheritance(cspeed_controller_ce, cspeed_component_ce);
+
+    zend_declare_property_null(cspeed_controller_ce, CSPEED_STRL(CSPEED_DI_INSTANCE), ZEND_ACC_PUBLIC);
+    zend_declare_property_null(cspeed_controller_ce, CSPEED_STRL(CSPEED_VIEW_INSTANCE), ZEND_ACC_PUBLIC);
+    zend_declare_property_null(cspeed_controller_ce, CSPEED_STRL(CSPEED_ROUTER_INSTANCE), ZEND_ACC_PUBLIC);
+
+    zend_declare_class_constant_string(cspeed_controller_ce, CSPEED_STRL(EVENT_BEFORE_ACTION), EVENT_BEFORE_ACTION);
+    zend_declare_class_constant_string(cspeed_controller_ce, CSPEED_STRL(EVENT_AFTER_ACTION),  EVENT_AFTER_ACTION);
 }/*}}}*/
 
 

@@ -24,7 +24,6 @@ class Router
      */
     function add($destUrl, $toUrl)
     {
-
     }
 
     /**
@@ -33,7 +32,6 @@ class Router
      */
     function addFromIni($iniFile)
     {
-
     }
 
     /**
@@ -42,6 +40,5 @@ class Router
      */
     function addFromArray($arrayRouters)
     {
-
     }
 }

@@ -23,9 +23,12 @@
 
 zend_class_entry *cspeed_controller_ce;
 
-#define CSPEED_DI_INSTANCE      "di"        /* To get the Di object */
-#define CSPEED_VIEW_INSTANCE    "view"      /* To get the View object */
-#define CSPEED_ROUTER_INSTANCE  "router"    /* To get the Router object */
+#define CSPEED_DI_INSTANCE      "di"                  /* To get the Di object */
+#define CSPEED_VIEW_INSTANCE    "view"                /* To get the View object */
+#define CSPEED_ROUTER_INSTANCE  "router"              /* To get the Router object */
+
+#define EVENT_BEFORE_ACTION           "EVENT_BEFORE_ACTION"       /* Before Action */
+#define EVENT_AFTER_ACTION            "EVENT_AFTER_ACTION"        /* After Action */
 
 CSPEED_INIT(controller);
 

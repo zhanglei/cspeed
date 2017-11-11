@@ -3,15 +3,26 @@
 namespace Cs;
 
 
-class App
+class App extends tool\Component
 {
     /**
-     * App constructor.
-     * @param null $diObject  The Cs\di\Di class object
+     * Some event which the App class supports
      */
-    function __construct($diObject = NULL)
-    {
+    const EVENT_BEFORE_REQUEST = "EVENT_BEFORE_REQUEST";
+    const EVENT_AFTER_REQUEST = "EVENT_AFTER_REQUEST";
 
+    /**
+     * @var App $app
+     */
+    public static $app;
+
+    /**
+     * App constructor.
+     * @param string $iniFilePathName   The INI file which you want to initialise the App class core
+     * @param string $iniFileNodeName   The INI file node name which the CSpeed to load the configs
+     */
+    function __construct($iniFilePathName = '', $iniFileNodeName = '')
+    {
     }
 
     /**
@@ -21,7 +32,6 @@ class App
      */
     function get($url, $closure)
     {
-
     }
 
     /**
@@ -31,7 +41,6 @@ class App
      */
     function post($url, $closure)
     {
-
     }
 
     /**
@@ -41,7 +50,6 @@ class App
      */
     function put($url, $closure)
     {
-
     }
 
     /**
@@ -51,7 +59,6 @@ class App
      */
     function patch($url, $closure)
     {
-
     }
 
     /**
@@ -61,7 +68,6 @@ class App
      */
     function delete($url, $closure)
     {
-
     }
 
     /**
@@ -71,7 +77,6 @@ class App
      */
     function head($url, $closure)
     {
-
     }
 
     /**
@@ -81,7 +86,6 @@ class App
      */
     function options($url, $closure)
     {
-
     }
 
     /**
@@ -90,7 +94,6 @@ class App
      */
     private function autoload($className)
     {
-
     }
 
     /**
@@ -100,7 +103,6 @@ class App
      */
     function setAlias($aliasKey, $aliasFullPath)
     {
-
     }
 
     /**
@@ -108,7 +110,6 @@ class App
      */
     function run()
     {
-
     }
 
     /**

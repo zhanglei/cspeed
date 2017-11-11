@@ -1,6 +1,79 @@
-# CSpeed v2.0.3 手册 #
+# CSpeed v2.1.0 手册 #
 
 ## 最新特性 ##
+
+**CSpeed v2.1.0特性：**
+
+1、修复现有的系统BUG，提升性能.
+
+2、增加 **观察者模式事件模型**，如：
+
+    <?php
+    
+    namespace app\modules\index\controllers;
+    
+    class Index extends \Cs\mvc\Controller
+    {
+        function initialise()
+        {
+            $this->on(Index::EVENT_BEFORE_ACTION, [$this, '_beforeAction'];
+            $this->on(Index::EVENT_AFTER_ACTION, function(){
+                echo "After action.<br>";
+            });
+        }
+        
+        function _beforeAction()
+        {
+            echo '_before action<br>';
+        }
+    }
+    
+**CSpeed** 引擎的事件模型继承于 **Cs\tool\Component** 类，所有需要使用事件特性的需求，需要继承父类 **\Cs\tool\Component**，父类代码如下：
+    
+    <?php
+    
+    namespace Cs\tool;
+    
+    class Component 
+    {
+        function on($eventName, $eventCallBack);
+        
+        function off($eventName, $eventCallBack = NULL);
+        
+        function trigger($eventName);
+    }
+    
+**CSpeed** 引擎的系统类中支持事件的有：**\Cs\App**、**\Cs\mvc\Controller**、**\Cs\mvc\Model**、**\Cs\rpc\Server** 类。
+    
+各个类支持的事件见IDE源码。
+
+如，在新版本的引擎中，控制器层面由于引入了事件机制，故不在提供**__beforeAction** 与 **__afterAction** 方法，如果需要在执行方法前执行特定的方法，那么可以使用事件，如：
+
+    <?php
+    
+    namespace app\modules\index\controllers;
+    
+    class Index extends \Cs\mvc\Controller
+    {
+        function initialise()
+        {
+           // 绑定方法执行之前的事件
+            $this->on(Index::EVENT_BEFORE_ACTION, [$this, '_beforeAction'];
+            // 绑定方法执行之后的事件
+            $this->on(Index::EVENT_AFTER_ACTION, function(){
+                echo "After action.<br>";
+            });
+        }
+        
+        /**
+         * 方法执行执行会执行本方法
+         */
+        function _beforeAction()
+        {
+            echo '_before action<br>';
+        }
+    }
+**CSpeed v2.0.3特性： **
 
 1、修复模型错误，优化整体架构
 
@@ -73,6 +146,7 @@ CSpeed服务端JSON-RPC类Server继承于 \Cs\mvc\Controller:
 
 此情况见于 2.0.0 版本。已在新版本中予以修复。
 
+**CSpeed v2.0.1特性：**
 新版本中 **getApp()** 方法是一个单例模式控制器获取方法；不再适应于创建一个 **Cs\App** 对象,
 新版本中全部更新为 构造函数形式。可以不传入任何的参数来生成一个 零 IO 消耗的 application 对象 。
 
@@ -102,27 +176,9 @@ CSpeed服务端JSON-RPC类Server继承于 \Cs\mvc\Controller:
     	}
     	
     	/**
-    	 * 执行具体的方法之前先执行的方法
-    	 * 不会执行父类的本方法
-    	 */
-    	function __beforeActoin()
-    	{
-    	
-    	}
-    	
-    	/**
     	 * 具体的方法
     	 */
     	function newsActon()
-    	{
-    	
-    	}
-    	
-    	/**
-    	 * 执行具体的方法之后执行的方法
-    	 * 不会执行父类的本方法
-    	 */
-    	function __afterActon()
     	{
     	
     	}
@@ -317,45 +373,40 @@ Cs\App类的构造函数支持传入绝对路径或者相对路径的INI文件�
 			);
 	    }
 	    
-	    /* 初始化数据库连接 */
-	    function __initDb($di, $router)
-	    {
-			$di->set('db', function(){
-			    return new \Cs\db\pdo\Adapter();
-			});
-	    }
+            /* 初始化数据库连接 */
+            function __initDb($di, $router)
+            {
+                $di->set('db', function(){
+                    return new \Cs\db\pdo\Adapter();
+                });
+            }
 	}
 
 ## 典型的控制器结构 ##
 
-	<?php
-
-	class Site extends \Cs\mvc\Controller
-	{
-	    /**
-	     * 本方法在每个控制器方法调用前进行调用
-	     */
-	    function __beforeAction()
-	    {
-
-	    }
-
-	    /**
-	     * 需要执行的方法
-	     */
-	    function indexAction()
-	    {
-	        // 如果开启自动渲染视图，可以使用 $this->view->setVar()方法向模板传输数据
-	    }
-
-	    /**
-	     * 在每个控制器方法调用执行后进行调用
-	     */
-	    function __afterAction()
-	    {
-
-	    }
-	}
+    <?php
+    
+    namespace app\modules\hello\controllers;
+    
+    class Cspeed extends \Cs\mvc\Controllers
+    {
+    	/**
+    	 * 初始化方法，如果有父类的话，则会先从顶级父类开始执行到本方法
+    	 * 来完成初始化
+    	 */
+    	function initialise()
+    	{
+    	
+    	}
+    	
+    	/**
+    	 * 具体的方法
+    	 */
+    	function newsActon()
+    	{
+    	
+    	}
+    }
 
 ## 典型的模型结构 ##
 
@@ -1000,3 +1051,45 @@ Cs\App类的构造函数支持传入绝对路径或者相对路径的INI文件�
     {
 
     }
+
+### Cs\tool\Component ###
+
+	/**
+	 * 构造函数
+	
+	/**
+	 * 绑定事件
+	 * @param $eventName 需要绑定的事件名称
+	 * @param $callBack     事件发生时调用的函数
+	 */
+	function on($eventName, $callBack);
+	
+	/**
+	 * 解除已经绑定的事件
+	 * @param $eventName 需要解除绑定的事件名称
+	 * @param $callBack     事件绑定的函数句柄, NULL会解除所有的事件名称一致的事件消息
+	 */
+	function off($eventName, $callBack = NULL);
+	
+	/**
+	 * 触发事件
+	 * @param $eventName 	需要触发的事件的名称
+	 */
+	function trigger($eventName);
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

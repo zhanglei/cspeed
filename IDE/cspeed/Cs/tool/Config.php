@@ -1,41 +1,41 @@
 <?php
-
-
+/**
+ * Created by PhpStorm.
+ * User: josin
+ * Date: 17-11-11
+ * Time: 上午8:07
+ */
 namespace Cs\tool;
 
 class Config
 {
-    
     /**
-     * Constructor.
+     * Config constructor.
      */
     function __construct()
     {
-
     }
 
     /**
-     * Load the INI config file to the object
-     * @param string $configFilePath    The config file's full path, which you want to load the file
+     * To load the ini file from the outside INI
+     * @param string $iniFile   The ini file which you want to load
      */
-    function loadConfig($configFilePath)
+    function loadConfig($iniFile)
     {
-
     }
 
     /**
-     * Return the configs
+     * To get all configs from the user-ini-config-file
      */
     function getConfigs()
     {
-
     }
 
     /**
-     * Return the config value with the given config key.
+     * To get the key-value with the given key name
+     * @param string $configKey The key name which you want to get the value from
      */
     function getConfig($configKey)
     {
-
     }
 }

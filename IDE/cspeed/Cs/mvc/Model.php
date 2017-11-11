@@ -8,8 +8,16 @@
 
 namespace Cs\mvc;
 
-class Model
+class Model extends \Cs\tool\Component
 {
+    /**
+     * Some events the Model supports
+     */
+    const EVENT_BEFORE_SAVE     = "EVENT_BEFORE_SAVE";
+    const EVENT_AFTER_SAVE      = "EVENT_AFTER_SAVE";
+    const EVENT_BEFORE_DELETE   = "EVENT_BEFORE_DELETE";
+    const EVENT_AFTER_DELETE    = "EVENT_AFTER_DELETE";
+
     /**
      * Model constructor.
      */
@@ -24,7 +32,6 @@ class Model
      */
     public function __set($name, $value)
     {
-
     }
 
     /**
@@ -42,7 +49,6 @@ class Model
      */
     function tableName()
     {
-
     }
 
     /**
@@ -99,7 +105,6 @@ class Model
      */
     function one()
     {
-
     }
 
     /**
@@ -107,7 +112,6 @@ class Model
      */
     function all()
     {
-
     }
 
     /**
@@ -115,7 +119,6 @@ class Model
      */
     function save()
     {
-
     }
 
     /**
@@ -123,6 +126,5 @@ class Model
      */
     function delete()
     {
-
     }
 }

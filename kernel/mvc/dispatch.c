@@ -42,6 +42,8 @@
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/php_string.h"
 
+#include "kernel/tool/component.h"
+
 #include "main/SAPI.h"          /* for sapi */
 
 void auto_render_view_file(zend_class_entry *controller_ptr, zval *controller_obj, zval *view_object)/*{{{ Renderin the file automatically */
@@ -194,18 +196,12 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
     /* To call the parent initialise method to do the initialise */
     zend_class_entry *parent = controller_ptr;
 
-    /* Call the Parent's methods to initialise itself */
-    recursive_call_parent_method(parent, "initialise");
+    /* To fix the parent calling bug #1103 */
+    recursive_call_parent_method_two(&controller_obj, "initialise");
 
     if (!instanceof_function(controller_ptr, cspeed_rpc_server_ce)){
         /* After running the initialise method. running the __beforeAction method */
-        if (CSPEED_METHOD_IN_OBJECT(&controller_obj, "__beforeAction")){
-            zval z_before_action, retval;
-            ZVAL_STRING(&z_before_action, "__beforeAction");
-            call_user_function(NULL, &controller_obj, &z_before_action, &retval, 0, NULL );
-            zval_ptr_dtor(&z_before_action);
-            zval_ptr_dtor(&retval);
-        }
+        trigger_events(&controller_obj, strpprintf(0, "%s", EVENT_BEFORE_ACTION));
         /* After adding the value into $_GET run the controller's action */
         zend_string *action_append_action = strpprintf(0, "%sAction", ZSTR_VAL(default_action));
         if (CSPEED_METHOD_IN_OBJECT(&controller_obj, ZSTR_VAL(action_append_action))) {
@@ -228,13 +224,7 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
             zval_ptr_dtor(&ret_val);
         }
         /* Do the after_action work */
-        if (CSPEED_METHOD_IN_OBJECT(&controller_obj, "__afterAction")){
-            zval z_after_action, retval;
-            ZVAL_STRING(&z_after_action, "__afterAction");
-            call_user_function(NULL, &controller_obj, &z_after_action, &retval, 0, NULL);
-            zval_ptr_dtor(&z_after_action);
-            zval_ptr_dtor(&retval);
-        }
+        trigger_events(&controller_obj, strpprintf(0, "%s", EVENT_AFTER_ACTION));
     }
     /* Release the unused memory */
     zval_ptr_dtor(&controller_obj);

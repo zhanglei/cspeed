@@ -287,6 +287,25 @@ void recursive_call_parent_method(zend_class_entry *ce, char *method_name)/*{{{ 
         ce = ce->parent;
     }
 }/*}}}*/
+
+void recursive_call_parent_method_two(zval *obj, char *method_name)/*{{{  Parent class's method to current ce */
+{
+    if (obj) {
+        if (Z_OBJCE_P(obj)->parent){
+            zval parent_obj;
+            object_init_ex(&parent_obj, Z_OBJCE_P(obj)->parent);
+            recursive_call_parent_method_two(&parent_obj, method_name);
+        }        
+        if (CSPEED_METHOD_IN_OBJECT(obj, method_name)){
+            zval function_name, retval;
+            ZVAL_STRING(&function_name, method_name);
+            call_user_function(NULL, obj, &function_name, &retval, 0, NULL);
+            zval_ptr_dtor(&function_name);
+            zval_ptr_dtor(&retval);
+        }
+    }
+}/*}}}*/
+
 /*
  * Local variables:
  * tab-width: 4

@@ -8,8 +8,13 @@
 
 namespace Cs\mvc;
 
-class Controller
+class Controller extends \Cs\tool\Component
 {
+    /**
+     * Some events the Controller supports
+     */
+    const EVENT_BEFORE_ACTION = "EVENT_BEFORE_ACTION";
+    const EVENT_AFTER_ACTION  = "EVENT_AFTER_ACTION";
 
     /**
      * @var $di \Cs\di\Di

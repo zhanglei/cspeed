@@ -40,6 +40,7 @@ int check_file_exists(char *file_path);                                         
 
 void recursive_call_parent_method(zend_class_entry *ce, char *method_name);      /* Calling the method from the top class to this */
 
+void recursive_call_parent_method_two(zval *obj, char *method_name);             /* Want obj usefull, use this instead before */
 #endif
 
 
