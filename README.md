@@ -1,5 +1,13 @@
 # CSpeed v2.1.0 手册 #
 
+## QQ群交流 ##
+
+https://jq.qq.com/?_wv=1027&k=5kSunAR
+
+CSpeed扩展官方QQ群号：
+
+    605383362	
+
 ## 最新特性 ##
 
 **CSpeed v2.1.0特性：**
