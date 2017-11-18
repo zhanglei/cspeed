@@ -19,21 +19,25 @@ CSpeed扩展官方QQ群号： **605383362**
 CSpeed CLI模式下，只需要在入口文件添加如下代码即可启动一个 CLI 模式的CSpeed 框架系统，以便进行需要长时间的请求或者数据处理。
 
 假设入口文件名称为： console.php
-	<?php
-	
-	$cli = new \Cs\console\Task();
-	
-	$cli->run($argv[1]);
-	
+
+```php
+<?php
+
+$cli = new \Cs\console\Task();
+
+$cli->run($argv[1]);
+```
 其中 **$argv[1]** 表示 命令行界面的输入参数信息，添加了如上的代码后，用户只需要在入口文件的目录下启动 “终端” or “命令行”，输入如下命令，请事先设置好环境变量或者使用 **PHP** 绝对路径：
 
-    php console.php index/good/info
-    
+```php
+php console.php index/good/info
+```
+
 就会导向到 **index** 模块 **Good** 控制器 **infoAction** 方法
 命令行模式也支持使用参数，如上所示：
-
-    php console.php index/good/info/name/cspeed
-    
+```php
+php console.php index/good/info/name/cspeed
+```
 那么在 **index** 模块 **Good** 控制器 **infoAction** 方法内，可以使用全局变量 **$_GET['name']** 或者CSpeed引擎的继承模块 **\Cs\net\Request** 的 **get('name')** 来获取 命令行模式下的传入参数 **name** 的值 **cspeed**。
 
 **CSpeed v2.1.0特性：**
@@ -41,72 +45,73 @@ CSpeed CLI模式下，只需要在入口文件添加如下代码即可启动一�
 1、修复现有的系统BUG，提升性能.
 
 2、增加 **观察者模式事件模型**，如：
+```php
+<?php
 
-    <?php
-    
-    namespace app\modules\index\controllers;
-    
-    class Index extends \Cs\mvc\Controller
-    {
-        function initialise()
-        {
-            $this->on(Index::EVENT_BEFORE_ACTION, [$this, '_beforeAction'];
-            $this->on(Index::EVENT_AFTER_ACTION, function(){
-                echo "After action.<br>";
-            });
-        }
-        
-        function _beforeAction()
-        {
-            echo '_before action<br>';
-        }
-    }
-    
+namespace app\modules\index\controllers;
+
+class Index extends \Cs\mvc\Controller
+{
+	function initialise()
+	{
+	    $this->on(Index::EVENT_BEFORE_ACTION, [$this, '_beforeAction'];
+	    $this->on(Index::EVENT_AFTER_ACTION, function(){
+		echo "After action.<br>";
+	    });
+	}
+
+	function _beforeAction()
+	{
+	    echo '_before action<br>';
+	}
+}
+```
 **CSpeed** 引擎的事件模型继承于 **Cs\tool\Component** 类，所有需要使用事件特性的需求，需要继承父类 **\Cs\tool\Component**，父类代码如下：
-    
-    <?php
-    
-    namespace Cs\tool;
-    
-    class Component 
-    {
-        function on($eventName, $eventCallBack);
-        
-        function off($eventName, $eventCallBack = NULL);
-        
-        function trigger($eventName);
-    }
-    
+```php
+<?php
+
+namespace Cs\tool;
+
+class Component 
+{
+	function on($eventName, $eventCallBack);
+
+	function off($eventName, $eventCallBack = NULL);
+
+	function trigger($eventName);
+}
+```
 **CSpeed** 引擎的系统类中支持事件的有：**\Cs\App**、**\Cs\mvc\Controller**、**\Cs\mvc\Model**、**\Cs\rpc\Server** 类。
     
 各个类支持的事件见IDE源码。
 
 如，在新版本的引擎中，控制器层面由于引入了事件机制，故不在提供    **__beforeAction** 与 **__afterAction** 方法，如果需要在执行方法前执行特定的方法，那么可以使用事件，如：
+```php
+<?php
 
-    <?php
-    
-    namespace app\modules\index\controllers;
-    
-    class Index extends \Cs\mvc\Controller
-    {
-        function initialise()
-        {
-           // 绑定方法执行之前的事件
-            $this->on(Index::EVENT_BEFORE_ACTION, [$this, '_beforeAction'];
-            // 绑定方法执行之后的事件
-            $this->on(Index::EVENT_AFTER_ACTION, function(){
-                echo "After action.<br>";
-            });
-        }
-        
-        /**
-         * 方法执行执行会执行本方法
-         */
-        function _beforeAction()
-        {
-            echo '_before action<br>';
-        }
-    }
+namespace app\modules\index\controllers;
+
+class Index extends \Cs\mvc\Controller
+{
+	function initialise()
+	{
+	   // 绑定方法执行之前的事件
+	    $this->on(Index::EVENT_BEFORE_ACTION, [$this, '_beforeAction']);
+	    // 绑定方法执行之后的事件
+	    $this->on(Index::EVENT_AFTER_ACTION, function(){
+		echo "After action.<br>";
+	    });
+	}
+
+	/**
+	 * 方法执行执行会执行本方法
+	 */
+	function _beforeAction()
+	{
+	    echo '_before action<br>';
+	}
+}
+```
 **CSpeed v2.0.3特性：**
 
 1、修复模型错误，优化整体架构
@@ -114,70 +119,70 @@ CSpeed CLI模式下，只需要在入口文件添加如下代码即可启动一�
 2、增加JSON-RPC模块，示例如下：
 
 客户端：
+```php
+$client = new \Cs\rpc\Client("http://www.xxx.com/who");
 
-    $client = new \Cs\rpc\Client("http://www.xxx.com/who");
-    
-    $result = $client->goods(['name' => 'apple', 'price' => '9.99']);
-    
-    /* RPC 服务端返回的JSON数据 */
-    echo $result;
-    
+$result = $client->goods(['name' => 'apple', 'price' => '9.99']);
+
+/* RPC 服务端返回的JSON数据 */
+echo $result;
+```
 服务端：
 
 CSpeed服务端JSON-RPC类Server继承于 \Cs\mvc\Controller:
 故控制器如下：
+```php
+<?php
 
-    <?php
-    
-    namespace app\modules\home\controllers;
-    
-    class Goods extends \Cs\rpc\Server
-    {
-        /* RPC类控制器只运行从父类到本类的initialise 
-         * 只需要在本方法内将本对象绑定到RPC端即可
-         */
-        public function initialise()
-        {
-            $this->handle($this);
-        }
-        
-        /**
-         * RPC方法后缀为Rpc，方法包含有一个参数为客户端调用的参数
-         * 数据类型与客户端调用的类型一致
-         */
-        function listRpc($params)
-        {
-            /* 只需要将返回的数据return即可 */
-            return $params;
-        }
-    }
+namespace app\modules\home\controllers;
 
-注意： CSpeed框架的RPC模块使用Linux-libcurl库进行开发，用户需要安装libcurl 7.0.15版本以上的类库文件即可。
+class Goods extends \Cs\rpc\Server
+{
+	/* RPC类控制器只运行从父类到本类的initialise 
+	 * 只需要在本方法内将本对象绑定到RPC端即可
+	 */
+	public function initialise()
+	{
+	    $this->handle($this);
+	}
+
+	/**
+	 * RPC方法后缀为Rpc，方法包含有一个参数为客户端调用的参数
+	 * 数据类型与客户端调用的类型一致
+	 */
+	function listRpc($params)
+	{
+	    /* 只需要将返回的数据return即可 */
+	    return $params;
+	}
+}
+```
+注意： CSpeed框架的```RPC```模块使用```Linux-libcurl```库进行开发，用户需要安装```libcurl 7.10.5```版本以上的类库文件即可。
 
 数据调用的格式如下：
 
 客户端调用传输的格式为：
-
-    {"id":x,  "method":"xx", "params":"xx", "jsonrpc":"2.0"}
-
+```php
+{"id":3,  "method":"xx", "params":"xx", "jsonrpc":"2.0"}
+```
 服务端返回的数据格式为：
-
-    {"jsonrpc": "2.0", "result": 19, "id": 3}
-    
+```php
+{"jsonrpc": "2.0", "result": 19, "id": 3}
+```    
 如果错误则包含一个 error 错误对象：
-
-    {"jsonrpc": "2.0", "error": {"code": -32700, "message": "Invalid JSON reqeust data"}, "id": 1}
-    
-当前版本中，如果出错，则返回的JSON数据中 id 始终为 1， 如果正确则返回请求数据的 id 与之对应。
+```php
+{"jsonrpc": "2.0", "error": {"code": -32700, "message": "Invalid JSON reqeust data"}, "id": -1}
+```    
+当前版本中，如果出错，则返回的JSON数据中 ```id``` 始终为 ```1```， 如果正确则返回请求数据的 ```id``` 与之对应。新版本中 v2.1.4中已经修复为 ```-1``` 表示出错，并且携带有 ```error```对象.
 
 修复使用 CSpeed 框架进行 API 项目时的高并发情况下的PHP崩溃的情况。
+```php
+$app = new App::getApp();
 
-	$app = new App::getApp();
-	
-	$app->get('/', function(){
-		echo "hello cspeed";
-	});
-
+$app->get('/', function(){
+	echo "hello cspeed";
+});
+```
 此情况见于 2.0.0 版本。已在新版本中予以修复。
 
 **CSpeed v2.0.1特性：**
