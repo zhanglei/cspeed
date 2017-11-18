@@ -54,7 +54,7 @@ class Index extends \Cs\mvc\Controller
 {
 	function initialise()
 	{
-	    $this->on(Index::EVENT_BEFORE_ACTION, [$this, '_beforeAction'];
+	    $this->on(Index::EVENT_BEFORE_ACTION, [$this, '_beforeAction']);
 	    $this->on(Index::EVENT_AFTER_ACTION, function(){
 		echo "After action.<br>";
 	    });
