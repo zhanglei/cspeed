@@ -38,7 +38,7 @@ php console.php index/good/info
 ```php
 php console.php index/good/info/name/cspeed
 ```
-那么在 **index** 模块 **Good** 控制器 **infoAction** 方法内，可以使用全局变量 **$_GET['name']** 或者CSpeed引擎的继承模块 **\Cs\net\Request** 的 **get('name')** 来获取 命令行模式下的传入参数 **name** 的值 **cspeed**。
+那么在 **index** 模块 **Good** 控制器 **infoAction** 方法内，可以使用全局变量 **$_GET['name']** 或者CSpeed引擎的网络模块 **\Cs\net\Request** 的 **get('name')** 来获取 命令行模式下的传入参数 **name** 的值 **cspeed**。
 
 **CSpeed v2.1.0特性：**
 
