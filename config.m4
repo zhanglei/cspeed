@@ -51,25 +51,27 @@ if test "$PHP_CSPEED" != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH(curl, $CURL_DIR/$PHP_LIBDIR, CURL_SHARED_LIBADD)
 
   PHP_NEW_EXTENSION(cspeed,
-    cspeed.c         \
-    kernel/CApp.c     \
-    kernel/di/di.c     \
-    kernel/db/pdo.c     \
-    kernel/mvc/view.c    \
-    kernel/net/request.c  \
-    kernel/tool/helper.c   \
-    kernel/mvc/dispatch.c   \
-    kernel/tool/require.c    \
-    kernel/tool/component.c   \
-    kernel/net/response.c      \
-    kernel/mvc/model.c          \
-    kernel/mvc/controller.c      \
-    kernel/db/model_interface.c   \
-    kernel/tool/configs.c          \
-    kernel/rpc/server.c             \
-    kernel/rpc/client.c              \
-    kernel/bootstrap.c                \
-    kernel/mvc/router.c                \
+    cspeed.c                            \
+    kernel/CApp.c                       \
+    kernel/di/di.c                      \
+    kernel/db/pdo.c                     \
+    kernel/mvc/view.c                   \
+    kernel/net/request.c                \
+    kernel/tool/helper.c                \
+    kernel/mvc/dispatch.c               \
+    kernel/tool/require.c               \
+    kernel/tool/component.c             \
+    kernel/net/response.c               \
+    kernel/mvc/model.c                  \
+    kernel/mvc/controller.c             \
+    kernel/db/model_interface.c         \
+    kernel/tool/configs.c               \
+    kernel/rpc/server.c                 \
+    kernel/rpc/client.c                 \
+    kernel/bootstrap.c                  \
+    kernel/mvc/router.c                 \
+    kernel/console/task.c               \
+    kernel/console/parse.c              \
     kernel/db/adapter.c,
   $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_ADD_BUILD_DIR([$ext_builddir/kernel])
@@ -79,6 +81,7 @@ if test "$PHP_CSPEED" != "no"; then
   PHP_ADD_BUILD_DIR([$ext_builddir/kernel/mvc])
   PHP_ADD_BUILD_DIR([$ext_builddir/kernel/net])
   PHP_ADD_BUILD_DIR([$ext_builddir/kernel/tool])
+  PHP_ADD_BUILD_DIR([$ext_builddir/kernel/console])
 
   PHP_SUBST(CURL_SHARED_LIBADD)
 fi

@@ -27,7 +27,7 @@ zend_class_entry *cspeed_app_ce;                                        /* The g
 #define CSPEED_APP_INSTANCE             "__app"                         /* Single App object */
 
 #define CSPEED_APP_EVENT_BEORE_REQUEST  "EVENT_BEFORE_REQUEST"          /* Event */
-#define CSPEED_APP_EVENT_AFTER_REQUEST  "EVENT_AFTER_REQUEST"          /* Event */
+#define CSPEED_APP_EVENT_AFTER_REQUEST  "EVENT_AFTER_REQUEST"           /* Event */
 
 int cspeed_app_load_file(zend_string *class_name_with_namespace, zend_execute_data *, zval *, zval *app_obj);
 
@@ -35,14 +35,6 @@ CSPEED_INIT(app);                                                       /* The i
 
 
 #endif
-
-
-
-
-
-
-
-
 
 /*
  * Local variables:

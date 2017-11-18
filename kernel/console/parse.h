@@ -16,22 +16,14 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
+#ifndef CSPEED_TASK_PARSE_H
+#define CSPEED_TASK_PARSE_H
 
-#ifndef CSPEED_RPC_CLIENT_H
-#define CSPEED_RPC_CLIENT_H
+void parse_cli_path_info(zval *path_info_array);
 
-zend_class_entry *cspeed_rpc_client_ce;                               /* The RPC Client class */
-
-#define CSPEED_CLIENT_URL                    "__url"                  /* The URL */
-#define CSPEED_CLIENT_POST_DATA              "__data"                 /* The value */
-#define CSPEED_CLIENT_POST_ID                "__id"                   /* The JSON-RPC id */
-
-CSPEED_INIT(client);                                                  /* The RPC Client init function */
+void dispather_cli_url(zend_string *info);
 
 #endif
-
-
 
 /*
  * Local variables:

@@ -28,6 +28,8 @@
 #include "php_cspeed.h"
 
 #include "kernel/net/response.h"
+#include "ext/json/php_json.h"
+#include "Zend/zend_smart_str.h"
 
 #include "main/SAPI.h"      /* For sapi header function */
 
@@ -118,14 +120,18 @@ CSPEED_METHOD(Response, setJsonContent)/*{{{ Set the response with the given for
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &json_array) == FAILURE) {
         return ;
     }
+    smart_str json_str = { 0 };
+    php_json_encode(&json_str, json_array, 0);
+    smart_str_0(&json_str);
+#if 0
     zval function_name, retval_ptr;
     ZVAL_STRING(&function_name, "json_encode");
     uint32_t param_count = 1;
-    zval params[] = {
-        *json_array
-    };
+    zval params[] = { *json_array };
     call_user_function(EG(function_table), NULL, &function_name, &retval_ptr, param_count, params);
-    zend_update_property(cspeed_response_ce, getThis(), CSPEED_STRL(CSPEED_RESPONSE_DATA), &retval_ptr);
+#endif
+    zend_update_property_string(cspeed_response_ce, getThis(), CSPEED_STRL(CSPEED_RESPONSE_DATA), ZSTR_VAL(json_str.s));
+    smart_str_free(&json_str);
 }
 /*}}}*/
 

@@ -151,3 +151,14 @@ CSPEED_INIT(client)/*{{{ proto void client_init()*/
     zend_declare_property_string(cspeed_rpc_client_ce, CSPEED_STRL(CSPEED_CLIENT_URL), "", ZEND_ACC_PRIVATE);
     zend_declare_property_long(cspeed_rpc_client_ce, CSPEED_STRL(CSPEED_CLIENT_POST_ID), 1, ZEND_ACC_PRIVATE);
 }/*}}}*/
+
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

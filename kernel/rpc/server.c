@@ -32,9 +32,12 @@
 #include "ext/json/php_json.h"
 #include "ext/standard/head.h"
 
+#include "kernel/tool/component.h"
 #include "kernel/mvc/controller.h"
 #include "kernel/rpc/server.h"
 #include "kernel/net/request.h"
+
+#include "main/SAPI.h"  /* for sapi */
 
 /*{{{ All ARGINFO For class Server */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_server_contruct, 0, 0, 0)
@@ -75,8 +78,21 @@ CSPEED_METHOD(Server, handle)   /*{{{ proto Server::handle */
     php_json_decode(&json_data, CSPEED_STRL(ZSTR_VAL(raw_data.s)), 1, PHP_JSON_PARSER_DEFAULT_DEPTH);
     smart_str_free(&raw_data);
 
+    /* Set the HTTP head to application/json */
+    sapi_header_line ctr = {0};
+    ctr.line_len         = spprintf(&(ctr.line), 0, "%s:%s", "Content-Type", "application/json;charset=UTF-8");
+    ctr.response_code    = 0;
+    if (sapi_header_op(SAPI_HEADER_REPLACE, &ctr) == SUCCESS) {
+        efree(ctr.line);
+    } else {
+        efree(ctr.line);
+        php_error_docref(NULL, E_ERROR, "Please install SAPI extension.");
+        return ;
+    }
+    /* End of the HTTP header set */
+
     if (ZVAL_IS_NULL(&json_data) || Z_TYPE(json_data) != IS_ARRAY) {
-        char *result = "{\"jsonrpc\":\"2.0\", \"error\":{\"message\":\"Invalid request JSON data.\", \"code\":-32700 }, \"id\":1 }";
+        char *result = "{\"jsonrpc\":\"2.0\", \"error\":{\"message\":\"Invalid request JSON data.\", \"code\":-32700 }, \"id\":-1 }";
         PHPWRITE(result, strlen(result));
         RETURN_FALSE
     }
@@ -95,7 +111,7 @@ CSPEED_METHOD(Server, handle)   /*{{{ proto Server::handle */
         
         if (UNEXPECTED(( value = zend_hash_str_find(Z_ARRVAL(json_data), CSPEED_STRL("method")) ) == NULL)) {
             zval_ptr_dtor(&json_data);
-            char *result = "{\"jsonrpc\":\"2.0\",\"error\":{\"message\":\"Missing the method index.\",\"code\":-32602}, \"id\":1 }";
+            char *result = "{\"jsonrpc\":\"2.0\",\"error\":{\"message\":\"Missing the method index.\",\"code\":-32602}, \"id\":-1 }";
             PHPWRITE( result, strlen(result));
             RETURN_FALSE
         }
@@ -103,11 +119,13 @@ CSPEED_METHOD(Server, handle)   /*{{{ proto Server::handle */
         ZVAL_STRING(&temp_func, ZSTR_VAL(strpprintf(0, "%sRpc", Z_STRVAL_P(value))));
         if (CSPEED_METHOD_IN_OBJECT(object, Z_STRVAL_P(&temp_func))){
             zval retval;
+            trigger_events(object, strpprintf(0, EVENT_BEFORE_ACTION));
             if (UNEXPECTED( ( params = zend_hash_str_find(Z_ARRVAL(json_data), CSPEED_STRL("params")) ) != NULL )) {
                 call_user_function(NULL, object, &temp_func, &retval, 1, params);
             } else {
                 call_user_function(NULL, object, &temp_func, &retval, 0, NULL);
             }
+            trigger_events(object, strpprintf(0, EVENT_AFTER_ACTION));
             zval_ptr_dtor(&temp_func);
             /* The result key */
             zval_add_ref(&retval);
@@ -116,7 +134,7 @@ CSPEED_METHOD(Server, handle)   /*{{{ proto Server::handle */
         } else {
             zval_ptr_dtor(&temp_func);
             zval_ptr_dtor(&json_data);
-            char *result = "{\"jsonrpc\":\"2.0\",\"error\":{\"message\":\"Method not found or exists.\",\"code\":-32601 },\"id\":1 }";
+            char *result = "{\"jsonrpc\":\"2.0\",\"error\":{\"message\":\"Method not found or exists.\",\"code\":-32601 },\"id\":-1 }";
             PHPWRITE(result, strlen(result));
             RETURN_FALSE
         }
@@ -148,3 +166,13 @@ CSPEED_INIT(server) /*{{{ proto void server_init() */
     zend_do_inheritance(cspeed_rpc_server_ce, cspeed_controller_ce);
 }/*}}}*/
 
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

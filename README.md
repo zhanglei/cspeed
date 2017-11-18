@@ -1,14 +1,40 @@
-# CSpeed v2.1.0 手册 #
+# CSpeed v2.1.4 手册 #
 
 ## QQ群交流 ##
 
 https://jq.qq.com/?_wv=1027&k=5kSunAR
 
-CSpeed扩展官方QQ群号：
-
-    605383362	
+CSpeed扩展官方QQ群号： **605383362**
 
 ## 最新特性 ##
+
+**CSpeed v2.1.4特性：**
+
+1、修复 **Cs\rpc\Server** bug
+
+	由于在每次请求中，RPC必须携带一个 ID 标识， 故正常情况下 `1` 标识一个正常的返回值，在2.1.4版本中，修复为返回值  `-1` 即表示请求出错.
+	
+2、新增 **CLI** 命令行模式支持
+	
+CSpeed CLI模式下，只需要在入口文件添加如下代码即可启动一个 CLI 模式的CSpeed 框架系统，以便进行需要长时间的请求或者数据处理。
+
+假设入口文件名称为： console.php
+	<?php
+	
+	$cli = new \Cs\console\Task();
+	
+	$cli->run($argv[1]);
+	
+其中 **$argv[1]** 表示 命令行界面的输入参数信息，添加了如上的代码后，用户只需要在入口文件的目录下启动 “终端” or “命令行”，输入如下命令，请事先设置好环境变量或者使用 **PHP** 绝对路径：
+
+    php console.php index/good/info
+    
+就会导向到 **index** 模块 **Good** 控制器 **infoAction** 方法
+命令行模式也支持使用参数，如上所示：
+
+    php console.php index/good/info/name/cspeed
+    
+那么在 **index** 模块 **Good** 控制器 **infoAction** 方法内，可以使用全局变量 **$_GET['name']** 或者CSpeed引擎的继承模块 **\Cs\net\Request** 的 **get('name')** 来获取 命令行模式下的传入参数 **name** 的值 **cspeed**。
 
 **CSpeed v2.1.0特性：**
 

@@ -18,19 +18,17 @@
 
 /* $Id$ */
 
-#ifndef CSPEED_RPC_CLIENT_H
-#define CSPEED_RPC_CLIENT_H
+#ifndef CSPEED_CONSOLE_TASK_H
+#define CSPEED_CONSOLE_TASK_H
 
-zend_class_entry *cspeed_rpc_client_ce;                               /* The RPC Client class */
+/* The \Cs\console\Task class */
+zend_class_entry *cspeed_task_ce;
 
-#define CSPEED_CLIENT_URL                    "__url"                  /* The URL */
-#define CSPEED_CLIENT_POST_DATA              "__data"                 /* The value */
-#define CSPEED_CLIENT_POST_ID                "__id"                   /* The JSON-RPC id */
+CSPEED_INIT(task);
 
-CSPEED_INIT(client);                                                  /* The RPC Client init function */
+
 
 #endif
-
 
 
 /*

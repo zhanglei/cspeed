@@ -83,6 +83,9 @@ PHP_MINIT_FUNCTION(cspeed)
     /* RPC class server */
     server_init();
     client_init();
+
+    /* CLI */
+    task_init();
     
     /* After initialise, return SUCCESS means OK */
     return SUCCESS;

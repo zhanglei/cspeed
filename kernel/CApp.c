@@ -43,8 +43,9 @@
 
 #include "kernel/tool/component.h"
 
-
-int cspeed_deal_reqeust(zend_string *url, zend_fcall_info *zfi, zend_fcall_info_cache *zfic, zval *ret_val) /*{{{ Deal the REQUEST */
+int
+cspeed_deal_reqeust(zend_string *url, zend_fcall_info *zfi, zend_fcall_info_cache *zfic, zval *ret_val) 
+/*{{{ Deal the REQUEST */
 {
     char *path_info = cspeed_request_server_str_key_val("PATH_INFO");
     if (CSPEED_STRING_NOT_EMPTY(path_info) 
@@ -77,9 +78,7 @@ int cspeed_deal_reqeust(zend_string *url, zend_fcall_info *zfi, zend_fcall_info_
         call_user_function(CG(function_table), NULL, &preg_function_name, &preg_replace_result, 3, preg_params);
 
         pcre_cache_entry *pce_regexp;
-        if ((pce_regexp = pcre_get_compiled_regex_cache(Z_STR(preg_replace_result))) == NULL) {
-            return -1;
-        } else {
+        if ((pce_regexp = pcre_get_compiled_regex_cache(Z_STR(preg_replace_result))) != NULL) {
             zval matches, subparts;
             ZVAL_NULL(&subparts);
             php_pcre_match_impl(pce_regexp, CSPEED_STRL(path_info), &matches, &subparts, 0, 0, 0, 0);
@@ -97,9 +96,8 @@ int cspeed_deal_reqeust(zend_string *url, zend_fcall_info *zfi, zend_fcall_info_
                 return 0;
             }
         }
-    } else {
-        return -1;
     }
+    return -1;
 }/*}}}*/
 
 void handle_request(INTERNAL_FUNCTION_PARAMETERS)/*{{{ Handle the user input from the PHP level*/
@@ -150,12 +148,14 @@ int cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCTI
         zval *has_exists = zend_hash_find(Z_ARRVAL_P(all_app_aliases), zend_string_init(CSPEED_STRL(current_alias), 0));
 
         if (has_exists) {   /* Exists the need alias */
-            int real_file_path_size = (Z_STRLEN_P(has_exists) + ZSTR_LEN(class_name_with_namespace) - (slash_pos - ZSTR_VAL(class_name_with_namespace)) + 5);
+            int real_file_path_size = (Z_STRLEN_P(has_exists) + ZSTR_LEN(class_name_with_namespace)
+                                        - (slash_pos - ZSTR_VAL(class_name_with_namespace)) + 5);
             char *real_file_path = (char *)malloc(sizeof(char) * real_file_path_size); /* five means the .php & space*/
             memset(real_file_path, 0, real_file_path_size);
 
             strncat(real_file_path, Z_STRVAL_P(has_exists), Z_STRLEN_P(has_exists));
-            strncat(real_file_path, ZSTR_VAL(class_name_with_namespace) + (slash_pos - ZSTR_VAL(class_name_with_namespace)), ZSTR_LEN(class_name_with_namespace) - (slash_pos - ZSTR_VAL(class_name_with_namespace)));
+            strncat(real_file_path, ZSTR_VAL(class_name_with_namespace) + (slash_pos - ZSTR_VAL(class_name_with_namespace)),
+                                 ZSTR_LEN(class_name_with_namespace) - (slash_pos - ZSTR_VAL(class_name_with_namespace)));
             strncat(real_file_path, ".php", strlen(".php"));
             /* Reslash all slash to reslash */
             cspeed_reverse_slash_char(real_file_path);
@@ -291,12 +291,12 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
         }
         if ( ( Z_TYPE(configs) == IS_ARRAY ) ) {
             zval *config_value, *core_configs;
-            if ( UNEXPECTED( (core_configs = zend_hash_find(Z_ARRVAL(configs), node_core_name)) == NULL )){
+            if ( EXPECTED( (core_configs = zend_hash_find(Z_ARRVAL(configs), node_core_name)) == NULL )){
                 php_error_docref(NULL, E_ERROR, "`%s` configs not found in config file.", ZSTR_VAL(node_core_name));
                 RETURN_FALSE
             }
             /*core.application*/
-            if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_APPLICATION_NAME))) != NULL ) ) {
                 CSPEED_G(core_application) = zend_string_copy(Z_STR_P(config_value));
             } else {
@@ -304,7 +304,7 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
                 RETURN_FALSE
             }
             /*core.bootstrap*/
-            if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_BOOTSTRAP_NAME))) != NULL ) ) {
                 CSPEED_G(core_bootstrap) = zend_string_copy(Z_STR_P(config_value));
             } else {
@@ -312,7 +312,7 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
                 RETURN_FALSE
             }
             /*core.bootstrap*/
-            if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_BOOTSTRAP_METHOD_NAME))) != NULL ) ) {
                 CSPEED_G(core_bootstrap_method_string) = zend_string_copy(Z_STR_P(config_value));
             } else {
@@ -320,7 +320,7 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
                 RETURN_FALSE
             }
             /* core.router.modules */
-            if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_MODULES_NAME) )) != NULL )) {
                 zval modules;
                 array_init(&modules);
@@ -332,7 +332,7 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
                 RETURN_FALSE
             }
             /* core.router.default.module */
-            if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_DEFAULT_MODULE_NAME) )) != NULL )) {
                 CSPEED_G(core_router_default_module) = zend_string_copy(Z_STR_P(config_value));
             } else {
@@ -340,7 +340,7 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
                 RETURN_FALSE
             }
             /* core.router.default.controller */
-            if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_DEFAULT_CONTROLLER_NAME) )) != NULL )) {
                 CSPEED_G(core_router_default_controller) = zend_string_copy(Z_STR_P(config_value));
             } else {
@@ -348,7 +348,7 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
                 RETURN_FALSE
             }
             /* core.router.default.action */
-            if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_DEFAULT_ACTION_NAME) )) != NULL )) {
                 CSPEED_G(core_router_default_action) = zend_string_copy(Z_STR_P(config_value));
             } else {
@@ -356,7 +356,7 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
                 RETURN_FALSE
             }
             /* core.view.ext */
-            if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_VIEW_EXT_NAME) )) != NULL )) {
                 CSPEED_G(core_view_ext) = zend_string_copy(Z_STR_P(config_value));
             } else {
@@ -364,39 +364,39 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
                 RETURN_FALSE
             }
             /* core.view.auto_render */
-            if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_VIEW_AUTO_RENDER) )) != NULL )) {
                 CSPEED_G(core_view_auto_render) = Z_STR_P(config_value);
             } else {
                 php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_VIEW_AUTO_RENDER);
                 RETURN_FALSE
             }
-            if ( UNEXPECTED( (core_configs = zend_hash_find(Z_ARRVAL(configs), node_db_name )) == NULL )){
+            if ( EXPECTED( (core_configs = zend_hash_find(Z_ARRVAL(configs), node_db_name )) == NULL )){
                 php_error_docref(NULL, E_ERROR, "`%s` configs not found in config file.", ZSTR_VAL(node_db_name));
                 RETURN_FALSE
             }
             /* Below are some optional configs to the DB engine, if have, set it to override the setting */
-            if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_DB_TYPE) )) != NULL )) {
                 CSPEED_G(db_master_type) = zend_string_copy(Z_STR_P(config_value));
             }
-            if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_DB_HOST) )) != NULL )) {
                 CSPEED_G(db_master_host) = zend_string_copy(Z_STR_P(config_value));
             }
-            if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_DB_PORT) )) != NULL )) {
                 CSPEED_G(db_master_port) = zend_string_copy(Z_STR_P(config_value));
             }
-            if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_DB_DB_NAME) )) != NULL )) {
                 CSPEED_G(db_master_dbname) = zend_string_copy(Z_STR_P(config_value));
             }
-            if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_DB_USERNAME) )) != NULL )) {
                 CSPEED_G(db_master_username) = zend_string_copy(Z_STR_P(config_value));
             }
-            if ( UNEXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_DB_PASSWORD) )) != NULL )) {
                 CSPEED_G(db_master_password) = zend_string_copy(Z_STR_P(config_value));
             }

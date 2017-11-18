@@ -26,3 +26,14 @@ zend_class_entry *cspeed_rpc_server_ce;                       /* The Class entry
 CSPEED_INIT(server);                                          /* The RPC Server Class */
 
 #endif
+
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */
