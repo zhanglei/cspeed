@@ -158,10 +158,6 @@ parse_cli_path_info(zval *path_info_array)
         }
     } ZEND_HASH_FOREACH_END();
 
-    /* Auto render the view file */
-    zval view_object;
-    auto_render_view_file(controller_ptr, &controller_obj, &view_object);
-
     /* To call the parent initialise method to do the initialise */
     zend_class_entry *parent = controller_ptr;
 
@@ -184,19 +180,11 @@ parse_cli_path_info(zval *path_info_array)
         return ;
     }
     zend_string_release(action_append_action);
-    /* To auto render the view file or not. */
-    if (!ZVAL_IS_NULL(&view_object)) {
-        zval ret_val;
-        render_view_file(&view_object, strpprintf(0, "%s/%s", ZSTR_VAL(CSPEED_G(core_router_default_controller)), 
-                ZSTR_VAL(CSPEED_G(core_router_default_action))), NULL, &ret_val);
-        zval_ptr_dtor(&ret_val);
-    }
     /* Do the after_action work */
     trigger_events(&controller_obj, strpprintf(0, "%s", EVENT_AFTER_ACTION));
 
     /* Release the unused memory */
     zval_ptr_dtor(&controller_obj);
-    zval_ptr_dtor(&view_object);
     /* Release the not need memory */
     zend_string_release(temp_module_path);
     zend_string_release(default_module);
