@@ -19,7 +19,7 @@ CSpeed扩展官方QQ群号： **605383362**
 	
 CSpeed CLI模式下，只需要在入口文件添加如下代码即可启动一个 CLI 模式的CSpeed 框架系统，以便进行需要长时间的请求或者数据处理。
 
-假设入口文件名称为： ```phpconsole.php```
+假设入口文件名称为： ```console.php```
 
 ```php
 <?php
