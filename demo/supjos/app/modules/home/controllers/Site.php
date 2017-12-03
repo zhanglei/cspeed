@@ -1,5 +1,7 @@
 <?php
 
+namespace app\modules\home\controllers;
+
 class Site extends \Cs\mvc\Controller
 {
     /**

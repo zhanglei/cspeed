@@ -1,5 +1,7 @@
 <?php
 
+namespace app\modules\home\controllers;
+
 class Index extends \Cs\mvc\Controller
 {
 	function indexAction()

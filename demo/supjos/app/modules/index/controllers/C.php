@@ -1,5 +1,7 @@
 <?php
 
+namespace app\modules\index\controllers;
+
 class C
 {
 	function indexAction()

@@ -231,9 +231,14 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_run, 0, 0, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_set_composer_loader, 0, 0, 1)
+    ZEND_ARG_INFO(0, composer_loader_file)
+ZEND_END_ARG_INFO()
 /* }}} */
 
-void initialise_app_object(zval *app_object, char *path)
+void 
+initialise_app_object(zval *app_object, char *path)
 {
     /* In the constructor initialise the aliases with the default alias named `app` */
     zval *default_aliases = zend_read_property(cspeed_app_ce, app_object, CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), 1, NULL);
@@ -551,6 +556,28 @@ CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
     }
 }/*}}}*/
 
+CSPEED_METHOD(App, setComposerLoader) /*{{{ proto App::setComposerLoader($filePathName) */
+{
+    zend_string *composer_file;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &composer_file) == FAILURE) {
+        return ;
+    }
+    
+    char path[MAXPATHLEN];
+    cspeed_get_cwd(path);
+    if (CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(composer_file))) {
+        if ( *(ZSTR_VAL(composer_file)) == '/' ) {
+            check_file_exists(ZSTR_VAL(composer_file));
+            cspeed_require_file(ZSTR_VAL(composer_file), NULL, NULL, NULL);
+        } else {
+            zend_string *temp_file_path = strpprintf(0, "%s/%s", path, ZSTR_VAL(composer_file));
+            check_file_exists(ZSTR_VAL(temp_file_path));
+            cspeed_require_file(ZSTR_VAL(temp_file_path), NULL, NULL, NULL);
+        }
+    }
+
+}/*}}}*/
+
 /* The functions for the class CApp */
 static const zend_function_entry cspeed_app_functions[] = {
     CSPEED_ME(App, __construct,         arginfo_cspeed_construct,                   ZEND_ACC_PUBLIC)
@@ -563,9 +590,10 @@ static const zend_function_entry cspeed_app_functions[] = {
     CSPEED_ME(App, options,             arginfo_cspeed_options,                     ZEND_ACC_PUBLIC)
     CSPEED_ME(App, autoload,            arginfo_cspeed_autoload,                    ZEND_ACC_PUBLIC)
     CSPEED_ME(App, setAlias,            arginfo_cspeed_set_alias,                   ZEND_ACC_PUBLIC)
-    CSPEED_ME(App, getApp,              arginfo_cspeed_get_app,                     ZEND_ACC_PUBLIC)
+    CSPEED_ME(App, getApp,              arginfo_cspeed_get_app,                     ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
     CSPEED_ME(App, run,                 arginfo_cspeed_run,                         ZEND_ACC_PUBLIC)
     CSPEED_ME(App, bootstrap,           arginfo_cspeed_bootstrap,                   ZEND_ACC_PUBLIC)
+    CSPEED_ME(App, setComposerLoader,   arginfo_cspeed_set_composer_loader,         ZEND_ACC_PUBLIC)
     PHP_FE_END
 };
 /*}}}*/

@@ -127,4 +127,12 @@ class App extends tool\Component
         return $this;
     }
 
+    /**
+     * To use the Composer loader
+     * @param $file
+     */
+    function setComposerLoader($file)
+    {
+
+    }
 }
