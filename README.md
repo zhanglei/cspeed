@@ -1,4 +1,4 @@
-# CSpeed v2.1.5手册 #
+# CSpeed v2.1.8手册 #
 
 ## QQ群交流 ##
 
@@ -7,6 +7,93 @@ https://jq.qq.com/?_wv=1027&k=5kSunAR
 CSpeed扩展官方QQ群号： **605383362**
 
 ## 最新特性 ##
+
+**CSpeed v2.1.8特性：**
+1、配置文件变更：
+```shell
+[db]
+db.mater.type                   =  mysql                 ; 数据库类型，默认：mysql
+db.mater.host                   =  localhost             ; 数据库主机地址
+db.mater.port                   =  3306                  ; 数据库端口
+db.mater.dbname                 =  cspeed                ; 数据库名称
+db.mater.username               =  cspeed                ; 数据库用户名
+db.mater.password               =  cspeed                ; 数据库密码
+```
+新版本配置文件：
+```shell
+[db]
+db.master.dsn                   =  'mysql:host=localhost;port=3306;dbname=supjos'    ; 数据库类型，默认：mysql
+db.master.username              =  root                                              ; 数据库用户名
+db.master.password              =  3333                                              ; 数据库密码
+```
+变更的主要原因在与使用```PDO```形式的dsn，能够更好的兼容各种数据库：Oracle、Pg、SqlServer等
+
+2、增加支持多数据库配置链接与切换：
+```php
+$di->set('db1', function(){
+	/* 省略任何参数表示从ini配置文件获取 */
+	return new \Cs\db\pdo\Adapter();
+});
+
+$di->set('db2', function(){
+    	/* 省略的参数系统自动从ini配置文件获取 */
+	return new \Cs\db\pdo\Adapter([
+	'dsn' => 'mysql:host=localhost;port=3308;dbname=product',
+	'username' => 'root',
+	'password' => 'root'
+    ]);
+});
+```
+如上配置了两个数据库链接，如果在使用模型的过程中需要进行切换，可以使用模型的方法：
+```php
+/* 表示当前模型操作```db2```数据库 */
+$model->setDb('db2');
+
+/* 表示当前模型操作```db1```数据库 */
+$model->setDb('db1');
+```
+更加方便的方式是在模型的构造函数中使用本方法：
+```php
+<?php
+
+namespace app\models;
+
+class User extends \Cs\mvc\Model
+{
+    public function __construct()
+    {
+        $this->on(User::EVENT_BEFORE_SAVE, [$this, 'beforeSave']);
+        $this->setDb('db2');
+    }
+
+    function beforeSave()
+    {
+        echo "BeforeSave <br>";
+    }
+
+    public function tableName()
+    {
+        return 'www_product';
+    }
+}
+```
+
+注意：```\Cs\db\pdo\Adapter```类本身就表示一个数据库链接，故```\Cs\db\pdo\Adapter```不支持数据库切换，用户可以直接使用```\Cs\db\pdo\Adapter```进行数据库的操作，CSpeed引擎的```\Cs\mvc\Model```本身就是基于```\Cs\db\pdo\Adapter```进行的二次封装.
+
+可以直接使用 ```\Cs\db\pdo\Adapter``` 分别操作数据库:
+```php
+$db1 = $this->di->get('db1');
+$db1->query('UPDATE xxx FROM xxx SET xx=xx');
+$db1->execute();
+```
+或者使用预处理：
+```php
+$db1 = $this->di->get('db1');
+$db1->query('UPDATE xxx FROM xxx SET xx=?', [99]);
+/* 或者如下的绑定名 */
+$db1->query('UPDATE xxx FROM xxx SET id=:id', [‘id’ => 99]);
+$db1->execute();
+```
 
 **CSpeed v2.1.5特性：**
 
@@ -17,7 +104,7 @@ CSpeed扩展官方QQ群号： **605383362**
 $app->setComposerLoader("xxx/autoload.php");
 ```
 
-2、在框架的任何位置均可使用此方法加载 ```compoesr```
+2、在框架的任何位置均可使用此方法加载 ```composer```
 ```php
 \Cs\App::getApp()->setComposerLoader("xx/autoload.php");
 ```

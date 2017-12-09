@@ -44,7 +44,8 @@ ZEND_END_ARG_INFO()
 
 /*}}}*/
 
-void initialise_di_object_properties(zval *di_object)/*{{{ Initialise the Di object's properties */
+void 
+initialise_di_object_properties(zval *di_object)/*{{{ Initialise the Di object's properties */
 {
     zval objects;
     array_init(&objects);

@@ -31,6 +31,7 @@ zend_class_entry *cspeed_model_ce;                                      /* The M
 #define CSPEED_MODEL_ORDER_BY           "__cspeed_model_order_by"       /* ORDER BY */
 #define CSPEED_MODEL_GROUP_BY           "__cspeed_model_group_by"       /* GROUP BY */
 #define CSPEED_MODEL_TABLE_NAME         "__cspeed_model_table_name"     /* Model table name */
+#define CSPEED_MODEL_ULTIMATE_PDO       "__cspeed_model_ultimate_pdo"   /* The finaly pdo object to do the job */
 
 #define EVENT_BEFORE_SAVE               "EVENT_BEFORE_SAVE"             /* BEFORE_SAVE */
 #define EVENT_AFTER_SAVE                "EVENT_AFTER_SAVE"              /* AFTER_SAVE */

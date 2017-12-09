@@ -140,20 +140,8 @@ CSPEED_METHOD(Task, __construct)/*{{{ Task::construct()*/
             }
             /* Below are some optional configs to the DB engine, if have, set it to override the setting */
             if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
-                CSPEED_STRL(CORE_CONFIG_DB_TYPE) )) != NULL )) {
-                CSPEED_G(db_master_type) = zend_string_copy(Z_STR_P(config_value));
-            }
-            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
-                CSPEED_STRL(CORE_CONFIG_DB_HOST) )) != NULL )) {
-                CSPEED_G(db_master_host) = zend_string_copy(Z_STR_P(config_value));
-            }
-            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
-                CSPEED_STRL(CORE_CONFIG_DB_PORT) )) != NULL )) {
-                CSPEED_G(db_master_port) = zend_string_copy(Z_STR_P(config_value));
-            }
-            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
-                CSPEED_STRL(CORE_CONFIG_DB_DB_NAME) )) != NULL )) {
-                CSPEED_G(db_master_dbname) = zend_string_copy(Z_STR_P(config_value));
+                CSPEED_STRL(CORE_CONFIG_DB_DSN) )) != NULL )) {
+                CSPEED_G(db_master_dsn) = zend_string_copy(Z_STR_P(config_value));
             }
             if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_DB_USERNAME) )) != NULL )) {

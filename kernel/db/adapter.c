@@ -146,14 +146,24 @@ ZEND_END_ARG_INFO()
 
 CSPEED_METHOD(Adapter, __construct)/*{{{ proto Adapter::__construct(array $options = [])*/
 {    
-    if (CSPEED_G(db_master_type) == NULL) {
-        php_error_docref(NULL, E_ERROR, "PDO need a valid DB connection type.");
-        RETURN_FALSE
+    zval *pdo_options = NULL;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a", &pdo_options) == FAILURE){
+        return ;
     }
-    if (CSPEED_G(db_master_dbname) == NULL) {
-        php_error_docref(NULL, E_ERROR, "PDO need a valid connection dbname.");
-        RETURN_FALSE
+    /* If setting the data from the given options */
+    if (pdo_options != NULL) {
+        zval *option_value;
+        if ( EXPECTED( (option_value = zend_hash_find(Z_ARRVAL_P(pdo_options), zend_string_init(CSPEED_STRL("dsn"), 0))) != NULL )) {
+            CSPEED_G(db_master_dsn) = zend_string_copy(Z_STR_P(option_value));
+        }
+        if ( EXPECTED( (option_value = zend_hash_find(Z_ARRVAL_P(pdo_options), zend_string_init(CSPEED_STRL("username"), 0))) != NULL )) {
+            CSPEED_G(db_master_username) = zend_string_copy(Z_STR_P(option_value));
+        }
+        if ( EXPECTED( (option_value = zend_hash_find(Z_ARRVAL_P(pdo_options), zend_string_init(CSPEED_STRL("password"), 0))) != NULL )) {
+            CSPEED_G(db_master_password) = zend_string_copy(Z_STR_P(option_value));
+        }
     }
+
     if (CSPEED_G(db_master_username) == NULL) {
         php_error_docref(NULL, E_ERROR, "PDO need a valid username.");
         RETURN_FALSE
@@ -162,25 +172,26 @@ CSPEED_METHOD(Adapter, __construct)/*{{{ proto Adapter::__construct(array $optio
         php_error_docref(NULL, E_ERROR, "PDO need a valid password.");
         RETURN_FALSE
     }
-    zval *pdo_options = NULL;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a", &pdo_options) == FAILURE){
-        return ;
-    }
-    /* adapter:host=localhost;port=3306;dbname=xxxx */
-    zend_string *dsn = strpprintf(0, "%s:host=%s;port=%s;dbname=%s", ZSTR_VAL(CSPEED_G(db_master_type)), 
-                       CSPEED_G(db_master_host) ? ZSTR_VAL(CSPEED_G(db_master_host)) : "localhost",
-                       CSPEED_G(db_master_port) ? ZSTR_VAL(CSPEED_G(db_master_port)) : "3306",
-                                                  ZSTR_VAL(CSPEED_G(db_master_dbname))
-     );
+
     zval pdo_object;
     if (pdo_options == NULL) {
-        cspeed_pdo_construct(&pdo_object, ZSTR_VAL(dsn), ZSTR_VAL(CSPEED_G(db_master_username)), 
+        cspeed_pdo_construct(&pdo_object, ZSTR_VAL(CSPEED_G(db_master_dsn)), ZSTR_VAL(CSPEED_G(db_master_username)), 
             ZSTR_VAL(CSPEED_G(db_master_password)), NULL);
-    } else if ( pdo_options && (Z_TYPE_P(pdo_options) == IS_ARRAY) ) {
-        cspeed_pdo_construct(&pdo_object, ZSTR_VAL(dsn), ZSTR_VAL(CSPEED_G(db_master_username)), 
-            ZSTR_VAL(CSPEED_G(db_master_password)), pdo_options);
+    } else if ( pdo_options && (Z_TYPE_P(pdo_options) == IS_ARRAY) ) 
+    {
+        zval *option_value;
+        if ( EXPECTED( (option_value = zend_hash_find(Z_ARRVAL_P(pdo_options), 
+            zend_string_init(CSPEED_STRL("options"), 0))) != NULL )) 
+        {
+            cspeed_pdo_construct(&pdo_object, ZSTR_VAL(CSPEED_G(db_master_dsn)), ZSTR_VAL(CSPEED_G(db_master_username)), 
+                ZSTR_VAL(CSPEED_G(db_master_password)), option_value);
+        } else {
+            cspeed_pdo_construct(&pdo_object, ZSTR_VAL(CSPEED_G(db_master_dsn)), ZSTR_VAL(CSPEED_G(db_master_username)), 
+                ZSTR_VAL(CSPEED_G(db_master_password)), NULL);
+        }
     }
     /* Store the getting pdo object into the property */
+    zend_update_property(cspeed_adapter_ce, getThis(), CSPEED_STRL(CSPEED_DB_THIS_PDO), &pdo_object);
     zend_update_static_property(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_PDO_OBJECT), &pdo_object);
 }/*}}}*/
 
@@ -525,6 +536,7 @@ CSPEED_INIT(adapter)/*{{{*/
     zend_declare_property_string(cspeed_adapter_ce, CSPEED_STRL(CSPEED_ADAPTER_RAW_SQL), "", ZEND_ACC_PROTECTED);
     zend_declare_property_null(cspeed_adapter_ce, CSPEED_STRL(CSPEED_ADAPTER_BIND_PARAMS), ZEND_ACC_PROTECTED);
     zend_declare_property_null(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_PDO_OBJECT), ZEND_ACC_PUBLIC|ZEND_ACC_STATIC);
+    zend_declare_property_null(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_THIS_PDO), ZEND_ACC_PUBLIC);
 }/*}}}*/
 
 

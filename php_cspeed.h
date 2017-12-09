@@ -24,7 +24,7 @@
 extern zend_module_entry cspeed_module_entry;
 #define phpext_cspeed_ptr &cspeed_module_entry
 
-#define PHP_CSPEED_VERSION "2.1.7"
+#define PHP_CSPEED_VERSION "2.1.8"
 
 #ifdef PHP_WIN32
 #	define PHP_CSPEED_API __declspec(dllexport)
@@ -55,10 +55,7 @@ ZEND_BEGIN_MODULE_GLOBALS(cspeed)
     zend_string   *core_view_auto_render;
 
     /* Below are the DB configs */
-    zend_string   *db_master_type;
-    zend_string   *db_master_host;
-    zend_string   *db_master_port;
-    zend_string   *db_master_dbname;
+    zend_string   *db_master_dsn;
     zend_string   *db_master_username;
     zend_string   *db_master_password;
 
@@ -99,10 +96,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define CORE_CONFIG_VIEW_AUTO_RENDER            "core.view.auto.render"
 
 /* Db configs */
-#define CORE_CONFIG_DB_TYPE                     "db.master.type"
-#define CORE_CONFIG_DB_HOST                     "db.master.host"
-#define CORE_CONFIG_DB_PORT                     "db.master.port"
-#define CORE_CONFIG_DB_DB_NAME                  "db.master.dbname"
+#define CORE_CONFIG_DB_DSN                      "db.master.dsn"
 #define CORE_CONFIG_DB_USERNAME                 "db.master.username"
 #define CORE_CONFIG_DB_PASSWORD                 "db.master.password"
 

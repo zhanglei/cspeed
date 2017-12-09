@@ -18,11 +18,13 @@ class Controller extends \Cs\tool\Component
 
     /**
      * @var $di \Cs\di\Di
+     * Each value set to the ```di``` can be accessed by di->get('xx')
      */
     public $di;
 
     /**
      * @var $view \Cs\mvc\View
+     * NOTE: Only the CSpeed autorender the View template, this variable will be initialised
      */
     public $view;
 
@@ -30,4 +32,5 @@ class Controller extends \Cs\tool\Component
      * @var $router \Cs\mvc\Router
      */
     public $router;
+
 }
