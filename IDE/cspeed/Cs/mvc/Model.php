@@ -127,4 +127,11 @@ class Model extends \Cs\tool\Component
     function delete()
     {
     }
+
+    /**
+     * Set the current model using which Db adapter connection.
+     */
+    function setDb()
+    {
+    }
 }

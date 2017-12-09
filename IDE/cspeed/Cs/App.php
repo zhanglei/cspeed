@@ -128,7 +128,7 @@ class App extends tool\Component
     }
 
     /**
-     * To use the Composer loader
+     * To use the Composer loade
      * @param $file
      */
     function setComposerLoader($file)

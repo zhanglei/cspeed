@@ -164,6 +164,10 @@ CSPEED_METHOD(Adapter, __construct)/*{{{ proto Adapter::__construct(array $optio
         }
     }
 
+    if (CSPEED_G(db_master_dsn) == NULL) {
+        php_error_docref(NULL, E_ERROR, "PDO need a valid dsn.");
+        RETURN_FALSE
+    }
     if (CSPEED_G(db_master_username) == NULL) {
         php_error_docref(NULL, E_ERROR, "PDO need a valid username.");
         RETURN_FALSE
