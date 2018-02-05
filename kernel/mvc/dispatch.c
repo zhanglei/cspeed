@@ -71,9 +71,9 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
     char *root_dir          = ZSTR_VAL(CSPEED_G(core_application));
     
     /* Get the default value from the engine. */
-    zend_string *default_module    = CSPEED_G(core_router_default_module);
-    zend_string *default_controller= CSPEED_G(core_router_default_controller);
-    zend_string *default_action    = CSPEED_G(core_router_default_action);
+    zend_string *default_module    = zend_string_tolower(CSPEED_G(core_router_default_module));
+    zend_string *default_controller= zend_string_tolower(CSPEED_G(core_router_default_controller));
+    zend_string *default_action    = zend_string_tolower(CSPEED_G(core_router_default_action));
 
     /* The module path */
     zend_string *temp_module_path = NULL, *temp_controller_path = NULL;
@@ -135,6 +135,7 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
         php_error_docref(NULL, E_ERROR, "Controller class :`%s` not found.", ZSTR_VAL(default_controller));
         return ;
     }
+    CSPEED_G(core_router_default_controller) = zend_string_tolower(CSPEED_G(core_router_default_controller));
     /* Parsing the action in PATH_INFO */
     if (UNEXPECTED( (temp_mca_value = zend_hash_index_find(Z_ARRVAL_P(path_info_array), 3)) != NULL )) {
         default_action = zend_string_copy(Z_STR_P(temp_mca_value));
@@ -240,6 +241,20 @@ void dispather_url()    /* {{{ Dispatcher the URL */
 {
     /* PATH_INFO */
     char *path_info = cspeed_request_server_str_key_val("PATH_INFO");
+
+    char *query_pos; /* The query position begin string */
+
+    /* To cut the Query string for the url */
+    if ( EXPECTED( (query_pos = strchr(path_info, '?')) != NULL ) ) {
+        path_info = substr(path_info, 0, query_pos - path_info);
+    }
+
+    int pattern_pos;
+
+    /* To remove the url_pattern string */
+    if ( EXPECTED( ( pattern_pos = stringstr( path_info, ZSTR_VAL(CSPEED_G(core_url_pattern)) ) ) != FALSE ) ) {
+        path_info = substr(path_info, 0, pattern_pos);
+    }
 
     /* To get the PATH_INFO array */
     zval path_info_array;

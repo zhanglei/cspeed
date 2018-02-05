@@ -376,6 +376,15 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
                 php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_VIEW_AUTO_RENDER);
                 RETURN_FALSE
             }
+            /* core.url.pattern */
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+                CSPEED_STRL(CORE_CONFIG_URL_PATTERN) )) != NULL )) {
+                CSPEED_G(core_url_pattern) = Z_STR_P(config_value);
+            } else {
+                php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_URL_PATTERN);
+                RETURN_FALSE
+            }
+            /* The DB config */
             if ( EXPECTED( (core_configs = zend_hash_find(Z_ARRVAL(configs), node_db_name )) == NULL )){
                 php_error_docref(NULL, E_ERROR, "`%s` configs not found in config file.", ZSTR_VAL(node_db_name));
                 RETURN_FALSE

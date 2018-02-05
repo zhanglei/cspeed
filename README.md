@@ -7,6 +7,9 @@ https://jq.qq.com/?_wv=1027&k=5kSunAR
 CSpeed扩展官方QQ群号： **605383362**
 
 ## 最新特性 ##
+**CSpeed v2.1.9特性：**
+配置文件新增伪静态设置，默认伪静态后缀: ```.html```
+core.url.pattern				= '.html'				 ; URL是否允许伪静态设置
 
 **CSpeed v2.1.8特性：**
 

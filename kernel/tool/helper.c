@@ -83,6 +83,51 @@ char *title_lower_string(char *src) /*{{{ Upper case the first char */
     return src;
 }/*}}}*/
 
+/**
+ * @brief substr
+ * @param str       The string which need to be cut
+ * @param start     The start pos which the sub-string begin
+ * @param length    The sub-string's length
+ * @return string   The result string which you need
+ */
+char *substr(char *str, int start, int length)
+{
+    int str_len = strlen(str);
+    int result_len;
+    if (length == -1) result_len = str_len - start;
+    else result_len = length + 1;
+
+    char *result = (char *)malloc(sizeof(char) * result_len);
+    memset(result, 0, result_len);
+    if (start >= 0) memcpy(result, str + start, result_len - 1);
+    else memcpy(result, str + (str_len - abs(start)), result_len - 1);
+
+    return result;
+}
+
+/**
+ * @brief strstr
+ * @param str
+ * @param pattern
+ * @return
+ */
+int stringstr(char *str, char *pattern)
+{
+    size_t start = 0;
+    for (; start < strlen(str); start++) {
+        if ( *(str + start) == *pattern ) {
+            size_t j = 0;
+            size_t pattern_len = strlen(pattern);
+            for (; j <= pattern_len; j++) {
+                if (j == pattern_len ) return start;
+                if ( *(str + start + j) == *(pattern + j) ) continue;
+                else return FALSE;
+            }
+        }
+    }
+    return FALSE;
+}
+
 void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_type, zval *arr) /* {{{ php_simple_ini_parser_cb */
 {
     switch (callback_type) {

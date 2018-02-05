@@ -128,8 +128,33 @@ CSPEED_METHOD(View, render)         /*{{{ proto View::render($file, $variables) 
 
 CSPEED_METHOD(View, partial)         /*{{{ proto View::partial($file, $variables) */
 {
-    render_file(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL, getThis());
+    // render_file(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL, getThis());
+    zend_string *temp_file;
+    zval *array_variables = NULL;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|a", &temp_file, &array_variables) == FAILURE) {
+        return ;
+    }
+    /* Fix the ZTS path problem */
+    char path[MAXPATHLEN];
+    cspeed_get_cwd(path);
 
+    zval *suffix    = zend_read_property(cspeed_view_ce, getThis(), CSPEED_STRL(CSPEED_VIEW_SUFFIX), 1, NULL);
+    
+    zend_string *real_path_file = strpprintf(0, "%s/%s/views/%s.%s", path, ZSTR_VAL(CSPEED_G(core_application)), 
+                    ZSTR_VAL(temp_file), ZSTR_VAL(CSPEED_G(core_view_ext)));
+    
+    zval *view_variables = zend_read_property(cspeed_view_ce, getThis(), CSPEED_STRL(CSPEED_VIEW_VARIABLES), 1, NULL);
+    if (array_variables && ( Z_TYPE_P(view_variables) == IS_ARRAY ) ) {
+        zend_string *var_name;
+        zval *var_value;
+        ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(array_variables), var_name, var_value){
+            add_assoc_zval(view_variables, ZSTR_VAL(var_name), var_value);
+        } ZEND_HASH_FOREACH_END();
+    }
+    check_file_exists(ZSTR_VAL(real_path_file));
+    if( cspeed_require_file(ZSTR_VAL(real_path_file), view_variables, getThis(), NULL) == FALSE) {
+        return ;
+    }
 }/*}}}*/
 
 CSPEED_METHOD(View, getRender)      /*{{{ proto View::getRender($file, $variables)*/

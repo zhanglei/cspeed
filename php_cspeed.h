@@ -53,6 +53,7 @@ ZEND_BEGIN_MODULE_GLOBALS(cspeed)
     zend_string   *core_router_default_action;
     zend_string   *core_view_ext;
     zend_string   *core_view_auto_render;
+    zend_string   *core_url_pattern;
 
     /* Below are the DB configs */
     zend_string   *db_master_dsn;
@@ -94,6 +95,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define CORE_CONFIG_DEFAULT_ACTION_NAME         "core.router.default.action"
 #define CORE_CONFIG_VIEW_EXT_NAME               "core.view.ext"
 #define CORE_CONFIG_VIEW_AUTO_RENDER            "core.view.auto.render"
+#define CORE_CONFIG_URL_PATTERN                 "core.url.pattern"
 
 /* Db configs */
 #define CORE_CONFIG_DB_DSN                      "db.master.dsn"
@@ -108,6 +110,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define CORE_ROUTER_DEFAULT_CONTROLLER          "index"
 #define CORE_ROUTER_DEFAULT_ACTION              "index"
 #define CORE_VIEW_EXT                           "html"
+#define CORE_URL_PATTERN                        ".html"
 #define CORE_VIEW_AUTO_RENDER                   "0"
 #define CORE_BOOSTRAP_METHOD_STRING             "__init"
 #define CORE_BOOTSTRAP_CLASS_NAME               "Bootstrap"
@@ -123,7 +126,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define CSPEED_STRL(str)                (str), strlen(str)
 #define CSPEED_METHOD_IN_OBJECT(object, method_name) ( ( Z_OBJ_HT_P(object)->get_method(&Z_OBJ_P(object),\
                                         zend_string_init(CSPEED_STRL(method_name), 0), NULL)) != NULL )
-
+#define substring( x, y ) substr( (x), (y), -1 )
 #define CSPEED_STRING_NOT_EMPTY(char)     ((*char) != '\0')
 
 extern ZEND_DECLARE_MODULE_GLOBALS(cspeed);
