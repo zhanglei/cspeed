@@ -21,7 +21,7 @@
 #ifndef CSPEED_APP_H
 #define CSPEED_APP_H
 
-zend_class_entry *cspeed_app_ce;                                        /* The global CApp class entry */
+extern zend_class_entry *cspeed_app_ce;                                        /* The global CApp class entry */
 
 #define CSPEED_APP_AUTOLOAD_ALIASES     "__cspeed_app_aliases"          /* The aliases which let the system to locate the file */
 #define CSPEED_APP_INSTANCE             "__app"                         /* Single App object */

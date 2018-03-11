@@ -21,7 +21,7 @@
 #ifndef CSPEED_MVC_ROUTER_H
 #define CSPEED_MVC_ROUTER_H
 
-zend_class_entry *cspeed_router_ce;                                           /* The \Cs\mvc\Router Class */
+extern zend_class_entry *cspeed_router_ce;                                           /* The \Cs\mvc\Router Class */
 
 #define CSPEED_ROUTER_ALL_ROUTINES              "__cspeed_all_routines"       /* All routines for the Router */
 

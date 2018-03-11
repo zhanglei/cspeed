@@ -27,21 +27,27 @@
 #include "ext/standard/info.h"
 #include "php_cspeed.h"
 
-#include "bootstrap.h"
+#include "kernel/bootinit.h"
 
-/*{{{ All ARG_INFO */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_bootstrap_construct, 0, 0, 0)
-ZEND_END_ARG_INFO()
-/*}}}*/
 
-static const zend_function_entry cspeed_bootstrap_functions[] = { /*{{{ All methods of the interface */
+static const zend_function_entry cspeed_bootinit_functions[] = { /*{{{*/
 
     PHP_FE_END
 };/*}}}*/
 
-CSPEED_INIT(bootstrap)  /*{{{ The initialise module function */
+CSPEED_INIT(bootinit) /*{{{*/
 {
     zend_class_entry ce;
-    INIT_NS_CLASS_ENTRY(ce, "Cs", "Bootstrap", NULL);
-    cspeed_bootstrap_ce = zend_register_internal_interface(&ce);
+    INIT_NS_CLASS_ENTRY(ce, "Cs", "BootInit", cspeed_bootinit_functions);
+    cspeed_bootinit_ce = zend_register_internal_interface(&ce);
 }/*}}}*/
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

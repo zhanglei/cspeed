@@ -21,7 +21,7 @@
 #ifndef CSPEED_COMPONENT_H
 #define CSPEED_COMPONENT_H
 
-zend_class_entry *cspeed_component_ce;
+extern zend_class_entry *cspeed_component_ce;
 
 int trigger_events(zval *object_ptr, zend_string *event_name);           /* To raise all the event from the exists events list */
 

@@ -54,6 +54,9 @@ PHP_MINIT_FUNCTION(cspeed)
     /* Event support */
     component_init();
 
+    /* Bootstrap interface */
+    bootinit_init();
+
     /* Di|App|View */
     di_init();
     app_init();
@@ -76,9 +79,6 @@ PHP_MINIT_FUNCTION(cspeed)
 
     /* Router class */
     router_init();
-
-    /* Bootstrap interface */
-    bootstrap_init();
 
     /* RPC class server */
     server_init();

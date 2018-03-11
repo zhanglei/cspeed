@@ -21,7 +21,7 @@
 #ifndef CSPEED_RPC_CLIENT_H
 #define CSPEED_RPC_CLIENT_H
 
-zend_class_entry *cspeed_rpc_client_ce;                               /* The RPC Client class */
+extern zend_class_entry *cspeed_rpc_client_ce;                               /* The RPC Client class */
 
 #define CSPEED_CLIENT_URL                    "__url"                  /* The URL */
 #define CSPEED_CLIENT_POST_DATA              "__data"                 /* The value */

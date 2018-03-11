@@ -43,6 +43,7 @@
 #include "ext/standard/php_string.h"
 
 #include "kernel/tool/component.h"
+#include <stdlib.h>
 
 #include "main/SAPI.h"          /* for sapi */
 
@@ -242,18 +243,29 @@ void dispather_url()    /* {{{ Dispatcher the URL */
     /* PATH_INFO */
     char *path_info = cspeed_request_server_str_key_val("PATH_INFO");
 
-    char *query_pos; /* The query position begin string */
-
-    /* To cut the Query string for the url */
-    if ( EXPECTED( (query_pos = strchr(path_info, '?')) != NULL ) ) {
-        path_info = substr(path_info, 0, query_pos - path_info);
-    }
+    int can_free = FALSE;
 
     int pattern_pos;
 
     /* To remove the url_pattern string */
     if ( EXPECTED( ( pattern_pos = stringstr( path_info, ZSTR_VAL(CSPEED_G(core_url_pattern)) ) ) != FALSE ) ) {
-        path_info = substr(path_info, 0, pattern_pos);
+        
+        char *path_two = (char *)malloc(sizeof(char) * (pattern_pos + 1));
+
+        memset(path_two, 0, (pattern_pos + 1));
+        memcpy(path_two, path_info, pattern_pos);
+
+        path_info = path_two;
+
+        can_free = TRUE;
+    }
+
+    char *query_pos; /* The query position begin string */
+
+    /* To cut the Query string for the url */
+    if ( EXPECTED( (query_pos = strchr(path_info, '?')) != NULL ) ) {
+        path_info = substr(path_info, 0, query_pos - path_info);
+        can_free = TRUE;
     }
 
     /* To get the PATH_INFO array */
@@ -312,6 +324,10 @@ void dispather_url()    /* {{{ Dispatcher the URL */
                 }
             }
         } ZEND_HASH_FOREACH_END();
+    }
+
+    if (can_free) {
+        free(path_info);
     }
 
     /*After Parsing the Router URL rules, parsing the PATH_INFO TO the Right Model|Controller|Action */

@@ -18,11 +18,20 @@
 
 /* $Id$ */
 
-#ifndef CSPEED_BOOTSTRAP_H
-#define CSPEED_BOOTSTRAP_H
+#ifndef CSPEED_DB_MODEL_INTERFACE_H
+#define CSPEED_DB_MODEL_INTERFACE_H
 
-zend_class_entry *cspeed_bootstrap_ce;                                    /* The \Cs\Bootstrap interface */
+extern zend_class_entry *cspeed_bootinit_ce;
 
-CSPEED_INIT(bootstrap);                                                   /* The bootstrap_init() function */
+CSPEED_INIT(bootinit);
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: noet sw=4 ts=4 fdm=marker
+ * vim<600: noet sw=4 ts=4
+ */

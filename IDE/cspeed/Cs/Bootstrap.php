@@ -6,6 +6,8 @@
  * Time: 上午11:54
  */
 
+namespace Cs;
+
 interface Bootstrap
 {
 

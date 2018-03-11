@@ -28,7 +28,7 @@
 #include "php_cspeed.h"
 
 #include "kernel/CApp.h"
-#include "kernel/bootstrap.h"
+#include "kernel/bootinit.h"
 #include "kernel/net/request.h"
 
 #include "kernel/tool/helper.h"
@@ -509,7 +509,7 @@ CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
     zend_class_entry *bootstrap_class_ptr = zend_hash_find_ptr(EG(class_table), 
                     zend_string_tolower(zend_string_init(CSPEED_STRL(CORE_BOOTSTRAP_CLASS_NAME), 0)));
 
-    if (!instanceof_function(bootstrap_class_ptr, cspeed_bootstrap_ce)){
+    if (!instanceof_function(bootstrap_class_ptr, cspeed_bootinit_ce)){
         php_error_docref(NULL, E_ERROR, "Bootstrap class must implements interface \\Cs\\Bootstrap.");
         RETURN_FALSE
     }
@@ -548,7 +548,7 @@ CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
         /* Return the App class object to user, to do the next job. such as the router parsing and so on. */
         RETURN_ZVAL(getThis(), 1, NULL);
     } else {
-        php_error_docref(NULL, E_ERROR, "class Boostrap not exists.");
+        php_error_docref(NULL, E_ERROR, "class BoosInit not exists.");
         RETURN_FALSE
     }
 }/*}}}*/

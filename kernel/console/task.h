@@ -21,12 +21,7 @@
 #ifndef CSPEED_CONSOLE_TASK_H
 #define CSPEED_CONSOLE_TASK_H
 
-/* The \Cs\console\Task class */
-zend_class_entry *cspeed_task_ce;
-
 CSPEED_INIT(task);
-
-
 
 #endif
 

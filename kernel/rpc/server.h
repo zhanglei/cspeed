@@ -21,7 +21,7 @@
 #ifndef CSPEED_RPC_SERVER_H
 #define CSPEED_RPC_SERVER_H
 
-zend_class_entry *cspeed_rpc_server_ce;                       /* The Class entry */
+extern zend_class_entry *cspeed_rpc_server_ce;                       /* The Class entry */
 
 CSPEED_INIT(server);                                          /* The RPC Server Class */
 

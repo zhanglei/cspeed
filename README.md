@@ -1,4 +1,4 @@
-# CSpeed v2.1.9手册 #
+# CSpeed v2.1.10手册 #
 
 ## QQ群交流 ##
 
@@ -6,330 +6,25 @@ https://jq.qq.com/?_wv=1027&k=5kSunAR
 
 CSpeed扩展官方QQ群号： **605383362**
 
-## 最新特性 ##
-**CSpeed v2.1.9特性：**
+## 框架特性 ##
 
-配置文件新增伪静态设置，默认伪静态后缀: ```.html```
+1、内置JSON-RPC支持
 
-core.url.pattern				= '.html'				 ; URL是否允许伪静态设置
+2、支持BootInit框架统一初始化入口，需要实现 \Cs\BootInit 接口
 
-**CSpeed v2.1.8特性：**
+3、支持多重数据库连接并切换，数据库使用 DSN 连接方式，原始方式支持多种数据库：PgSQL、MySQL等，数据库连接池正在开发。
 
-1、配置文件变更：
-```shell
-[db]
-db.mater.type                   =  mysql                 ; 数据库类型，默认：mysql
-db.mater.host                   =  localhost             ; 数据库主机地址
-db.mater.port                   =  3306                  ; 数据库端口
-db.mater.dbname                 =  cspeed                ; 数据库名称
-db.mater.username               =  cspeed                ; 数据库用户名
-db.mater.password               =  cspeed                ; 数据库密码
-```
-新版本配置文件：
-```shell
-[db]
-db.master.dsn                   =  'mysql:host=localhost;port=3306;dbname=supjos'    ; 数据库类型，默认：mysql
-db.master.username              =  root                                              ; 数据库用户名
-db.master.password              =  3333                                              ; 数据库密码
-```
-变更的主要原因在与使用```PDO```形式的dsn，能够更好的兼容各种数据库：Oracle、Pg、SqlServer等
+4、模型AR特性支持[目前不完善]
 
-2、增加支持多数据库配置链接与切换：
-```php
-$di->set('db1', function(){
-	/* 省略任何参数表示从ini配置文件获取 */
-	return new \Cs\db\pdo\Adapter();
-});
+5、配置文件[ini]按需加载：\Cs\tool\Config 类
 
-$di->set('db2', function(){
-    	/* 省略的参数系统自动从ini配置文件获取 */
-	return new \Cs\db\pdo\Adapter([
-	'dsn' => 'mysql:host=localhost;port=3308;dbname=product',
-	'username' => 'root',
-	'password' => 'root'
-    ]);
-});
-```
-如上配置了两个数据库链接，如果在使用模型的过程中需要进行切换，可以使用模型的方法：
-```php
-/* 表示当前模型操作```db2```数据库 */
-$model->setDb('db2');
+6、事件支持： \Cs\tool\Component 类
 
-/* 表示当前模型操作```db1```数据库 */
-$model->setDb('db1');
-```
-更加方便的方式是在模型的构造函数中使用本方法：
-```php
-<?php
+7、MVC三层开发方式
 
-namespace app\models;
+8、命令行模式支持并支持命令行参数传递
 
-class User extends \Cs\mvc\Model
-{
-    public function __construct()
-    {
-        $this->on(User::EVENT_BEFORE_SAVE, [$this, 'beforeSave']);
-        $this->setDb('db2');
-    }
-
-    function beforeSave()
-    {
-        echo "BeforeSave <br>";
-    }
-
-    public function tableName()
-    {
-        return 'www_product';
-    }
-}
-```
-
-注意：```\Cs\db\pdo\Adapter```类本身就表示一个数据库链接，故```\Cs\db\pdo\Adapter```不支持数据库切换，用户可以直接使用```\Cs\db\pdo\Adapter```进行数据库的操作，CSpeed引擎的```\Cs\mvc\Model```本身就是基于```\Cs\db\pdo\Adapter```进行的二次封装.
-
-可以直接使用 ```\Cs\db\pdo\Adapter``` 分别操作数据库:
-```php
-$db1 = $this->di->get('db1');
-$db1->query('UPDATE xxx FROM xxx SET xx=xx');
-$db1->execute();
-```
-或者使用预处理：
-```php
-$db1 = $this->di->get('db1');
-$db1->query('UPDATE xxx FROM xxx SET xx=?', [99]);
-/* 或者如下的绑定名 */
-$db1->query('UPDATE xxx FROM xxx SET id=:id', [‘id’ => 99]);
-$db1->execute();
-```
-
-**CSpeed v2.1.5特性：**
-
-新增 ```composer``` 支持。使用如下两种方式加载```composer```：
-
-1、入口文件处
-```php
-$app->setComposerLoader("xxx/autoload.php");
-```
-
-2、在框架的任何位置均可使用此方法加载 ```composer```
-```php
-\Cs\App::getApp()->setComposerLoader("xx/autoload.php");
-```
-
-**CSpeed v2.1.4特性：**
-
-1、修复 **Cs\rpc\Server** bug
-
-	由于在每次请求中，RPC必须携带一个 ID 标识， 故正常情况下 `1` 标识一个正常的返回值，在2.1.4版本中，修复为返回值  `-1` 即表示请求出错.
-	
-2、新增 **CLI** 命令行模式支持
-	
-CSpeed CLI模式下，只需要在入口文件添加如下代码即可启动一个 CLI 模式的CSpeed 框架系统，以便进行需要长时间的请求或者数据处理。
-
-假设入口文件名称为： console.php
-
-```php
-<?php
-
-$cli = new \Cs\console\Task();
-
-$cli->run($argv[1]);
-```
-其中 **$argv[1]** 表示 命令行界面的输入参数信息，添加了如上的代码后，用户只需要在入口文件的目录下启动 “终端” or “命令行”，输入如下命令，请事先设置好环境变量或者使用 **PHP** 绝对路径：
-
-```php
-php console.php index/good/info
-```
-
-就会导向到 **index** 模块 **Good** 控制器 **infoAction** 方法
-命令行模式也支持使用参数，如上所示：
-```php
-php console.php index/good/info/name/cspeed
-```
-那么在 **index** 模块 **Good** 控制器 **infoAction** 方法内，可以使用全局变量 **$_GET['name']** 或者CSpeed引擎的网络模块 **\Cs\net\Request** 的 **get('name')** 来获取 命令行模式下的传入参数 **name** 的值 **cspeed**。
-
-**CSpeed v2.1.0特性：**
-
-1、修复现有的系统BUG，提升性能.
-
-2、增加 **观察者模式事件模型**，如：
-```php
-<?php
-
-namespace app\modules\index\controllers;
-
-class Index extends \Cs\mvc\Controller
-{
-	function initialise()
-	{
-	    $this->on(Index::EVENT_BEFORE_ACTION, [$this, '_beforeAction']);
-	    $this->on(Index::EVENT_AFTER_ACTION, function(){
-		echo "After action.<br>";
-	    });
-	}
-
-	function _beforeAction()
-	{
-	    echo '_before action<br>';
-	}
-}
-```
-**CSpeed** 引擎的事件模型继承于 **Cs\tool\Component** 类，所有需要使用事件特性的需求，需要继承父类 **\Cs\tool\Component**，父类代码如下：
-```php
-<?php
-
-namespace Cs\tool;
-
-class Component 
-{
-	function on($eventName, $eventCallBack);
-
-	function off($eventName, $eventCallBack = NULL);
-
-	function trigger($eventName);
-}
-```
-**CSpeed** 引擎的系统类中支持事件的有：**\Cs\App**、**\Cs\mvc\Controller**、**\Cs\mvc\Model**、**\Cs\rpc\Server** 类。
-    
-各个类支持的事件见IDE源码。
-
-如，在新版本的引擎中，控制器层面由于引入了事件机制，故不在提供    **__beforeAction** 与 **__afterAction** 方法，如果需要在执行方法前执行特定的方法，那么可以使用事件，如：
-```php
-<?php
-
-namespace app\modules\index\controllers;
-
-class Index extends \Cs\mvc\Controller
-{
-	function initialise()
-	{
-	   // 绑定方法执行之前的事件
-	    $this->on(Index::EVENT_BEFORE_ACTION, [$this, '_beforeAction']);
-	    // 绑定方法执行之后的事件
-	    $this->on(Index::EVENT_AFTER_ACTION, function(){
-		echo "After action.<br>";
-	    });
-	}
-
-	/**
-	 * 方法执行执行会执行本方法
-	 */
-	function _beforeAction()
-	{
-	    echo '_before action<br>';
-	}
-}
-```
-**CSpeed v2.0.3特性：**
-
-1、修复模型错误，优化整体架构
-
-2、增加JSON-RPC模块，示例如下：
-
-客户端：
-```php
-$client = new \Cs\rpc\Client("http://www.xxx.com/who");
-
-$result = $client->goods(['name' => 'apple', 'price' => '9.99']);
-
-/* RPC 服务端返回的JSON数据 */
-echo $result;
-```
-服务端：
-
-CSpeed服务端JSON-RPC类Server继承于 \Cs\mvc\Controller:
-故控制器如下：
-```php
-<?php
-
-namespace app\modules\home\controllers;
-
-class Goods extends \Cs\rpc\Server
-{
-	/* RPC类控制器只运行从父类到本类的initialise 
-	 * 只需要在本方法内将本对象绑定到RPC端即可
-	 */
-	public function initialise()
-	{
-	    $this->handle($this);
-	}
-
-	/**
-	 * RPC方法后缀为Rpc，方法包含有一个参数为客户端调用的参数
-	 * 数据类型与客户端调用的类型一致
-	 */
-	function listRpc($params)
-	{
-	    /* 只需要将返回的数据return即可 */
-	    return $params;
-	}
-}
-```
-注意： CSpeed框架的```RPC```模块使用```Linux-libcurl```库进行开发，用户需要安装```libcurl 7.10.5```版本以上的类库文件即可。
-
-数据调用的格式如下：
-
-客户端调用传输的格式为：
-```php
-{"id":3,  "method":"xx", "params":"xx", "jsonrpc":"2.0"}
-```
-服务端返回的数据格式为：
-```php
-{"jsonrpc": "2.0", "result": 19, "id": 3}
-```    
-如果错误则包含一个 error 错误对象：
-```php
-{"jsonrpc": "2.0", "error": {"code": -32700, "message": "Invalid JSON reqeust data"}, "id": -1}
-```    
-当前版本中，如果出错，则返回的JSON数据中 ```id``` 始终为 ```1```， 如果正确则返回请求数据的 ```id``` 与之对应。新版本中 v2.1.4中已经修复为 ```-1``` 表示出错，并且携带有 ```error```对象.
-
-修复使用 CSpeed 框架进行 API 项目时的高并发情况下的PHP崩溃的情况。
-```php
-$app = new App::getApp();
-
-$app->get('/', function(){
-	echo "hello cspeed";
-});
-```
-此情况见于 2.0.0 版本。已在新版本中予以修复。
-
-**CSpeed v2.0.1特性：**
-
-新版本中 **getApp()** 方法是一个单例模式控制器获取方法；不再适应于创建一个 **Cs\App** 对象,
-新版本中全部更新为 构造函数形式。可以不传入任何的参数来生成一个 零 IO 消耗的 application 对象 。
-
-控制器全部更新为命名空间形式，如路由：
-
-    http://www.supjos.com/hello/cspeed/news
-    
-导向到的是 **hello** 模块中的 **Cspeed** 控制器中的 **newsAction** 方法:
-
-控制器的格式如下：
-
-左右的控制器都必须继承自 **Cs\mvc\Controller** 类：
-
-    <?php
-    
-    namespace app\modules\hello\controllers;
-    
-    class Cspeed extends \Cs\mvc\Controllers
-    {
-    	/**
-    	 * 初始化方法，如果有父类的话，则会先从顶级父类开始执行到本方法
-    	 * 来完成初始化
-    	 */
-    	function initialise()
-    	{
-    	
-    	}
-    	
-    	/**
-    	 * 具体的方法
-    	 */
-    	function newsActon()
-    	{
-    	
-    	}
-    }
+9、原生C语言开发，极致性能，目前已经在 Linux、macOSX 上测试通过
 
 ## 安装指南 ##
 
@@ -481,6 +176,7 @@ Cs\App类的构造函数支持传入绝对路径或者相对路径的INI文件�
 	core.router.default.action      =  index                 ; 默认方法
 	core.view.ext                   =  phtml                 ; 视图文件后缀
 	core.view.auto.render           =  0                     ; 是否自动渲染视图，１：自动渲染、０：不渲染
+	core.url.pattern				= '.html'	 			 ; url 模型的伪静态设置
 
 	[db]
 	db.master.type                   =  mysql                 ; 数据库类型，默认：mysql
@@ -499,10 +195,12 @@ Cs\App类的构造函数支持传入绝对路径或者相对路径的INI文件�
 	core.router.default.controller  =  Index                 ; 默认控制器
 	core.router.default.action      =  index                 ; 默认方法
 	core.view.ext                   =  xhtml                 ; 视图文件后缀
+	core.view.auto.render           =  0                     ; 是否自动渲染视图，１：自动渲染、０：不渲染
+	core.url.pattern				= '.html'	 			 ; url 模型的伪静态设置
 
 ## 典型的Bootstrap初始化类 ##
 
-	class Bootstrap implements \Cs\Bootstrap
+	class Bootstrap implements \Cs\BootInit
 	{
 	    /* 初始化路由与视图 */
 	    function __initRouter($di, $router)
@@ -538,7 +236,7 @@ Cs\App类的构造函数支持传入绝对路径或者相对路径的INI文件�
     class Cspeed extends \Cs\mvc\Controllers
     {
     	/**
-    	 * 初始化方法，如果有父类的话，则会先从顶级父类开始执行到本方法
+    	 * 初始化方法，如果实例化本方法，则 initialise 方法会从顶级父类开始执行到本方法
     	 * 来完成初始化
     	 */
     	function initialise()
@@ -548,6 +246,7 @@ Cs\App类的构造函数支持传入绝对路径或者相对路径的INI文件�
     	
     	/**
     	 * 具体的方法
+    	 * CSpeed 框架内，URL的方法以 Action 结束
     	 */
     	function newsActon()
     	{
@@ -563,6 +262,16 @@ Cs\App类的构造函数支持传入绝对路径或者相对路径的INI文件�
 
 	class User extends \Cs\mvc\Model
 	{
+		/**
+		 * 如果存在构造函数，务必显式调用父类构造函数
+		 * 可以在构造函数内使用事件绑定特性
+		 */
+		function __construct()
+		{
+			// 如果存在构造函数方法，则务必显式调用父类的构造器
+			parent::__construct();
+		}
+		
 		function tableName()
 		{
 			return "www_product";
@@ -652,7 +361,7 @@ Cs\App类的构造函数支持传入绝对路径或者相对路径的INI文件�
      */
     function options($url, $closure)
 
-### Cs\Bootstrap ###
+### Cs\BootInit ###
 
     预留接口
     

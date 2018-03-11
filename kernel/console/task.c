@@ -31,6 +31,8 @@
 #include "kernel/console/task.h"
 #include "kernel/console/parse.h"
 
+/* The \Cs\console\Task class */
+extern zend_class_entry *cspeed_task_ce;
 
 /* {{{ All ARG_INFO For Task class */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_task_construct, 0, 0, 0)
