@@ -176,7 +176,6 @@ Cs\App类的构造函数支持传入绝对路径或者相对路径的INI文件�
 	core.router.default.action      =  index                 ; 默认方法
 	core.view.ext                   =  phtml                 ; 视图文件后缀
 	core.view.auto.render           =  0                     ; 是否自动渲染视图，１：自动渲染、０：不渲染
-	core.url.pattern				= '.html'	 			 ; url 模型的伪静态设置
 	core.url.pattern		= '.html'	 	 ; url 模型的伪静态设置
 
 	[db]
@@ -197,7 +196,6 @@ Cs\App类的构造函数支持传入绝对路径或者相对路径的INI文件�
 	core.router.default.action      =  index                 ; 默认方法
 	core.view.ext                   =  xhtml                 ; 视图文件后缀
 	core.view.auto.render           =  0                     ; 是否自动渲染视图，１：自动渲染、０：不渲染
-	core.url.pattern				= '.html'	 			 ; url 模型的伪静态设置
 	core.url.pattern		= '.html'	 	 ; url 模型的伪静态设置
 
 ## 典型的Bootstrap初始化类 ##
