@@ -21,7 +21,7 @@
 #ifndef CSPEED_TOOL_CONFIGS_H
 #define CSPEED_TOOL_CONFIGS_H
 
-zend_class_entry *cspeed_config_ce;
+extern zend_class_entry *cspeed_config_ce;
 
 #define CSPEED_CONFIG_VARIABLES         "__cspeed_config_variables"             /*All variables*/
 

@@ -51,8 +51,10 @@ if test "$PHP_CSPEED" != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH(curl, $CURL_DIR/$PHP_LIBDIR, CURL_SHARED_LIBADD)
 
   PHP_NEW_EXTENSION(cspeed,
+    classes.c                           \
     cspeed.c                            \
     kernel/CApp.c                       \
+    kernel/bootinit.c                   \
     kernel/di/di.c                      \
     kernel/db/pdo.c                     \
     kernel/mvc/view.c                   \
@@ -68,7 +70,6 @@ if test "$PHP_CSPEED" != "no"; then
     kernel/tool/configs.c               \
     kernel/rpc/server.c                 \
     kernel/rpc/client.c                 \
-    kernel/bootstrap.c                  \
     kernel/mvc/router.c                 \
     kernel/console/task.c               \
     kernel/console/parse.c              \

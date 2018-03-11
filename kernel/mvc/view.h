@@ -21,7 +21,7 @@
 #ifndef CSPEED_VIEW_H
 #define CSPEED_VIEW_H
 
-zend_class_entry *cspeed_view_ce;                                         /* The class View */
+extern zend_class_entry *cspeed_view_ce;                                         /* The class View */
 
 void initialise_view_object_properties(zval *view_object);                /* Initialise the need properties */
 

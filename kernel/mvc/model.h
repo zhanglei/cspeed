@@ -21,7 +21,7 @@
 #ifndef CSPEED_MODEL_H
 #define CSPEED_MODEL_H
 
-zend_class_entry *cspeed_model_ce;                                      /* The Model class */
+extern zend_class_entry *cspeed_model_ce;                                      /* The Model class */
 
 #define CSPEED_MODEL_MAGIC_DATAS        "__cspeed_model_magic_datas"    /* The Model magic datas */
 #define CSPEED_MODEL_PDO_OBJECT         "__cspeed_model_pdo_object"     /* The PDO object */

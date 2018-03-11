@@ -21,7 +21,7 @@
 #ifndef CSPEED_RESPONSE_H
 #define CSPEED_RESPONSE_H
 
-zend_class_entry *cspeed_response_ce;                                      /* Response class entry */
+extern zend_class_entry *cspeed_response_ce;                                      /* Response class entry */
 
 #define CSPEED_RESPONSE_HEADER_VARIABLES      "__response_http_headers"    /* Response HTTP headers */
 #define CSPEED_RESPONSE_DATA                  "__response_data"            /* The data which you want to response to the client */

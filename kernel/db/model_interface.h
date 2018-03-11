@@ -21,7 +21,7 @@
 #ifndef CSPEED_DB_MODEL_INTERFACE_H
 #define CSPEED_DB_MODEL_INTERFACE_H
 
-zend_class_entry *cspeed_model_interface_ce;
+extern zend_class_entry *cspeed_model_interface_ce;
 
 CSPEED_INIT(model_interface);
 

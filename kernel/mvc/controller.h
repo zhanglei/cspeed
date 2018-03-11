@@ -21,7 +21,7 @@
 #ifndef CSPEED_MVC_CONTROLLER_H
 #define CSPEED_MVC_CONTROLLER_H
 
-zend_class_entry *cspeed_controller_ce;
+extern zend_class_entry *cspeed_controller_ce;
 
 #define CSPEED_DI_INSTANCE      "di"                  /* To get the Di object */
 #define CSPEED_VIEW_INSTANCE    "view"                /* To get the View object */

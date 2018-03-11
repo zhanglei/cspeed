@@ -33,7 +33,7 @@ char *cspeed_request_post_str_key_val(const char *post_key);        /* Return th
 
 zend_bool cspeed_request_is_method(char *method_name);              /* Return the current request is the given request method name */
 
-zend_class_entry *cspeed_request_ce;                                /* Request class entry */
+extern zend_class_entry *cspeed_request_ce;                                /* Request class entry */
 
 CSPEED_INIT(request);
 #endif
