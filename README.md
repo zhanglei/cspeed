@@ -224,22 +224,22 @@ $task->run($args[1]);
 
 
 ```php
-	$router = new \Cs\mvc\Router();
+$router = new \Cs\mvc\Router();
 	
-    $router->add(
-        '/back/:action:/:id:',
-        '/shop/list/$1'
-    );
-    $router->add(
-        '/shop/:controller:/:action:/:any:',
-        '/get/\1/\2/\3'
-    );
+$router->add(
+    '/back/:action:/:id:',
+    '/shop/list/$1'
+);
+$router->add(
+    '/shop/:controller:/:action:/:any:',
+    '/get/\1/\2/\3'
+);
     
-	$router->addFromArray([
-		  '/shop/:controller:/:action:/:any:' =>'/get/\1/\2/\3',
-        '/admin/:controller:/:action:/:any:' =>'/put/\1/\2/\3',
-	]);
-    $router->addFromIni('../app/router.ini');
+$router->addFromArray([
+	  '/shop/:controller:/:action:/:any:' =>'/get/\1/\2/\3',
+    '/admin/:controller:/:action:/:any:' =>'/put/\1/\2/\3',
+]);
+$router->addFromIni('../app/router.ini');
 
 ```
 **原生C语言开发，极致性能，目前已经在 Linux、macOSX 上测试通过**
