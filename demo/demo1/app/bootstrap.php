@@ -17,25 +17,11 @@ class BootInit implements \Cs\BootInit
         );
         $router->addFromIni('../app/router.ini');
     }
-
+    
     function __InitDb($di, $router)
     {
         $di->set('db', function(){
             return new \Cs\db\pdo\Adapter();
-        });
-
-        $di->set('slave', function(){
-            return new \Cs\db\pdo\Adapter([
-                'dsn' => 'mysql:host=localhost;port=3306;dbname=slave',
-                'username' => 'root',
-                'password' => '3333'
-            ]);
-        });
-
-        $di->set('factory', function(){
-            $objectFactory  = new \Cs\ObjectFactory();
-            $objectFactory->init("config.php");
-            return $objectFactory;
         });
     }
 }
