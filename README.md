@@ -205,8 +205,6 @@ $user->setName(new app\models\Tools());
     ]
 ```   
 这就告诉 CSpeed 如果属性是 **private** 修饰，则使用 **values**数组的相应的值初始化，**public** 修饰的属性也进行初始化，但是 **protected** 修饰的属性不进行初始化。
-```
-
 
 9、命令行模式支持并支持命令行参数传递
 
