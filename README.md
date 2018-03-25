@@ -207,9 +207,23 @@ $user->setName(new app\models\Tools());
 这就告诉 CSpeed 如果属性是 **private** 修饰，则使用 **values**数组的相应的值初始化，**public** 修饰的属性也进行初始化，但是 **protected** 修饰的属性不进行初始化。
 ```
 
+
 9、命令行模式支持并支持命令行参数传递
 
+```php
+
+$task = new \Cs\console\Task();
+
+// 或者也可以使用参数形式初始化系统，参数格式与 Cs\App 一致
+$task = new \Cs\console\Task("xxx/xxx.ini", "dev");
+
+// 运行命令行
+$task->run($args[1]);
+
+```
+
 10、强悍的 **路由** 功能，如
+
 
 ```php
 	$router = new \Cs\mvc\Router();
