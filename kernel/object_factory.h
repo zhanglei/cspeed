@@ -18,28 +18,16 @@
 
 /* $Id$ */
 
-#ifndef   CSPEED_TOOL_REQUIRE_H
-#define   CSPEED_TOOL_REQUIRE_H
+#ifndef CSPEED_OBJECT_FACTORY_H
+#define CSPEED_OBJECT_FACTORY_H
 
-int cspeed_require_file(char *, zval *, zval *, zval *);              /* The function to requrie file */
+extern zend_class_entry *cspeed_object_factory_ce;          /* The IOC factory class */
 
-int cspeed_require_php_file(const char *, zval *);
+#define OBJECT_FACTORY_STORE    "_objects"                  /* The stores to posit the objects */
+
+CSPEED_INIT(object_factory);
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /*

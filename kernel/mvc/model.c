@@ -33,6 +33,15 @@
 #include "zend_smart_str.h"             /* Use the smart_str */
 
 void 
+reset_model_sql(zval *this) /*{{{ To clear the current sql result for the next execute */
+{
+    zend_update_property_string(cspeed_model_ce, this, CSPEED_STRL(CSPEED_MODEL_WHERE_COND), "");
+    zend_update_property_string(cspeed_model_ce, this, CSPEED_STRL(CSPEED_MODEL_ORDER_BY), "");
+    zend_update_property_string(cspeed_model_ce, this, CSPEED_STRL(CSPEED_MODEL_SELECT), "*");
+    zend_update_property_string(cspeed_model_ce, this, CSPEED_STRL(CSPEED_MODEL_GROUP_BY), "");
+}/*}}}*/
+
+void 
 initialise_the_model_object(zval *model_object, zend_long new_record, INTERNAL_FUNCTION_PARAMETERS)/*{{{*/
 {
     /* Fetch the PDO object from the given Di class */
@@ -73,6 +82,50 @@ initialise_the_model_object(zval *model_object, zend_long new_record, INTERNAL_F
             zend_update_property_long(cspeed_model_ce, model_object, CSPEED_STRL(CSPEED_MODEL_NEW_RECORD), IS_FALSE);
         }
     }
+
+    /* Get the columns for the table */
+    zend_string *columns_sql = strpprintf(0, "SHOW COLUMNS FROM `%s`", Z_STRVAL(retval));
+    zval *pdo_object_set = zend_read_property(cspeed_model_ce, model_object, CSPEED_STRL(CSPEED_MODEL_PDO_OBJECT), 1, NULL);
+    zval pdo_statement;
+    cspeed_pdo_prepare(pdo_object_set, ZSTR_VAL(columns_sql), &pdo_statement);
+    zval ret;
+    cspeed_pdo_statement_set_fetch_mode(&pdo_statement, 2, &ret);
+    zval retval_data;
+    cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval_data);
+    reset_model_sql(model_object);
+    if (!output_sql_errors(&pdo_statement)){
+        zval result;
+        cspeed_pdo_statement_fetch_all(&pdo_statement, &result);
+        /* Set the columns data into the property */
+        zend_update_property(cspeed_model_ce, model_object, CSPEED_STRL(CSPEED_MODEL_COLUMNS_DETAIL), &result);
+
+        zval *each_column;
+        zval column_data;
+        array_init(&column_data);
+
+        /* set the primary or not */
+        int is_set_primary = 0;
+
+        ZEND_HASH_FOREACH_VAL(Z_ARRVAL(result), each_column) {
+            if ( each_column && ( Z_TYPE_P( each_column ) == IS_ARRAY) ) {
+                zval *column_name = zend_hash_find(Z_ARRVAL_P(each_column), strpprintf(0, "Field"));
+                if ( column_name != NULL ) {
+                    add_next_index_string(&column_data, Z_STRVAL_P(column_name));
+                }
+                if (is_set_primary == 0) {
+                    /* The primary key name, if set */
+                    zval *primary_key = zend_hash_find(Z_ARRVAL_P(each_column), strpprintf(0, "Key"));
+                    if ( (primary_key != NULL) && ( CSPEED_STRING_NOT_EMPTY(Z_STRVAL_P(primary_key))) ) {
+                        zend_update_property_str(cspeed_model_ce, model_object, CSPEED_STRL(CSPEED_MODEL_PRIMARY), Z_STR_P(column_name));
+                        is_set_primary = 1;
+                    }
+                }
+            }
+        } ZEND_HASH_FOREACH_END();
+        /* Set the data */
+        zend_update_property(cspeed_model_ce, model_object, CSPEED_STRL(CSPEED_MODEL_COLUMNS), &column_data);
+    }
+
 }/*}}}*/
 
 char *
@@ -161,20 +214,12 @@ build_delete_sql(zval *this)/* {{{ Build the DELETE where condition */
     }
 }/*}}}*/
 
-void 
-reset_model_sql(zval *this) /*{{{ To clear the current sql result for the next execute */
-{
-    zend_update_property_string(cspeed_model_ce, this, CSPEED_STRL(CSPEED_MODEL_WHERE_COND), "");
-    zend_update_property_string(cspeed_model_ce, this, CSPEED_STRL(CSPEED_MODEL_ORDER_BY), "");
-    zend_update_property_string(cspeed_model_ce, this, CSPEED_STRL(CSPEED_MODEL_SELECT), "*");
-    zend_update_property_string(cspeed_model_ce, this, CSPEED_STRL(CSPEED_MODEL_GROUP_BY), "");
-}/*}}}*/
-
 void
 set_model_ultimate_pdo(zval *this) /*{{{ To set the finally pdo object to do the job. */
 {
     zval *is_set_ultimate_pdo = zend_read_property(cspeed_model_ce, this, CSPEED_STRL(CSPEED_MODEL_ULTIMATE_PDO), 1, NULL);
-    if (!ZVAL_IS_NULL(is_set_ultimate_pdo)) {
+
+    if ( !ZVAL_IS_NULL(is_set_ultimate_pdo) ) {
         zend_update_property(cspeed_model_ce, this, CSPEED_STRL(CSPEED_MODEL_PDO_OBJECT), is_set_ultimate_pdo);
     }
 }/*}}}*/
@@ -239,15 +284,29 @@ CSPEED_METHOD(Model, __construct)/*{{{ proto Model::construct()*/
 
 CSPEED_METHOD(Model, __set)/*{{{ proto Model::__set($name, $value) The magic functions */
 {
-    initialise_the_model_object(getThis(), -1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
-
     zend_string *key; zval *value;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz", &key, &value) == FAILURE) {
         return ;
     }
     if (CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(key))) {
-        zval *magic_datas = zend_read_property(cspeed_model_ce, getThis(), 
-            CSPEED_STRL(CSPEED_MODEL_MAGIC_DATAS), 1, NULL);
+        /* Judge the field in columns or not, if in add to the magic data */
+        zval *columns = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_COLUMNS), 1, NULL);
+        if (columns == NULL) RETURN_FALSE;
+
+        zval *temp_value;
+        int has_field = 0;
+        ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(columns), temp_value) {
+            if ( strncmp(ZSTR_VAL(key), CSPEED_STRL(Z_STRVAL_P(temp_value)) ) == 0 ) {
+                has_field = 1;
+                break;
+            }
+        } ZEND_HASH_FOREACH_END();
+
+        if (!has_field) {
+            RETURN_FALSE
+        }
+
+        zval *magic_datas = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_MAGIC_DATAS), 1, NULL);
         if ( Z_TYPE_P(value) == IS_LONG ) {
             add_assoc_long(magic_datas, ZSTR_VAL(key), Z_LVAL_P(value));
         } else if ( Z_TYPE_P(value) == IS_STRING ) {
@@ -277,7 +336,6 @@ CSPEED_METHOD(Model, find)/*{{{ proto Model::find() To do the update() method */
 
 CSPEED_METHOD(Model, where)/*{{{ proto Model::where()*/
 {
-    initialise_the_model_object(getThis(), -1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
     zval *where;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &where) == FAILURE) {
         return ;
@@ -302,7 +360,6 @@ CSPEED_METHOD(Model, where)/*{{{ proto Model::where()*/
 
 CSPEED_METHOD(Model, andWhere)/*{{{ proto Model::andWhere()*/
 {
-    initialise_the_model_object(getThis(), -1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
     zval *where;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &where) == FAILURE) {
         return ;
@@ -366,7 +423,6 @@ CSPEED_METHOD(Model, orderBy)/*{{{ proto Model::orderBy()*/
 
 CSPEED_METHOD(Model, groupBy)/*{{{ proto Model::groupBy()*/
 {
-    initialise_the_model_object(getThis(), -1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
     zval *group_by;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &group_by) == FAILURE) {
         return ;
@@ -403,7 +459,6 @@ CSPEED_METHOD(Model, tableName) /*{{{ proto Model::tableName()*/
 
 CSPEED_METHOD(Model, one)/*{{{ proto Model::one()*/
 {
-    initialise_the_model_object(getThis(), -1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
     set_model_ultimate_pdo(getThis());
     zval *table_name = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_TABLE_NAME), 1, NULL);
     zval *select     = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_SELECT), 1, NULL);
@@ -432,7 +487,6 @@ CSPEED_METHOD(Model, one)/*{{{ proto Model::one()*/
 
 CSPEED_METHOD(Model, select)    /*{{{ proto Model::select($fields)*/
 {
-    initialise_the_model_object(getThis(), -1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
     zval *fields;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &fields) == FAILURE) {
         return ;
@@ -456,7 +510,6 @@ CSPEED_METHOD(Model, select)    /*{{{ proto Model::select($fields)*/
 
 CSPEED_METHOD(Model, all)/*{{{ proto Model::all()*/
 {
-    initialise_the_model_object(getThis(), -1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
     set_model_ultimate_pdo(getThis());
     zval *table_name = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_TABLE_NAME), 1, NULL);
     zval *where      = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_WHERE_COND), 1, NULL);
@@ -484,7 +537,6 @@ CSPEED_METHOD(Model, all)/*{{{ proto Model::all()*/
 
 CSPEED_METHOD(Model, save)/*{{{ proto Model::save()*/
 {
-    initialise_the_model_object(getThis(), -1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
     set_model_ultimate_pdo(getThis());
     
     /* NULL insert, otherwise update*/
@@ -526,7 +578,6 @@ CSPEED_METHOD(Model, save)/*{{{ proto Model::save()*/
 
 CSPEED_METHOD(Model, delete)/*{{{ proto Model::delete()*/
 {
-    initialise_the_model_object(getThis(), -1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
     set_model_ultimate_pdo(getThis());
     /* If the magic datas exsits, do the concate-process first */
     build_delete_sql(getThis());
@@ -568,9 +619,11 @@ CSPEED_METHOD(Model, setDb)/*{{{ proto Model::setDb('db')*/
         {
             /* The db adapter exsits. set the db */
             zval *adapter_pdo_object = zend_read_property(cspeed_adapter_ce, db_adapter, CSPEED_STRL(CSPEED_DB_THIS_PDO), 1, NULL);
-            zend_update_property(cspeed_adapter_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_ULTIMATE_PDO), adapter_pdo_object);
+            zval_add_ref(adapter_pdo_object);
+            zend_update_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_ULTIMATE_PDO), adapter_pdo_object);
             RETURN_TRUE
         }
+        RETURN_FALSE
     } else {
         php_error_docref(NULL, E_ERROR, "Please set the Adapter object into the Di container first.");
         RETURN_FALSE
@@ -611,7 +664,10 @@ CSPEED_INIT(model)  /*{{{ Load the module function*/
     zend_declare_property_null(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_PDO_OBJECT), ZEND_ACC_PRIVATE);
     zend_declare_property_long(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_NEW_RECORD), IS_TRUE, ZEND_ACC_PRIVATE);
     zend_declare_property_null(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_ULTIMATE_PDO), ZEND_ACC_PRIVATE);
+    zend_declare_property_null(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_COLUMNS_DETAIL), ZEND_ACC_PRIVATE);
+    zend_declare_property_null(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_COLUMNS), ZEND_ACC_PRIVATE);
 
+    zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_PRIMARY), "", ZEND_ACC_PRIVATE);
     zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_WHERE_COND), "", ZEND_ACC_PRIVATE);
     zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_ORDER_BY), "", ZEND_ACC_PRIVATE);
     zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_SELECT), "*", ZEND_ACC_PRIVATE);

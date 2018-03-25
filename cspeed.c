@@ -54,6 +54,9 @@ PHP_MINIT_FUNCTION(cspeed)
     /* Event support */
     component_init();
 
+    /* The IOC object class */
+    object_factory_init();
+
     /* Bootstrap interface */
     bootinit_init();
 

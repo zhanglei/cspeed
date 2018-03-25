@@ -1,4 +1,4 @@
-# CSpeed v2.1.10手册 #
+# CSpeed v2.1.11手册 #
 
 ## QQ群交流 ##
 
@@ -8,23 +8,229 @@ CSpeed扩展官方QQ群号： **605383362**
 
 ## 框架特性 ##
 
-1、内置JSON-RPC支持
+1、内置 **JSON-RPC** 支持
 
-2、支持BootInit框架统一初始化入口，需要实现 \Cs\BootInit 接口
+示例：
+将需要作为服务端的控制器设置为 **RPC** 服务端:
+
+```php
+namespace app\modules\admin;
+
+class User extends \Cs\rpc\Server
+{
+	public function initialise()
+	{
+		$this->handle($this);
+	}
+	
+	/**
+	 * 参数为客户端传入
+	 */
+	function listsRpc()
+	{
+		// 此处返回需要的数据即可， 数组形式，如：
+		return [ 'kernel' => 'CSpeed', 'version' => '2.1.11' ];
+	}
+}
+```
+客户端只需要如下使用：
+
+```php
+$client = new \Cs\rpc\Client('http://xxx.xxx.com/admin/user');	
+
+$data = $client->lists();
+// 也可以传入数据至服务端
+$results = $client->lists(['age' => '20'])
+	
+```
+
+2、支持 **BootInit** 框架统一初始化入口，需要实现 **\Cs\BootInit** 接口
+
+```php
+
+示例：
+
+此处分为两块初始化：数据库与普通的视图模型等初始化：
+
+class BootInit implements \Cs\BootInit
+{
+	/**
+	 * 初始化数据库
+	 */
+	function __initDb()
+	{
+	}
+	
+	/**
+	 * 初始化其他的数据，比如说 IOC 工厂
+	 */
+	function __initData()
+	{
+	}
+
+}
+```
+
 
 3、支持多重数据库连接并切换，数据库使用 DSN 连接方式，原始方式支持多种数据库：PgSQL、MySQL等，数据库连接池正在开发。
 
+```php
+
+模型支持切换数据库：
+$model = new app\models\User();
+$model->setDb('master');
+
+// do some job
+...
+
+// Change to slave db
+$model->setDb('slave');
+
+切换数据库之前需要在容器中注入相应的数据库，比如上面的 master与slave数据库：
+
+$di->set('master', function(){
+	return new \Cs\db\pdo\Adapter();
+});
+
+$di->set('slave', function(){
+	return new \Cs\db\pdo\Adapter([
+		'dsn' => 'mysql:host=localhost;port=3306;dbname=supjos',
+		'username' => 'root',
+		'password' => 'root'
+	]);
+});
+```
 4、模型AR特性支持[目前不完善]
 
-5、配置文件[ini]按需加载：\Cs\tool\Config 类
+5、配置文件[ini]按需加载：**\Cs\tool\Config** 类
 
-6、事件支持： \Cs\tool\Component 类
+```php
 
-7、MVC三层开发方式
+$config = new \Cs\tool\Configs();
+$config->loadConfig('xxx/xxx.ini');
 
-8、命令行模式支持并支持命令行参数传递
+$configs = $config->getConfigs();
+// 或者指定获取相应的属性名对应的值
+$configValue = $config->getConfigs('db');
+```
 
-9、原生C语言开发，极致性能，目前已经在 Linux、macOSX 上测试通过
+6、事件支持： **\Cs\tool\Component** 类
+
+7、**MVC** 三层开发方式
+
+8、配置文件解耦，使用 **\Cs\ObjectFactory** 解耦
+
+```php
+
+用户可以在 BootInit文件中集体进行类的初始化工作，方便进行模型与业务逻辑的解耦：
+
+假设用户的PHP类模型的工厂配置文件如下：
+
+<?php
+
+return [
+    'rsa' => [
+        'class'      => '\app\models\User',
+        'properties' => [
+            'name' => '\app\models\Tools',
+            'two'  => '\app\models\Tools'
+        ],
+        'values'     => [
+            'abc'     => new stdClass(),
+            'linux'   => 'Yes, I favorite it',
+            'windows' => 'No unless do choice'
+        ],
+        'attrs'       => [
+            'private' => true,
+            'public'  => true
+        ]
+    ],
+    'aes' => [
+        'class'      => 'Cs\tool\Config',
+        'properties' => [
+            'data' => 'app\models\User'
+        ]
+    ]
+];
+```
+用户只需要按照这个规则即可让模型的初始化与构造工作交给 **CSpeed** 进行完成，性能与效率也相比较原生PHP的方式较高:
+
+规则：
+**数组的每一个键名对应于唯一一个类标识ID，
+比如上方的是两个类标识ID：
+rsa、aes**
+
+每一个类标识ID对应一个交给 **CSpeed** 初始化的类，
+如：
+**rsa** 对应于 **app\models\User** 类，
+每个子数组对应于怎么初始化 这个模型类，
+**class**：标识初始化的类，包含命名空间
+**properties**：通过 setter 方法注入相应的对象。
+如：
+
+```php
+	'properties' => [
+	    'name' => '\app\models\Tools',
+	    'two'  => '\app\models\Tools'
+	]
+```	
+这就告诉 CSpeed 调用：app\models\User 类的 **setName** 方法，并且方法内有一个对象： **app\models\Tools**，也就相当于如下的PHP代码
+
+```php
+$user = new \app\models\User();
+$user->setName(new app\models\Tools());
+```
+
+【注意】：
+**properties数组包含几个元素就对应于调用几个setter方法。**
+
+如果用户不使用 **IOC** 进行注入，只是想初始化属性，则可以使用 **values** 数组来执行：
+
+```php
+    'values'     => [
+        'abc'     => new stdClass(),
+        'linux'   => 'Yes, I favorite it',
+        'windows' => 'No unless do choice'
+    ],
+```    
+   上面代码就会告诉 CSpeed引擎去使用 new stdClass()值初始化 ```app\models\User```类的 **abc** 属性，使用 “ Yes, I favorite it” 初始化 ```app\models\User```类的 **linux** 属性吗，以此类推.
+
+当然为了不印象内部的 **private** 修饰的属性，可以指定 那种修饰符的属性可以初始化：
+
+```php
+    'attrs'       => [
+        'private'   => true,
+        'public'    => true，
+        'protected' => fasle
+    ]
+```   
+这就告诉 CSpeed 如果属性是 **private** 修饰，则使用 **values**数组的相应的值初始化，**public** 修饰的属性也进行初始化，但是 **protected** 修饰的属性不进行初始化。
+```
+
+9、命令行模式支持并支持命令行参数传递
+
+10、强悍的 **路由** 功能，如
+
+```php
+	$router = new \Cs\mvc\Router();
+	
+    $router->add(
+        '/back/:action:/:id:',
+        '/shop/list/$1'
+    );
+    $router->add(
+        '/shop/:controller:/:action:/:any:',
+        '/get/\1/\2/\3'
+    );
+    
+	$router->addFromArray([
+		  '/shop/:controller:/:action:/:any:' =>'/get/\1/\2/\3',
+        '/admin/:controller:/:action:/:any:' =>'/put/\1/\2/\3',
+	]);
+    $router->addFromIni('../app/router.ini');
+
+```
+**原生C语言开发，极致性能，目前已经在 Linux、macOSX 上测试通过**
 
 ## 安装指南 ##
 

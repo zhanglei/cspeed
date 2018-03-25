@@ -127,10 +127,16 @@ void handle_method_request(zval *object_ptr, char *method_name, INTERNAL_FUNCTIO
 } /*}}}*/
 
 int cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCTION_PARAMETERS, zval *app_obj) /*{{{ Load file */
-{
+{    
+    if ( *(ZSTR_VAL(class_name_with_namespace)) == '\\' ) {
+        class_name_with_namespace = strpprintf(0, "%s", ZSTR_VAL(class_name_with_namespace) + 1);
+    }
+
     char *slash_pos = strchr(ZSTR_VAL(class_name_with_namespace), '\\');
+    
     if (slash_pos == NULL) { /* No slash find */
-        zend_string *real_file_path = strpprintf(0, "./%s", ZSTR_VAL(class_name_with_namespace));
+        zend_string *real_file_path = strpprintf(0, "./%s.php", ZSTR_VAL(class_name_with_namespace));
+        check_file_exists(ZSTR_VAL(real_file_path));
         if (cspeed_require_file(ZSTR_VAL(real_file_path), NULL, NULL, NULL) == FALSE){
             return FALSE;
         }
@@ -146,6 +152,11 @@ int cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCTI
          */
         zval *all_app_aliases = zend_read_property(cspeed_app_ce, app_obj, CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), 1, NULL);
         zval *has_exists = zend_hash_find(Z_ARRVAL_P(all_app_aliases), zend_string_init(CSPEED_STRL(current_alias), 0));
+
+        if ( strncmp(current_alias, CSPEED_STRL("Cs")) == 0 ) {
+            free(current_alias);
+            php_error_docref(NULL, E_ERROR, "CSpeed framework not contain the class: `%s`.", ZSTR_VAL(class_name_with_namespace));
+        }
 
         if (has_exists) {   /* Exists the need alias */
             int real_file_path_size = (Z_STRLEN_P(has_exists) + ZSTR_LEN(class_name_with_namespace)
@@ -163,6 +174,8 @@ int cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCTI
             check_file_exists(real_file_path);
             /* After checking, require the file */
             if (cspeed_require_file(real_file_path, NULL, NULL, NULL) == FALSE){
+                free(current_alias);
+                free(real_file_path);
                 return FALSE;
             }
             free(current_alias);
@@ -510,7 +523,7 @@ CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
                     zend_string_tolower(zend_string_init(CSPEED_STRL(CORE_BOOTSTRAP_CLASS_NAME), 0)));
 
     if (!instanceof_function(bootstrap_class_ptr, cspeed_bootinit_ce)){
-        php_error_docref(NULL, E_ERROR, "Bootstrap class must implements interface \\Cs\\Bootstrap.");
+        php_error_docref(NULL, E_ERROR, "BootInit class must implements interface \\Cs\\BootInit.");
         RETURN_FALSE
     }
 

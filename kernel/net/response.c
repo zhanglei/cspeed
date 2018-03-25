@@ -132,6 +132,9 @@ CSPEED_METHOD(Response, setJsonContent)/*{{{ Set the response with the given for
 #endif
     zend_update_property_string(cspeed_response_ce, getThis(), CSPEED_STRL(CSPEED_RESPONSE_DATA), ZSTR_VAL(json_str.s));
     smart_str_free(&json_str);
+
+    zval *response_headers = zend_read_property(cspeed_response_ce, getThis(), CSPEED_STRL(CSPEED_RESPONSE_HEADER_VARIABLES), 1, NULL);
+    add_assoc_string(response_headers, "Content-Type", "application/json;charset=UTF-8");
 }
 /*}}}*/
 

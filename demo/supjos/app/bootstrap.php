@@ -1,6 +1,6 @@
 <?php
 
-class Bootstrap implements \Cs\Bootstrap
+class BootInit implements \Cs\BootInit
 {
     function __initRouter($di, $router)
     {
@@ -21,7 +21,7 @@ class Bootstrap implements \Cs\Bootstrap
     function __InitDb($di, $router)
     {
         $di->set('db', function(){
-            return new \Cs\db\pdo\MySql();
+            return new \Cs\db\pdo\Adapter();
         });
     }
 }

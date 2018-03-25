@@ -68,8 +68,8 @@ zend_bool output_sql_errors(zval *pdo_statement)  /*{{{ Return the SQL running e
     zval *sql_state = zend_hash_index_find(Z_ARRVAL(retval), 0);
     zval *sql_code = zend_hash_index_find(Z_ARRVAL_P(&retval), 1);
     zval *sql_info = zend_hash_index_find(Z_ARRVAL_P(&retval), 2);
-    if ( memcmp( Z_STRVAL_P(sql_state), CSPEED_STRL("0000"))){
-        zend_printf("SQL ERROR: %d %s", Z_LVAL_P(sql_code), Z_STRVAL_P(sql_info));
+    if (!zend_string_equals( Z_STR_P(sql_state), strpprintf(0, "00000") )) {
+        php_error_docref(NULL, E_ERROR, "SQL: %d %s", Z_LVAL_P(sql_code), Z_STRVAL_P(sql_info));
         return TRUE;
     }
     return FALSE;

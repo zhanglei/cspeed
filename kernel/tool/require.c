@@ -106,6 +106,49 @@ int cspeed_require_file(const char * file_name, zval *variables, zval *called_ob
 
 
 
+/*{{{ To require the file as the function in PHP: require
+    for the variables which were come from user-input
+ */
+int cspeed_require_php_file(const char * file_name, zval *retval)
+{
+    zend_file_handle file_handle;
+
+    file_handle.free_filename = 0;
+    file_handle.type          = ZEND_HANDLE_FILENAME;
+    file_handle.opened_path   = NULL;
+    file_handle.filename      = file_name;
+    file_handle.handle.fp     = NULL;
+    zend_op_array *op_array = NULL;
+    zend_try {
+        op_array = zend_compile_file(&file_handle, ZEND_INCLUDE);
+    }zend_end_try();
+    if (EG(exception)) {
+        zend_exception_error(EG(exception), E_ERROR);
+        return FALSE;
+    }
+    zend_execute_data *require_call = zend_vm_stack_push_call_frame(
+          ZEND_CALL_NESTED_CODE | ZEND_CALL_HAS_SYMBOL_TABLE,
+          (zend_function *)op_array, 
+          0, 
+          NULL, 
+          NULL
+    );
+    zend_init_execute_data(require_call, op_array, retval);
+    ZEND_ADD_CALL_FLAG(require_call, ZEND_CALL_TOP);
+    zend_execute_ex(require_call);
+    zend_vm_stack_free_call_frame(require_call);
+    destroy_op_array(op_array);
+    efree_size(op_array, sizeof(zend_op_array));
+    if (EG(exception)) {
+        zend_exception_error(EG(exception), E_ERROR);
+        return FALSE;
+    }
+    zend_destroy_file_handle(&file_handle);
+
+    return TRUE;
+}
+/*}}}*/
+
 
 
 

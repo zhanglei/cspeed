@@ -24,3 +24,4 @@ zend_class_entry *cspeed_component_ce;
 zend_class_entry *cspeed_config_ce;
 zend_class_entry *cspeed_di_ce;
 zend_class_entry *cspeed_bootinit_ce;
+zend_class_entry *cspeed_object_factory_ce;

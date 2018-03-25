@@ -8,7 +8,7 @@
 
 namespace Cs;
 
-interface Bootstrap
+interface BootInit
 {
 
 }

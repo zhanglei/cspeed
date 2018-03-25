@@ -24,7 +24,7 @@
 extern zend_module_entry cspeed_module_entry;
 #define phpext_cspeed_ptr &cspeed_module_entry
 
-#define PHP_CSPEED_VERSION "2.1.10"
+#define PHP_CSPEED_VERSION "2.1.11"
 
 #ifdef PHP_WIN32
 #	define PHP_CSPEED_API __declspec(dllexport)
@@ -104,7 +104,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 
 /* Below are some default setting of the CSpeed engine */
 #define CORE_APPLICATION                        "../app"
-#define CORE_BOOTSTRAP                          "../app/bootstrap.php"
+#define CORE_BOOTSTRAP                          "../app/bootinit.php"
 #define CORE_ROUTER_MODULES                     "home"
 #define CORE_ROUTER_DEFAULT_MODULE              "home"
 #define CORE_ROUTER_DEFAULT_CONTROLLER          "index"
@@ -113,7 +113,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define CORE_URL_PATTERN                        ".html"
 #define CORE_VIEW_AUTO_RENDER                   "0"
 #define CORE_BOOSTRAP_METHOD_STRING             "__init"
-#define CORE_BOOTSTRAP_CLASS_NAME               "Bootstrap"
+#define CORE_BOOTSTRAP_CLASS_NAME               "BootInit"
 
 #define CORE_VIEW_NEED_RENDER                   "1"
 

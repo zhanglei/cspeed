@@ -100,6 +100,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_view_set_view_dir, 0, 0, 1)
     ZEND_ARG_INFO(0, view_dir)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_view_get, 0, 0, 1)
+    ZEND_ARG_INFO(0, property_name)
+ZEND_END_ARG_INFO()
+
+
 /*}}}*/
 
 void initialise_view_object_properties(zval *view_object)
@@ -108,17 +114,33 @@ void initialise_view_object_properties(zval *view_object)
     array_init(&view_variables);
     zend_update_property(cspeed_view_ce, view_object, CSPEED_STRL(CSPEED_VIEW_VARIABLES), &view_variables);
     zval_ptr_dtor(&view_variables);
-
-    zend_update_property_str(cspeed_view_ce, view_object, CSPEED_STRL(CSPEED_VIEW_SUFFIX),                  CSPEED_G(core_view_ext));
-    zend_update_property_str(cspeed_view_ce, view_object, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_MODULE_ID),    CSPEED_G(core_router_default_module));
-    zend_update_property_str(cspeed_view_ce, view_object, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_CONTROLLER_ID),CSPEED_G(core_router_default_controller));
-    zend_update_property_str(cspeed_view_ce, view_object, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_ACTION_ID),    CSPEED_G(core_router_default_action));
 }
 
 CSPEED_METHOD(View, __construct)    /*{{{ proto View::__construct() */
 {
     initialise_view_object_properties(getThis());
 }/*}}}*/
+
+CSPEED_METHOD(View, __get)
+{
+    zend_string *property_name;
+    if ( zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &property_name) == FAILURE ){
+        return ;
+    }
+
+    if ( CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(property_name)) ) {
+        if ( (strncmp(ZSTR_VAL(property_name), CSPEED_STRL("module_id")) == 0) ) {
+            RETURN_STR(CSPEED_G(core_router_default_module));
+        } else if ( (strncmp(ZSTR_VAL(property_name), CSPEED_STRL("controller_id")) == 0) ) {
+            RETURN_STR(CSPEED_G(core_router_default_controller));
+        } else if ( (strncmp(ZSTR_VAL(property_name), CSPEED_STRL("action_id")) == 0) ) {
+            RETURN_STR(CSPEED_G(core_router_default_action));
+        } else {
+            php_error_docref(NULL, E_ERROR, "__get only accept the parameter named: `module_id` or `controller_id` or `action_id`.");
+        }
+    }
+    php_error_docref(NULL, E_ERROR, "__get need a valid string index.");
+}
 
 CSPEED_METHOD(View, render)         /*{{{ proto View::render($file, $variables) */
 {
@@ -201,6 +223,7 @@ static const zend_function_entry cspeed_view_functions[] = { /*{{{ All methods t
     CSPEED_ME(View, getRender,      arginfo_view_get_render,       ZEND_ACC_PUBLIC)
     CSPEED_ME(View, setViewDir,     arginfo_view_set_view_dir,     ZEND_ACC_PUBLIC)
     CSPEED_ME(View, partial,        arginfo_view_partial,          ZEND_ACC_PUBLIC)
+    CSPEED_ME(View, __get,          arginfo_view_get,              ZEND_ACC_PUBLIC)
 
     PHP_FE_END
 };/*}}}*/
@@ -214,9 +237,6 @@ CSPEED_INIT(view) /*{{{ Initialise function to initialise the view components */
     zend_declare_property_null(cspeed_view_ce,   CSPEED_STRL(CSPEED_VIEW_VARIABLES), ZEND_ACC_PROTECTED);
     zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_SUFFIX), "", ZEND_ACC_PROTECTED);
     zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_DIRS), CSPEED_VIEW_DIRS_V, ZEND_ACC_PROTECTED);
-    zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_MODULE_ID), "", ZEND_ACC_PUBLIC);
-    zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_CONTROLLER_ID), "", ZEND_ACC_PUBLIC);
-    zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_CONTROLLER_ACTION_ID), "", ZEND_ACC_PUBLIC);
 }/*}}}*/
 
 

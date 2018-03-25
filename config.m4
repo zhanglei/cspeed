@@ -55,6 +55,7 @@ if test "$PHP_CSPEED" != "no"; then
     cspeed.c                            \
     kernel/CApp.c                       \
     kernel/bootinit.c                   \
+    kernel/object_factory.c             \
     kernel/di/di.c                      \
     kernel/db/pdo.c                     \
     kernel/mvc/view.c                   \
