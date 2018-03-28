@@ -207,7 +207,7 @@ $user->setName(new app\models\Tools());
     'attrs'       => [
         'private'   => true,
         'public'    => true，
-        'protected' => fasle
+        'protected' => false
     ]
 ```   
 这就告诉 CSpeed 如果属性是 **private** 修饰，则使用 **values**数组的相应的值初始化，**public** 修饰的属性也进行初始化，但是 **protected** 修饰的属性不进行初始化。
@@ -225,6 +225,12 @@ $task = new \Cs\console\Task("xxx/xxx.ini", "dev");
 $task->run($args[1]);
 
 ```
+bash切换到本脚本的目录，键入如下的命令即可：
+
+```php
+php -f index.php hello/world/lists
+```
+表示让 **CSpeed** 执行 **hello** 模块下 **world** 控制器的 **lists** 方法
 
 10、强悍的 **路由** 功能，如
 
@@ -248,6 +254,8 @@ $router->addFromArray([
 $router->addFromIni('../app/router.ini');
 
 ```
+开发者只需要在入口处定义路由，即可以自动的跳转到指定的路由。
+
 **原生C语言开发，极致性能，目前已经在 Linux、macOSX 上测试通过**
 
 ## 安装指南 ##
@@ -390,41 +398,45 @@ Cs\App类的构造函数支持传入绝对路径或者相对路径的INI文件�
 
 ## CSpeed引擎INI配置项 ##
 
-	[core]
-	core.application                = '../app'               ; WEB目录
-	core.bootstrap                  = '../app/bootstrap.php' ; 指定bootstrap 类目录
-	core.bootstrap.method.string    = '__init'               ; 指定Bootstrap类的初始化方法的前缀 
-	core.router.modules             =  index,home,back       ; 注册多模块
-	core.router.default.module      =  index                 ; 默认模块
-	core.router.default.controller  =  Index                 ; 默认控制器
-	core.router.default.action      =  index                 ; 默认方法
-	core.view.ext                   =  phtml                 ; 视图文件后缀
-	core.view.auto.render           =  0                     ; 是否自动渲染视图，１：自动渲染、０：不渲染
-	core.url.pattern		= '.html'	 	 ; url 模型的伪静态设置
+```ini
+[core]
+core.application                = '../app'               ; WEB目录
+core.bootstrap                  = '../app/bootstrap.php' ; 指定bootstrap 类目录
+core.bootstrap.method.string    = '__init'               ; 指定Bootstrap类的初始化方法的前缀 
+core.router.modules             =  index,home,back       ; 注册多模块
+core.router.default.module      =  index                 ; 默认模块
+core.router.default.controller  =  index                 ; 默认控制器
+core.router.default.action      =  index                 ; 默认方法
+core.view.ext                   =  phtml                 ; 视图文件后缀
+core.view.auto.render           =  0                     ; 是否自动渲染视图，１：自动渲染、０：不渲染
+core.url.pattern				= '.html'				 ; 伪静态设置
 
-	[db]
-	db.master.type                   =  mysql                 ; 数据库类型，默认：mysql
-	db.master.host                   =  localhost             ; 数据库主机地址
-	db.master.port                   =  3306                  ; 数据库端口
-	db.master.dbname                 =  supjos                ; 数据库名称
-	db.master.username               =  root                  ; 数据库用户名
-	db.master.password               =  3333                  ; 数据库密码
+[db]
+db.master.dsn                   =  'mysql:host=localhost;port=3306;dbname=supjos'    ; 数据库类型
+db.master.username              =  root                                              ; 数据库用户名
+db.master.password              =  3333                                              ; 数据库密码
 
-	[dev:core]
-	core.application                = '../app'               ; WEB目录
-	core.bootstrap                  = '../app/bootstrap.php' ; 指定bootstrap 类目录
-	core.bootstrap.method.string    = '__init'               ; 指定Bootstrap类的初始化方法的前缀 
-	core.router.modules             =  index,home            ; 注册多模块
-	core.router.default.module      =  index                 ; 默认模块
-	core.router.default.controller  =  Index                 ; 默认控制器
-	core.router.default.action      =  index                 ; 默认方法
-	core.view.ext                   =  xhtml                 ; 视图文件后缀
-	core.view.auto.render           =  0                     ; 是否自动渲染视图，１：自动渲染、０：不渲染
-	core.url.pattern		= '.html'	 	 ; url 模型的伪静态设置
+[dev:core]
+core.application                = '../app'               ; WEB目录
+core.bootstrap                  = '../app/bootstrap.php' ; 指定bootstrap 类目录
+core.bootstrap.method.string    = '__init'               ; 指定Bootstrap类的初始化方法的前缀 
+core.router.modules             =  index,home            ; 注册多模块
+core.router.default.module      =  index                 ; 默认模块
+core.router.default.controller  =  Index                 ; 默认控制器
+core.router.default.action      =  index                 ; 默认方法
+core.view.ext                   =  xhtml                 ; 视图文件后缀
+core.view.auto.render           =  0                     ; 是否自动渲染视图，１：自动渲染、０：不渲染
+core.url.pattern				= '.html'				 ; 伪静态设置
 
-## 典型的Bootstrap初始化类 ##
+[dev:db]
+db.master.dsn                   =  'mysql:host=localhost;port=3306;dbname=supjos'    ; 数据库类型
+db.master.username              =  root                                              ; 数据库用户名
+db.master.password              =  3333                                              ; 数据库密码
+```
 
-	class Bootstrap implements \Cs\BootInit
+## 典型的BootInit初始化类 ##
+
+	class BootInit implements \Cs\BootInit
 	{
 	    /* 初始化路由与视图 */
 	    function __initRouter($di, $router)
@@ -450,6 +462,8 @@ Cs\App类的构造函数支持传入绝对路径或者相对路径的INI文件�
                 });
             }
 	}
+	
+**\Cs\BootInit** 类中所有的以配置文件中的 指定的前缀开头的方法均会被调用，并且会自动传入两个参数： **$di** 与 **$router**，表示注入容器与路由，以便开发者设置与初始化整套系统。	
 
 ## 典型的控制器结构 ##
 
