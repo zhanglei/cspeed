@@ -129,11 +129,11 @@ CSPEED_METHOD(View, __get)
     }
 
     if ( CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(property_name)) ) {
-        if ( (strncmp(ZSTR_VAL(property_name), CSPEED_STRL("module_id")) == 0) ) {
+        if ( (strncmp(ZSTR_VAL(property_name), ("module_id"), strlen("module_id")) == 0) ) {
             RETURN_STR(CSPEED_G(core_router_default_module));
-        } else if ( (strncmp(ZSTR_VAL(property_name), CSPEED_STRL("controller_id")) == 0) ) {
+        } else if ( (strncmp(ZSTR_VAL(property_name), ("controller_id"), strlen("controller_id")) == 0) ) {
             RETURN_STR(CSPEED_G(core_router_default_controller));
-        } else if ( (strncmp(ZSTR_VAL(property_name), CSPEED_STRL("action_id")) == 0) ) {
+        } else if ( (strncmp(ZSTR_VAL(property_name), ("action_id"), strlen("action_id")) == 0) ) {
             RETURN_STR(CSPEED_G(core_router_default_action));
         } else {
             php_error_docref(NULL, E_ERROR, "__get only accept the parameter named: `module_id` or `controller_id` or `action_id`.");

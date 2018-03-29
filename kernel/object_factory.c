@@ -169,7 +169,7 @@ nest_again:
                                     zval *attr_value;
                                     ZEND_HASH_FOREACH_STR_KEY_VAL( Z_ARRVAL_P(attrs), attr_key, attr_value) {
                                         if ( 
-                                            (strncmp(ZSTR_VAL(attr_key), CSPEED_STRL("private") ) == 0) 
+                                            (strncmp(ZSTR_VAL(attr_key), ("private"), strlen("private") ) == 0) 
                                              && (property_info->flags & ZEND_ACC_PRIVATE ) ) {
                                             if ( (Z_TYPE_INFO_P(attr_value) == IS_FALSE) ) {
                                                 set_attr_or_not = 0;
@@ -180,7 +180,7 @@ nest_again:
                                             }
                                         }
                                         if ( 
-                                            (strncmp(ZSTR_VAL(attr_key), CSPEED_STRL("protected") ) == 0) 
+                                            (strncmp(ZSTR_VAL(attr_key), ("protected"), strlen("protected") ) == 0) 
                                              && (property_info->flags & ZEND_ACC_PROTECTED ) ) {
                                             if ( (Z_TYPE_INFO_P(attr_value) == IS_FALSE) ) {
                                                 set_attr_or_not = 0;
@@ -190,7 +190,7 @@ nest_again:
                                                 break;
                                             }
                                         }
-                                        if ( strncmp(ZSTR_VAL(attr_key), CSPEED_STRL("public") ) == 0 ) {
+                                        if ( strncmp(ZSTR_VAL(attr_key), ("public"), strlen("public") ) == 0 ) {
                                             if ( (Z_TYPE_INFO_P(attr_value) == IS_FALSE) &&
                                                 (property_info->flags & ZEND_ACC_PUBLIC) ) {
                                                 set_attr_or_not = 0;

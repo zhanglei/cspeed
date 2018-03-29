@@ -296,7 +296,7 @@ CSPEED_METHOD(Model, __set)/*{{{ proto Model::__set($name, $value) The magic fun
         zval *temp_value;
         int has_field = 0;
         ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(columns), temp_value) {
-            if ( strncmp(ZSTR_VAL(key), CSPEED_STRL(Z_STRVAL_P(temp_value)) ) == 0 ) {
+            if ( strncmp(ZSTR_VAL(key), Z_STRVAL_P(temp_value), Z_STRLEN_P(temp_value) ) == 0 ) {
                 has_field = 1;
                 break;
             }

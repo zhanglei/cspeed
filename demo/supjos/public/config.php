@@ -17,7 +17,7 @@ return [
             'abc'     => new stdClass(),
             'linux'   => 'Linux',
             'windows' => 'Windows',
-            'macos'     => 'macOSX'
+            'macos'   => 'macOSX'
         ],
         'attrs'       => [
             'private' => true,

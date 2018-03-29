@@ -153,7 +153,7 @@ int cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCTI
         zval *all_app_aliases = zend_read_property(cspeed_app_ce, app_obj, CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), 1, NULL);
         zval *has_exists = zend_hash_find(Z_ARRVAL_P(all_app_aliases), zend_string_init(CSPEED_STRL(current_alias), 0));
 
-        if ( strncmp(current_alias, CSPEED_STRL("Cs")) == 0 ) {
+        if ( strncmp(current_alias, ("Cs"), strlen("Cs")) == 0 ) {
             free(current_alias);
             php_error_docref(NULL, E_ERROR, "CSpeed framework not contain the class: `%s`.", ZSTR_VAL(class_name_with_namespace));
         }
