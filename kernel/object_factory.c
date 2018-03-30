@@ -160,17 +160,26 @@ nest_again:
                             if ( (property_info->flags & ZEND_ACC_SHADOW) 
                                 || (property_info->flags & ZEND_ACC_PUBLIC)
                                 || (property_info->flags & ZEND_ACC_PRIVATE)
+                                || (property_info->flags & ZEND_ACC_PROTECTED)
                                  ) {
                                 /* Find the attr property */
                                 zval *attrs = zend_hash_find(Z_ARRVAL_P(val_value), strpprintf(0, "attrs"));
                                 if ( attrs && ( Z_TYPE_P(attrs) == IS_ARRAY ) ) {
-                                    // php_error_docref(NULL, E_ERROR, "array");
                                     zend_string * attr_key;
                                     zval *attr_value;
                                     ZEND_HASH_FOREACH_STR_KEY_VAL( Z_ARRVAL_P(attrs), attr_key, attr_value) {
                                         if ( 
-                                            (strncmp(ZSTR_VAL(attr_key), ("private"), strlen("private") ) == 0) 
-                                             && (property_info->flags & ZEND_ACC_PRIVATE ) ) {
+                                          (
+                                            ( strncmp(ZSTR_VAL(attr_key), ("public"), strlen("public") ) == 0 )
+                                             && (property_info->flags & ZEND_ACC_PUBLIC) )
+                                          || ( 
+                                            ( strncmp(ZSTR_VAL(attr_key), ("protected"), strlen("protected") ) == 0) 
+                                             && (property_info->flags & ZEND_ACC_PROTECTED ) )
+                                          || (
+                                             ( (strncmp(ZSTR_VAL(attr_key), ("private"), strlen("private") ) == 0) 
+                                             && (property_info->flags & ZEND_ACC_PRIVATE ) )
+                                          )
+                                        ) {
                                             if ( (Z_TYPE_INFO_P(attr_value) == IS_FALSE) ) {
                                                 set_attr_or_not = 0;
                                                 break;
@@ -179,28 +188,6 @@ nest_again:
                                                 break;
                                             }
                                         }
-                                        if ( 
-                                            (strncmp(ZSTR_VAL(attr_key), ("protected"), strlen("protected") ) == 0) 
-                                             && (property_info->flags & ZEND_ACC_PROTECTED ) ) {
-                                            if ( (Z_TYPE_INFO_P(attr_value) == IS_FALSE) ) {
-                                                set_attr_or_not = 0;
-                                                break;
-                                            } else {
-                                                set_attr_or_not = 1;
-                                                break;
-                                            }
-                                        }
-                                        if ( strncmp(ZSTR_VAL(attr_key), ("public"), strlen("public") ) == 0 ) {
-                                            if ( (Z_TYPE_INFO_P(attr_value) == IS_FALSE) &&
-                                                (property_info->flags & ZEND_ACC_PUBLIC) ) {
-                                                set_attr_or_not = 0;
-                                                break;
-                                            } else {
-                                                set_attr_or_not = 1;
-                                                break;
-                                            }
-                                        }
-
                                     } ZEND_HASH_FOREACH_END();
                                 }
                             }
