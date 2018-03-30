@@ -80,19 +80,25 @@ class BootInit implements \Cs\BootInit
 
 3、支持多重数据库连接并切换，数据库使用 DSN 连接方式，原始方式支持多种数据库：PgSQL、MySQL等，数据库连接池正在开发。
 
-```php
-
 模型支持切换数据库：
+
+```php
 $model = new app\models\User();
+
+// 设置 master 数据库连接
 $model->setDb('master');
 
 // do some job
 ...
 
-// Change to slave db
+// 切换到 slave 数据库连接
 $model->setDb('slave');
 
-切换数据库之前需要在容器中注入相应的数据库，比如上面的 master与slave数据库：
+```
+
+切换数据库之前需要在容器中注入相应的数据库，比如上面的 **master** 与 **slave** 数据库：
+
+```php
 
 $di->set('master', function(){
 	return new \Cs\db\pdo\Adapter();
@@ -106,6 +112,23 @@ $di->set('slave', function(){
 	]);
 });
 ```
+
+**\Cs\db\pdo\Adapter** 类一样支持 **PDO** 的初始化参数，如设置持久连接：
+
+```php
+$di->set('slave', function(){
+	return new \Cs\db\pdo\Adapter([
+		'dsn' => 'mysql:host=localhost;port=3306;dbname=supjos',
+		'username' => 'root',
+		'password' => 'root',
+		'options'  => [
+           \PDO::ATTR_PERSISTENT => true, // 持久连接
+           \PDO::ATTR_AUTOCOMMIT => 0     // 默认不自动提交
+       ]
+	]);
+});
+```
+
 4、模型AR特性支持[目前不完善]
 
 5、配置文件[ini]按需加载：**\Cs\tool\Config** 类
@@ -120,9 +143,43 @@ $configs = $config->getConfigs();
 $configValue = $config->getConfigs('db');
 ```
 
-6、事件支持： **\Cs\tool\Component** 类
+6、**观察者事件机制**支持： **\Cs\tool\Component** 类
+
+控制器控制在控制器方法执行之前执行一些入口控制，那么可以使用事件支持：
+
+```php
+// 如果控制器内存在本方法，则会从其顶级父类执行到本函数完成初始化
+// 注意，不会执行构造函数： __construct()，在构造函数内指定不会生效
+// initialise 方法是控制器的初始化函数入口
+function initialise()
+{
+    $this->on(self::EVENT_BEFORE_ACTION, function(){
+        echo 'Hello first fun me';
+    });
+}
+```
+
+**initialise**方法存在一个参数：$object(名称用户自定，这里假设用户定义为：$object)，表示当前控制器类，如：
+
+```php
+namespace app\modules\index\controllers;
+
+class Goods extends \Cs\mvc\Controller {
+	function initialise($object)
+	{
+		// 那么 $object 表示当前的控制器类: Goods的对象，打印如下：
+	    echo '<pre>';
+	    print_r($object);
+	    echo '</pre>';
+	}
+}
+```
 
 7、**MVC** 三层开发方式
+
+```php
+使用了 B/S 开发中最普及的开发模式： MVC
+```
 
 8、配置文件解耦，使用 **\Cs\ObjectFactory** 解耦
 
@@ -147,8 +204,9 @@ return [
             'windows' => 'No unless do choice'
         ],
         'attrs'       => [
-            'private' => true,
-            'public'  => true
+            'private'   => false,
+            'public'    => true,
+            'protected' => fasle
         ]
     ],
     'aes' => [
@@ -199,9 +257,9 @@ $user->setName(new app\models\Tools());
         'windows' => 'No unless do choice'
     ],
 ```    
-   上面代码就会告诉 CSpeed引擎去使用 new stdClass()值初始化 ```app\models\User```类的 **abc** 属性，使用 “ Yes, I favorite it” 初始化 ```app\models\User```类的 **linux** 属性吗，以此类推.
+   上面代码就会告诉 CSpeed引擎去使用 ```new stdClass()``` 值初始化 ```app\models\User```类的 ```abc``` 属性，使用 ```Yes, I favorite it``` 初始化 ```app\models\User```类的 ```linux``` 属性吗，以此类推.
 
-当然为了不印象内部的 **private** 修饰的属性，可以指定 那种修饰符的属性可以初始化：
+当然为了不影响内部的 **private** 修饰的属性，可以指定 那种修饰符的属性可以初始化：
 
 ```php
     'attrs'       => [
@@ -815,18 +873,6 @@ db.master.password              =  3333                                         
      * 从父类初始化到本类
      */
     function initialise()
-    
-    /**
-     * 在执行具体的方法之前调用
-     * 不会执行父类的本方法
-     */
-    function __beforeAction()
-    
-    /**
-     * 在执行完具体的方法之后调用
-     * 不会执行父类的本方法
-     */
-    function __afterAction()
 
 ### Cs\mvc\Model ###
 
@@ -894,6 +940,17 @@ db.master.password              =  3333                                         
      * 执行 DELETE 操作
      */
     function delete()
+    
+    /**
+     * 获取当前模型操作的 PDO 对象
+     * 可以使用本方法返回的 PDO 来调用 PDO 的方法等
+     */
+    function getDb()
+    
+    /**
+     * 获取当前模型对应的 \Cs\db\pdo\Adapter 对象
+     */
+    function getAdapter()
 
 ### Cs\mvc\View ###
 
@@ -1170,6 +1227,22 @@ db.master.password              =  3333                                         
 	 * @param $eventName 	需要触发的事件的名称
 	 */
 	function trigger($eventName);
+	
+	
+### Cs\ObjectFactory ###
+
+	/**
+	 * 依据 配置文件 初始化 IOC 类工厂
+	 * @param $factoryConfig 需要进入IOC控制的配置文件
+	 */
+	function init($factoryConfig);
+	
+	/**
+	 * 获取 IOC 工厂的某一个对象
+	 * @param $key 需要从工厂里面获取的对象对应的 对象ID
+	 */
+	function getObject($id);
+	
 	
 	
 	

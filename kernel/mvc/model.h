@@ -33,6 +33,7 @@ extern zend_class_entry *cspeed_model_ce;                                      /
 #define CSPEED_MODEL_TABLE_NAME         "__cspeed_model_table_name"     /* Model table name */
 #define CSPEED_MODEL_ULTIMATE_PDO       "__cspeed_model_ultimate_pdo"   /* The finaly pdo object to do the job */
 
+#define CSPEED_MODEL_ADAPTER            "__adapter"                     /* The current adapter related to this model */
 #define CSPEED_MODEL_COLUMNS_DETAIL     "__columns_detail"              /* Columns Details */
 #define CSPEED_MODEL_COLUMNS            "__columns"                     /* Columns */
 #define CSPEED_MODEL_PRIMARY            "__primary_key"                 /* The primary key */

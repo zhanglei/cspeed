@@ -23,8 +23,9 @@
 
 extern zend_class_entry *cspeed_adapter_ce;
 
-#define CSPEED_DB_PDO_OBJECT            "__cspeed_db_pdo"                 /* The Db's pdo object */
+#define CSPEED_DB_PDO_OBJECT            "__cspeed_db_pdo"               /* The Db's pdo object */
 #define CSPEED_DB_THIS_PDO              "__cspeed_adapter_this_pdo"     /* The Db's pdo object attach to the Adapter */
+#define CSPEED_DB_THIS_ADAPTER          "__cspeed_adapter"              /* The current Adapter object */
 
 #define CSPEED_ADAPTER_SELECT           "__cspeed_adapter_select"       /* The select fields */
 #define CSPEED_ADAPTER_FROM             "__cspeed_adapter_from"         /* The from fields */

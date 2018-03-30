@@ -100,30 +100,33 @@ cspeed_deal_reqeust(zend_string *url, zend_fcall_info *zfi, zend_fcall_info_cach
     return -1;
 }/*}}}*/
 
-void handle_request(INTERNAL_FUNCTION_PARAMETERS)/*{{{ Handle the user input from the PHP level*/
+int handle_request(INTERNAL_FUNCTION_PARAMETERS)/*{{{ Handle the user input from the PHP level*/
 {
     zend_string *url;
     zend_fcall_info zfi;
     zend_fcall_info_cache zfic;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sf*", &url, &zfi, &zfic, 
         &zfi.params, &zfi.param_count) == FAILURE) {
-        return ;
+        return -1;
     }
     zval retval;
     int result = cspeed_deal_reqeust(url, &zfi, &zfic, &retval);
-    if (result == 0) {
-        RETURN_ZVAL(&retval, 1, 0);
-    }
-    RETURN_FALSE
+    zval_ptr_dtor(&retval);
+    return result;
 } /*}}}*/
 
 void handle_method_request(zval *object_ptr, char *method_name, INTERNAL_FUNCTION_PARAMETERS)/*{{{ Handle the request */
 {
+    int continue_or_false = 0;
     trigger_events(object_ptr, strpprintf(0, "%s", CSPEED_APP_EVENT_BEORE_REQUEST));
     if (cspeed_request_is_method(method_name)) {
-        handle_request(INTERNAL_FUNCTION_PARAM_PASSTHRU);   
+        continue_or_false = handle_request(INTERNAL_FUNCTION_PARAM_PASSTHRU);
     }
     trigger_events(object_ptr, strpprintf(0, "%s", CSPEED_APP_EVENT_AFTER_REQUEST));
+    if ( continue_or_false > 0 ) {
+        /* Fix: if meet the suited regular url, the next will abandoned */
+        php_request_shutdown(NULL);
+    }
 } /*}}}*/
 
 int cspeed_app_load_file(zend_string *class_name_with_namespace, INTERNAL_FUNCTION_PARAMETERS, zval *app_obj) /*{{{ Load file */

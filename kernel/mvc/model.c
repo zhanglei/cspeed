@@ -275,6 +275,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_set_db, 0, 0, 1)
     ZEND_ARG_INFO(0, di_db_name)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_get_db, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_get_adapter, 0, 0, 0)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 CSPEED_METHOD(Model, __construct)/*{{{ proto Model::construct()*/
@@ -617,6 +623,8 @@ CSPEED_METHOD(Model, setDb)/*{{{ proto Model::setDb('db')*/
         zval *objects = zend_read_property(cspeed_di_ce, &di_object, CSPEED_STRL(CSPEED_DI_OBJECT), 1, NULL);
         if (EXPECTED( (db_adapter = zend_hash_find(Z_ARRVAL_P(objects), db_name) ) != NULL )) 
         {
+            /* Set the adapter to the property */
+            zend_update_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_ADAPTER), db_adapter);
             /* The db adapter exsits. set the db */
             zval *adapter_pdo_object = zend_read_property(cspeed_adapter_ce, db_adapter, CSPEED_STRL(CSPEED_DB_THIS_PDO), 1, NULL);
             zval_add_ref(adapter_pdo_object);
@@ -629,6 +637,34 @@ CSPEED_METHOD(Model, setDb)/*{{{ proto Model::setDb('db')*/
         RETURN_FALSE
     }
 }/*}}}*/
+
+CSPEED_METHOD(Model, getDb)
+{
+    zval *is_set_ultimate_pdo = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_ULTIMATE_PDO), 1, NULL);
+
+    if ( !ZVAL_IS_NULL(is_set_ultimate_pdo) ) {
+        RETURN_ZVAL(is_set_ultimate_pdo, 1, 0);
+    }
+
+    is_set_ultimate_pdo = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_PDO_OBJECT), 1, NULL);
+    if ( ZVAL_IS_NULL(is_set_ultimate_pdo) ) {
+        php_error_docref(NULL, E_ERROR, "Sorry, you must set Adapter to the \\Cs\\di\\Di object");
+    }
+    RETURN_ZVAL(is_set_ultimate_pdo, 1, NULL);
+}
+
+CSPEED_METHOD(Model, getAdapter)
+{
+    zval *adapter_object = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_ADAPTER), 1, NULL);
+    if ( !ZVAL_IS_NULL(adapter_object) ){
+        RETURN_ZVAL(adapter_object, 1, 0);
+    }
+    adapter_object = zend_read_static_property(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_THIS_ADAPTER), 1);
+    if ( ZVAL_IS_NULL(adapter_object) ) {
+        php_error_docref(NULL, E_ERROR, "Sorry, you must set Adapter to the \\Cs\\di\\Di object.");
+    }
+    RETURN_ZVAL(adapter_object, 1, 0);
+}
 
 /*{{{ All functions definitions */
 static const zend_function_entry cspeed_model_functions[] = {
@@ -646,6 +682,8 @@ static const zend_function_entry cspeed_model_functions[] = {
     CSPEED_ME(Model, save, arginfo_cspeed_model_save, ZEND_ACC_PUBLIC)
     CSPEED_ME(Model, delete, arginfo_cspeed_model_delete, ZEND_ACC_PUBLIC)
     CSPEED_ME(Model, setDb, arginfo_cspeed_model_set_db, ZEND_ACC_PUBLIC)
+    CSPEED_ME(Model, getDb, arginfo_cspeed_model_get_db, ZEND_ACC_PUBLIC)
+    CSPEED_ME(Model, getAdapter, arginfo_cspeed_model_get_adapter, ZEND_ACC_PUBLIC)
 
     PHP_FE_END
 };/*}}}*/
@@ -666,6 +704,7 @@ CSPEED_INIT(model)  /*{{{ Load the module function*/
     zend_declare_property_null(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_ULTIMATE_PDO), ZEND_ACC_PRIVATE);
     zend_declare_property_null(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_COLUMNS_DETAIL), ZEND_ACC_PRIVATE);
     zend_declare_property_null(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_COLUMNS), ZEND_ACC_PRIVATE);
+    zend_declare_property_null(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_ADAPTER), ZEND_ACC_PRIVATE);
 
     zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_PRIMARY), "", ZEND_ACC_PRIVATE);
     zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_WHERE_COND), "", ZEND_ACC_PRIVATE);

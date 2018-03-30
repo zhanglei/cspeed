@@ -197,6 +197,7 @@ CSPEED_METHOD(Adapter, __construct)/*{{{ proto Adapter::__construct(array $optio
     /* Store the getting pdo object into the property */
     zend_update_property(cspeed_adapter_ce, getThis(), CSPEED_STRL(CSPEED_DB_THIS_PDO), &pdo_object);
     zend_update_static_property(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_PDO_OBJECT), &pdo_object);
+    zend_update_static_property(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_THIS_ADAPTER), getThis());
 }/*}}}*/
 
 CSPEED_METHOD(Adapter, select)/*{{{ proto Adapter::select($fields)*/
@@ -397,7 +398,7 @@ CSPEED_METHOD(Adapter, query)/*{{{ proto Adapter::query($rawsql)*/
 
 CSPEED_METHOD(Adapter, execute)/*{{{ proto Adapter::execute($rawsql)*/
 {
-    zval *pdo_object = zend_read_static_property(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_PDO_OBJECT), 1);
+    zval *pdo_object = zend_read_property(cspeed_adapter_ce, getThis(), CSPEED_STRL(CSPEED_DB_THIS_PDO), 1, NULL);
     zval *sql_property = zend_read_property(cspeed_adapter_ce, getThis(), CSPEED_STRL(CSPEED_ADAPTER_RAW_SQL), 1, NULL);
     zval *param_property = zend_read_property(cspeed_adapter_ce, getThis(), CSPEED_STRL(CSPEED_ADAPTER_BIND_PARAMS), 1, NULL);
 
@@ -421,7 +422,7 @@ CSPEED_METHOD(Adapter, execute)/*{{{ proto Adapter::execute($rawsql)*/
 
 CSPEED_METHOD(Adapter, begin)/*{{{ proto Adapter::begin()*/
 {
-    zval *pdo_object = zend_read_static_property(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_PDO_OBJECT), 1);
+    zval *pdo_object = zend_read_property(cspeed_adapter_ce, getThis(), CSPEED_STRL(CSPEED_DB_THIS_PDO), 1, NULL);
     zval retval;
     cspeed_pdo_begin_transaction(pdo_object, &retval);
     RETURN_ZVAL(&retval, 1, NULL);
@@ -429,7 +430,7 @@ CSPEED_METHOD(Adapter, begin)/*{{{ proto Adapter::begin()*/
 
 CSPEED_METHOD(Adapter, rollback)/*{{{ proto Adapter::rollback()*/
 {
-    zval *pdo_object = zend_read_static_property(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_PDO_OBJECT), 1);
+    zval *pdo_object = zend_read_property(cspeed_adapter_ce, getThis(), CSPEED_STRL(CSPEED_DB_THIS_PDO), 1, NULL);
     zval retval;
     cspeed_pdo_roll_back(pdo_object, &retval);
     RETURN_ZVAL(&retval, 1, NULL);
@@ -437,7 +438,7 @@ CSPEED_METHOD(Adapter, rollback)/*{{{ proto Adapter::rollback()*/
 
 CSPEED_METHOD(Adapter, commit)/*{{{ proto Adapter::commit()*/
 {
-    zval *pdo_object = zend_read_static_property(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_PDO_OBJECT), 1);
+    zval *pdo_object = zend_read_property(cspeed_adapter_ce, getThis(), CSPEED_STRL(CSPEED_DB_THIS_PDO), 1, NULL);
     zval retval;
     cspeed_pdo_commit(pdo_object, &retval);
     RETURN_ZVAL(&retval, 1, NULL);
@@ -445,7 +446,7 @@ CSPEED_METHOD(Adapter, commit)/*{{{ proto Adapter::commit()*/
 
 CSPEED_METHOD(Adapter, lastInsertId)/*{{{ proto Adapter::lastInsertId()*/
 {
-    zval *pdo_object = zend_read_static_property(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_PDO_OBJECT), 1);
+    zval *pdo_object = zend_read_property(cspeed_adapter_ce, getThis(), CSPEED_STRL(CSPEED_DB_THIS_PDO), 1, NULL);
     zval retval;
     cspeed_pdo_last_insert_id(pdo_object, NULL, &retval);
     RETURN_ZVAL(&retval, 1, NULL);
@@ -453,7 +454,7 @@ CSPEED_METHOD(Adapter, lastInsertId)/*{{{ proto Adapter::lastInsertId()*/
 
 CSPEED_METHOD(Adapter, rowCount)/*{{{ proto Adapter::rowCount()*/
 {
-    zval *pdo_object = zend_read_static_property(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_PDO_OBJECT), 1);
+    zval *pdo_object = zend_read_property(cspeed_adapter_ce, getThis(), CSPEED_STRL(CSPEED_DB_THIS_PDO), 1, NULL);
     zval retval;
     cspeed_pdo_statement_row_count(pdo_object, &retval);
     RETURN_ZVAL(&retval, 1, NULL);
@@ -461,7 +462,7 @@ CSPEED_METHOD(Adapter, rowCount)/*{{{ proto Adapter::rowCount()*/
 
 CSPEED_METHOD(Adapter, find)/*{{{ proto Adapter::find()*/
 {
-    zval *pdo_object = zend_read_static_property(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_PDO_OBJECT), 1);
+    zval *pdo_object = zend_read_property(cspeed_adapter_ce, getThis(), CSPEED_STRL(CSPEED_DB_THIS_PDO), 1, NULL);
 
     zval pdo_statement;
     cspeed_pdo_prepare(pdo_object, get_build_sql(getThis()), &pdo_statement);
@@ -483,7 +484,7 @@ CSPEED_METHOD(Adapter, find)/*{{{ proto Adapter::find()*/
 
 CSPEED_METHOD(Adapter, findAll)/*{{{ proto Adapter::findAll()*/
 {
-    zval *pdo_object = zend_read_static_property(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_PDO_OBJECT), 1);
+    zval *pdo_object = zend_read_property(cspeed_adapter_ce, getThis(), CSPEED_STRL(CSPEED_DB_THIS_PDO), 1, NULL);
     zval pdo_statement;
     cspeed_pdo_prepare(pdo_object, get_build_sql(getThis()), &pdo_statement);
     zval ret;
@@ -539,7 +540,8 @@ CSPEED_INIT(adapter)/*{{{*/
     zend_declare_property_string(cspeed_adapter_ce, CSPEED_STRL(CSPEED_ADAPTER_LIMIT), "", ZEND_ACC_PROTECTED);
     zend_declare_property_string(cspeed_adapter_ce, CSPEED_STRL(CSPEED_ADAPTER_RAW_SQL), "", ZEND_ACC_PROTECTED);
     zend_declare_property_null(cspeed_adapter_ce, CSPEED_STRL(CSPEED_ADAPTER_BIND_PARAMS), ZEND_ACC_PROTECTED);
-    zend_declare_property_null(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_PDO_OBJECT), ZEND_ACC_PUBLIC|ZEND_ACC_STATIC);
+    zend_declare_property_null(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_PDO_OBJECT), ZEND_ACC_STATIC);
+    zend_declare_property_null(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_THIS_ADAPTER), ZEND_ACC_STATIC);
     zend_declare_property_null(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_THIS_PDO), ZEND_ACC_PUBLIC);
 }/*}}}*/
 

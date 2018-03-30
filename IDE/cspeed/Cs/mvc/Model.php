@@ -134,4 +134,20 @@ class Model extends \Cs\tool\Component
     function setDb()
     {
     }
+
+    /**
+     * @return \PDO
+     */
+    function getDb()
+    {
+        return new \PDO();
+    }
+
+    /**
+     * @return \Cs\db\pdo\Adapter
+     */
+    function getAdapter()
+    {
+        return new \Cs\db\pdo\Adapter();
+    }
 }
