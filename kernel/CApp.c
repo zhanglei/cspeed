@@ -123,7 +123,7 @@ void handle_method_request(zval *object_ptr, char *method_name, INTERNAL_FUNCTIO
         continue_or_false = handle_request(INTERNAL_FUNCTION_PARAM_PASSTHRU);
     }
     trigger_events(object_ptr, strpprintf(0, "%s", CSPEED_APP_EVENT_AFTER_REQUEST));
-    if ( continue_or_false > 0 ) {
+    if ( continue_or_false >= 0 ) {
         /* Fix: if meet the suited regular url, the next will abandoned */
         php_request_shutdown(NULL);
     }
