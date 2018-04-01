@@ -146,6 +146,15 @@ class Adapter implements ModelInterface
     }
 
     /**
+     * Return the adapter is in-transaction-mode
+     * @return mixed
+     */
+    function isInTransaction()
+    {
+
+    }
+
+    /**
      * Return the effected row count
      */
     function rowCount()

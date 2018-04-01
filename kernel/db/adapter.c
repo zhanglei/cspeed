@@ -142,6 +142,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_adapter_find_all, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_adapter_in_transaction, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 /*}}}*/
 
 CSPEED_METHOD(Adapter, __construct)/*{{{ proto Adapter::__construct(array $options = [])*/
@@ -501,6 +504,14 @@ CSPEED_METHOD(Adapter, findAll)/*{{{ proto Adapter::findAll()*/
     RETURN_NULL()
 }/*}}}*/
 
+CSPEED_METHOD(Adapter, isInTransaction) /*{{{ proto Adapter::isInTransaction*/
+{
+    zval *pdo_object = zend_read_property(cspeed_adapter_ce, getThis(), CSPEED_STRL(CSPEED_DB_THIS_PDO), 1, NULL);
+    zval retval;
+    cspeed_pdo_in_transaction(pdo_object, &retval);
+    RETURN_ZVAL(&retval, 1, NULL);
+}/*}}}*/
+
 static const zend_function_entry cspeed_adapter_functions[] = { /*{{{*/
     CSPEED_ME(Adapter, __construct, arginfo_cspeed_adapter_construct, ZEND_ACC_PUBLIC)
     CSPEED_ME(Adapter, select, arginfo_cspeed_adapter_select, ZEND_ACC_PUBLIC)
@@ -520,6 +531,7 @@ static const zend_function_entry cspeed_adapter_functions[] = { /*{{{*/
     CSPEED_ME(Adapter, rowCount, arginfo_cspeed_adapter_row_count, ZEND_ACC_PUBLIC)
     CSPEED_ME(Adapter, find, arginfo_cspeed_adapter_find, ZEND_ACC_PUBLIC)
     CSPEED_ME(Adapter, findAll, arginfo_cspeed_adapter_find_all, ZEND_ACC_PUBLIC)
+    CSPEED_ME(Adapter, isInTransaction, arginfo_cspeed_adapter_in_transaction, ZEND_ACC_PUBLIC)
     PHP_FE_END
 };/*}}}*/
 

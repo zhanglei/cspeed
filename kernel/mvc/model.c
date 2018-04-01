@@ -75,7 +75,7 @@ initialise_the_model_object(zval *model_object, zend_long new_record, INTERNAL_F
         CSPEED_STRL(CSPEED_MODEL_TABLE_NAME), Z_STRVAL(retval));
 
     /* Update the value to IS_TRUE */
-    if (new_record != -1){
+    if (new_record > 0){
         if (new_record == IS_TRUE){
             zend_update_property_long(cspeed_model_ce, model_object, CSPEED_STRL(CSPEED_MODEL_NEW_RECORD), IS_TRUE);
         } else {
@@ -328,8 +328,6 @@ CSPEED_METHOD(Model, __set)/*{{{ proto Model::__set($name, $value) The magic fun
 
 CSPEED_METHOD(Model, find)/*{{{ proto Model::find() To do the update() method */
 {
-    /* Not a new Record */
-    zend_update_static_property_long(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_NEW_RECORD), IS_FALSE);
     zval model_object;
     object_init_ex(&model_object, zend_get_called_scope(execute_data));
 
