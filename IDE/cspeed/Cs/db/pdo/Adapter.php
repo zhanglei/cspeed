@@ -89,7 +89,7 @@ class Adapter implements ModelInterface
      * @param array $bindParams
      * @return $this|Adapter
      */
-    function query($rawSql, array $bindParams)
+    function createCommand($rawSql, array $bindParams)
     {
         return $this;
     }

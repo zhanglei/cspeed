@@ -113,7 +113,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_adapter_limit, 0, 0, 1)
     ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_adapter_query, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_adapter_create_command, 0, 0, 1)
     ZEND_ARG_INFO(0, raw_sql)
     ZEND_ARG_INFO(0, bind_params)
 ZEND_END_ARG_INFO()
@@ -384,7 +384,7 @@ CSPEED_METHOD(Adapter, limit)/*{{{ proto Adapter::limit($limit)*/
     RETURN_ZVAL(getThis(), 1, NULL);
 }/*}}}*/
 
-CSPEED_METHOD(Adapter, query)/*{{{ proto Adapter::query($rawsql)*/
+CSPEED_METHOD(Adapter, createCommand)/*{{{ proto Adapter::createCommand($rawsql)*/
 {
     zend_string *raw_sql;
     zval *bind_params = NULL;
@@ -522,7 +522,7 @@ static const zend_function_entry cspeed_adapter_functions[] = { /*{{{*/
     CSPEED_ME(Adapter, having, arginfo_cspeed_adapter_having, ZEND_ACC_PUBLIC)
     CSPEED_ME(Adapter, orderBy, arginfo_cspeed_adapter_order_by, ZEND_ACC_PUBLIC)
     CSPEED_ME(Adapter, limit, arginfo_cspeed_adapter_limit, ZEND_ACC_PUBLIC)
-    CSPEED_ME(Adapter, query, arginfo_cspeed_adapter_query, ZEND_ACC_PUBLIC)
+    CSPEED_ME(Adapter, createCommand, arginfo_cspeed_adapter_create_command, ZEND_ACC_PUBLIC)
     CSPEED_ME(Adapter, execute, arginfo_cspeed_adapter_execute, ZEND_ACC_PUBLIC)
     CSPEED_ME(Adapter, begin, arginfo_cspeed_adapter_begin, ZEND_ACC_PUBLIC)
     CSPEED_ME(Adapter, rollback, arginfo_cspeed_adapter_rollback, ZEND_ACC_PUBLIC)
