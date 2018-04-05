@@ -66,7 +66,7 @@ interface ModelInterface
      * @param array $bindParams     The binding parameters you want to bind to the SQL
      * @return ModelInterface
      */
-    function query($rawSql, array $bindParams);
+    function createCommand($rawSql, array $bindParams);
 
     /**
      * Execute the SQL and return the result of the SQL execution data-sets
