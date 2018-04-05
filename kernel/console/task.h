@@ -21,6 +21,8 @@
 #ifndef CSPEED_CONSOLE_TASK_H
 #define CSPEED_CONSOLE_TASK_H
 
+#define CSPEED_TASK_AUTOLOAD_ALIASES  "__alias"
+
 CSPEED_INIT(task);
 
 #endif

@@ -351,6 +351,200 @@ void recursive_call_parent_method_two(zval *obj, char *method_name)/*{{{  Parent
     }
 }/*}}}*/
 
+int 
+cspeed_autoload_file(zend_string *class_name_with_namespace, INTERNAL_FUNCTION_PARAMETERS, zval *obj, char *alias) /*{{{ Load file */
+{    
+    if ( *(ZSTR_VAL(class_name_with_namespace)) == '\\' ) {
+        class_name_with_namespace = strpprintf(0, "%s", ZSTR_VAL(class_name_with_namespace) + 1);
+    }
+
+    char *slash_pos = strchr(ZSTR_VAL(class_name_with_namespace), '\\');
+    
+    if (slash_pos == NULL) { /* No slash find */
+        zend_string *real_file_path = strpprintf(0, "./%s.php", ZSTR_VAL(class_name_with_namespace));
+        check_file_exists(ZSTR_VAL(real_file_path));
+        if (cspeed_require_file(ZSTR_VAL(real_file_path), NULL, NULL, NULL) == FALSE){
+            return FALSE;
+        }
+        zend_string_release(real_file_path);
+    } else {                 /* find the slash */
+        char *current_alias = (char *)malloc(sizeof(char) * (slash_pos - ZSTR_VAL(class_name_with_namespace) + 1));
+        memset(current_alias, 0, (slash_pos - ZSTR_VAL(class_name_with_namespace) + 1));
+        memcpy(current_alias, ZSTR_VAL(class_name_with_namespace), (slash_pos - ZSTR_VAL(class_name_with_namespace)));
+
+        /* Before the steps the current_alias was `app` for example
+            After we get the namespace alias, we can find the global aliases to find whether the alias is exists or not.
+            if exists, replace it and plus the left character to form the correctly path
+         */
+        zval *all_app_aliases = zend_read_property(Z_OBJCE_P(obj), obj, CSPEED_STRL(alias), 1, NULL);
+        zval *has_exists = zend_hash_find(Z_ARRVAL_P(all_app_aliases), zend_string_init(CSPEED_STRL(current_alias), 0));
+
+        if ( strncmp(current_alias, ("Cs"), strlen("Cs")) == 0 ) {
+            free(current_alias);
+            php_error_docref(NULL, E_ERROR, "CSpeed framework not contain the class: `%s`.", ZSTR_VAL(class_name_with_namespace));
+        }
+
+        if (has_exists) {   /* Exists the need alias */
+            int real_file_path_size = (Z_STRLEN_P(has_exists) + ZSTR_LEN(class_name_with_namespace)
+                                        - (slash_pos - ZSTR_VAL(class_name_with_namespace)) + 5);
+            char *real_file_path = (char *)malloc(sizeof(char) * real_file_path_size); /* five means the .php & space*/
+            memset(real_file_path, 0, real_file_path_size);
+
+            strncat(real_file_path, Z_STRVAL_P(has_exists), Z_STRLEN_P(has_exists));
+            strncat(real_file_path, ZSTR_VAL(class_name_with_namespace) + (slash_pos - ZSTR_VAL(class_name_with_namespace)),
+                                 ZSTR_LEN(class_name_with_namespace) - (slash_pos - ZSTR_VAL(class_name_with_namespace)));
+            strncat(real_file_path, ".php", strlen(".php"));
+            /* Reslash all slash to reslash */
+            cspeed_reverse_slash_char(real_file_path);
+            /* check whether the file is exists or not */
+            check_file_exists(real_file_path);
+            /* After checking, require the file */
+            if (cspeed_require_file(real_file_path, NULL, NULL, NULL) == FALSE){
+                free(current_alias);
+                free(real_file_path);
+                return FALSE;
+            }
+            free(current_alias);
+            free(real_file_path);
+        } else {            /* Not found the needing alias */
+            php_error_docref(NULL, E_ERROR, "Namespace alias: %s not found. please set it first before use.", current_alias);
+            free(current_alias);
+            return FALSE;
+        }
+    }
+    return TRUE;
+} /*}}}*/
+
+
+void
+load_kernel_setting(zend_string *ini_config_file, zend_string *ini_config_node_name, char *path) /*{{{ Load the kernel default setting */
+{
+    if ( ini_config_file && CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(ini_config_file))) {
+        zend_string *ini_real_file;
+        if ( *(ZSTR_VAL(ini_config_file)) == '/' ) {
+            ini_real_file = ini_config_file;
+        } else {
+            ini_real_file = strpprintf(0, "%s/%s", path, ZSTR_VAL(ini_config_file));
+        }
+        check_file_exists(ZSTR_VAL(ini_real_file));
+        zval configs;
+        zend_string *node_core_name = strpprintf(0, "%s%s%s", ini_config_node_name ? ZSTR_VAL(ini_config_node_name) : "",
+                    ini_config_node_name ? ":" : "", "core" );
+        zend_string *node_db_name = strpprintf(0, "%s%s%s", ini_config_node_name ? ZSTR_VAL(ini_config_node_name) : "",
+                    ini_config_node_name ? ":" : "", "db" );
+        /* Parsing the INI file */
+        cspeed_parse_ini_file(ZSTR_VAL(ini_real_file), NULL , NULL, 1, &configs);
+
+        if (ZVAL_IS_NULL(&configs)  && !zend_hash_num_elements(Z_ARRVAL(configs)) ) {
+            php_error_docref(NULL, E_ERROR, "Configs empty.");
+        }
+        if ( ( Z_TYPE(configs) == IS_ARRAY ) ) {
+            zval *config_value, *core_configs;
+            if ( EXPECTED( (core_configs = zend_hash_find(Z_ARRVAL(configs), node_core_name)) == NULL )){
+                php_error_docref(NULL, E_ERROR, "`%s` configs not found in config file.", ZSTR_VAL(node_core_name));
+            }
+            /*core.application*/
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+                CSPEED_STRL(CORE_CONFIG_APPLICATION_NAME))) != NULL ) ) {
+                CSPEED_G(core_application) = zend_string_copy(Z_STR_P(config_value));
+            } else {
+                php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_APPLICATION_NAME);
+            }
+            /*core.bootstrap*/
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+                CSPEED_STRL(CORE_CONFIG_BOOTSTRAP_NAME))) != NULL ) ) {
+                CSPEED_G(core_bootstrap) = zend_string_copy(Z_STR_P(config_value));
+            } else {
+                php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_BOOTSTRAP_NAME);
+            }
+            /*core.bootstrap*/
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+                CSPEED_STRL(CORE_CONFIG_BOOTSTRAP_METHOD_NAME))) != NULL ) ) {
+                CSPEED_G(core_bootstrap_method_string) = zend_string_copy(Z_STR_P(config_value));
+            } else {
+                php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_BOOTSTRAP_METHOD_NAME);
+            }
+            /* core.router.modules */
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+                CSPEED_STRL(CORE_CONFIG_MODULES_NAME) )) != NULL )) {
+                zval modules;
+                array_init(&modules);
+                php_explode(zend_string_init(CSPEED_STRL(","), 0), Z_STR_P(config_value), &modules, ZEND_LONG_MAX);
+                zval_add_ref(&modules);
+                CSPEED_G(core_router_modules) = Z_ARRVAL(modules);
+            } else {
+                php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_MODULES_NAME);
+            }
+            /* core.router.default.module */
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+                CSPEED_STRL(CORE_CONFIG_DEFAULT_MODULE_NAME) )) != NULL )) {
+                CSPEED_G(core_router_default_module) = zend_string_copy(Z_STR_P(config_value));
+            } else {
+                php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_DEFAULT_MODULE_NAME);
+            }
+            /* core.router.default.controller */
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+                CSPEED_STRL(CORE_CONFIG_DEFAULT_CONTROLLER_NAME) )) != NULL )) {
+                CSPEED_G(core_router_default_controller) = zend_string_copy(Z_STR_P(config_value));
+            } else {
+                php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_DEFAULT_CONTROLLER_NAME);
+            }
+            /* core.router.default.action */
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+                CSPEED_STRL(CORE_CONFIG_DEFAULT_ACTION_NAME) )) != NULL )) {
+                CSPEED_G(core_router_default_action) = zend_string_copy(Z_STR_P(config_value));
+            } else {
+                php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_DEFAULT_ACTION_NAME);
+            }
+            /* core.view.ext */
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+                CSPEED_STRL(CORE_CONFIG_VIEW_EXT_NAME) )) != NULL )) {
+                CSPEED_G(core_view_ext) = zend_string_copy(Z_STR_P(config_value));
+            } else {
+                php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_VIEW_EXT_NAME);
+            }
+            /* core.view.auto_render */
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+                CSPEED_STRL(CORE_CONFIG_VIEW_AUTO_RENDER) )) != NULL )) {
+                CSPEED_G(core_view_auto_render) = Z_STR_P(config_value);
+            } else {
+                php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_VIEW_AUTO_RENDER);
+            }
+            /* core.url.pattern */
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+                CSPEED_STRL(CORE_CONFIG_URL_PATTERN) )) != NULL )) {
+                CSPEED_G(core_url_pattern) = Z_STR_P(config_value);
+            } else {
+                php_error_docref(NULL, E_ERROR, "Config :`%s` not set.", CORE_CONFIG_URL_PATTERN);
+            }
+            /* The DB config */
+            if ( EXPECTED( (core_configs = zend_hash_find(Z_ARRVAL(configs), node_db_name )) == NULL )){
+                php_error_docref(NULL, E_ERROR, "`%s` configs not found in config file.", ZSTR_VAL(node_db_name));
+            }
+            /* Below are some optional configs to the DB engine, if have, set it to override the setting */
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+                CSPEED_STRL(CORE_CONFIG_DB_DSN) )) != NULL )) {
+                CSPEED_G(db_master_dsn) = zend_string_copy(Z_STR_P(config_value));
+            }
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+                CSPEED_STRL(CORE_CONFIG_DB_USERNAME) )) != NULL )) {
+                CSPEED_G(db_master_username) = zend_string_copy(Z_STR_P(config_value));
+            }
+            if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+                CSPEED_STRL(CORE_CONFIG_DB_PASSWORD) )) != NULL )) {
+                CSPEED_G(db_master_password) = zend_string_copy(Z_STR_P(config_value));
+            }
+            zend_string_release(node_core_name);
+            zend_string_release(node_db_name);
+        } else {
+            zend_string_release(node_core_name);
+            zend_string_release(node_db_name);
+            php_error_docref(NULL, E_ERROR, "Configs data type wrong.");
+        }
+    }
+}
+
+
 /*
  * Local variables:
  * tab-width: 4

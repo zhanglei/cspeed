@@ -40,7 +40,7 @@ parse_cli_path_info(zval *path_info_array)
     zend_ulong index; zval *value;
 
     /* The web directory */
-    char *root_dir                 = ".";
+    char *root_dir          = ZSTR_VAL(CSPEED_G(core_application));
     
     /* Get the default value from the engine. */
     zend_string *default_module    = CSPEED_G(core_router_default_module);
@@ -73,7 +73,7 @@ parse_cli_path_info(zval *path_info_array)
         php_error_docref(NULL, E_ERROR, "Module: `%s` are not allowed to access.", ZSTR_VAL(default_module));
         return ;
     }
-
+    
     /* After the module is allowed. to parsing the module is exists or not. */
     temp_module_path = strpprintf(0, "%s/%s/modules/%s", cspeed_get_cwd(path), root_dir, ZSTR_VAL(default_module));
     
@@ -119,6 +119,7 @@ parse_cli_path_info(zval *path_info_array)
     } else {
         zend_update_property_null(controller_ptr, &controller_obj, CSPEED_STRL(CSPEED_DI_INSTANCE));
     }
+    
     if (CSPEED_G(router_object)){
         zval router_object;
         ZVAL_OBJ(&router_object, CSPEED_G(router_object));
@@ -133,10 +134,10 @@ parse_cli_path_info(zval *path_info_array)
     array_init(&key_sets);
     array_init(&value_sets);
     ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(path_info_array), index, value){
-        if ( (index != 0) && (index % 2 == 0) ){    /* Key name*/
+        if ( (index != 0) && ( ( index & 1 ) == 0) ){    /* Key name*/
             add_next_index_zval(&key_sets, value);
         }
-        if ( (index != 0) && (index % 2 != 0) ) {   /* Key value */
+        if ( (index != 0) && ( ( index & 1 ) != 0) ) {   /* Key value */
             add_next_index_zval(&value_sets, value);
         }
     } ZEND_HASH_FOREACH_END();
