@@ -28,6 +28,7 @@
 #include "php_cspeed.h"
 
 #include "kernel/CApp.h"
+#include "kernel/tool/helper.h"
 #include "kernel/tool/require.h"
 #include "kernel/object_factory.h"
 
@@ -94,7 +95,7 @@ out_again:
 
             if ( !class_ce ){
               /* Auto include the file */
-              cspeed_app_load_file(Z_STR_P(class_name), INTERNAL_FUNCTION_PARAM_PASSTHRU, app_object);
+              cspeed_autoload_file(Z_STR_P(class_name), app_object, CSPEED_APP_AUTOLOAD_ALIASES);
               goto out_again;
             }
 
@@ -122,7 +123,7 @@ nest_again:
                         class_ce_two = zend_hash_find_ptr(EG(class_table), zend_string_tolower(Z_STR_P(key_value)));
                       }
                       if ( !class_ce_two ) {
-                          cspeed_app_load_file(Z_STR_P(key_value), INTERNAL_FUNCTION_PARAM_PASSTHRU, app_object);
+                          cspeed_autoload_file(Z_STR_P(key_value), app_object, CSPEED_APP_AUTOLOAD_ALIASES);
                           goto nest_again;
                       }
                       zval object_value;

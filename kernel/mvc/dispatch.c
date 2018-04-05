@@ -121,7 +121,7 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
         php_error_docref(NULL, E_ERROR, "You must create a Cs\\App object first.");
         return ;
     }
-    if (cspeed_app_load_file(ns_class_name, NULL, NULL, app_object) == FALSE){
+    if (cspeed_autoload_file(ns_class_name, app_object, CSPEED_APP_AUTOLOAD_ALIASES) == FALSE){
         return ;
     }
     /* After require the class from the controller file. create the controller object and do the initialise process */

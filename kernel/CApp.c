@@ -280,7 +280,7 @@ CSPEED_METHOD(App, autoload)/*{{{ proto App::autoload The cspeed framework's aut
         return;
     }
     /* To load the file */
-    cspeed_autoload_file(class_name_with_namespace, INTERNAL_FUNCTION_PARAM_PASSTHRU, getThis(), CSPEED_APP_AUTOLOAD_ALIASES);
+    cspeed_autoload_file(class_name_with_namespace, getThis(), CSPEED_APP_AUTOLOAD_ALIASES);
 }/*}}}*/
 
 CSPEED_METHOD(App, setAlias)/*{{{ proto App::setAlias() */

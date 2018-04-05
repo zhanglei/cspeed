@@ -352,7 +352,7 @@ void recursive_call_parent_method_two(zval *obj, char *method_name)/*{{{  Parent
 }/*}}}*/
 
 int 
-cspeed_autoload_file(zend_string *class_name_with_namespace, INTERNAL_FUNCTION_PARAMETERS, zval *obj, char *alias) /*{{{ Load file */
+cspeed_autoload_file(zend_string *class_name_with_namespace, zval *obj, char *alias) /*{{{ Load file */
 {    
     if ( *(ZSTR_VAL(class_name_with_namespace)) == '\\' ) {
         class_name_with_namespace = strpprintf(0, "%s", ZSTR_VAL(class_name_with_namespace) + 1);

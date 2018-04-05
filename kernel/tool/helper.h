@@ -21,26 +21,43 @@
 #ifndef CSPEED_TOOL_HELPER_H
 #define CSPEED_TOOL_HELPER_H
 
-char *cspeed_reverse_slash_char(char *src);                                      /* Reverse all slashes to reslash */
+/* Reverse all slashes to reslash */
+char *cspeed_reverse_slash_char(char *src);                                      
 
-char *cspeed_get_cwd();                                                          /* Get current directory */
+/* Get current directory */
+char *cspeed_get_cwd();                                                          
 
-char *title_upper_string(char *src);                                             /* Upper case the first char */
+/* Upper case the first char */
+char *title_upper_string(char *src);                                             
 
-char *title_lower_string(char *src);                                             /* Lower case the first char */
+/* Lower case the first char */
+char *title_lower_string(char *src);                                             
 
+/* Parse the ini file with the given node and key */
 void cspeed_parse_ini_file(char *file_name, char *node_name, 
-                           char *node_key, zend_bool, zval *retval);             /* Parse the ini file with the given node and key */
+                           char *node_key, zend_bool, zval *retval);             
 
-void cspeed_build_equal_string(zval *array, char *begin_str, zval *result);      /* Building the string */
+/* Building the string */
+void cspeed_build_equal_string(zval *array, char *begin_str, zval *result);      
 
-void cspeed_build_quote_string(zval *array, zval *result);                       /* Building the quote string */
+/* Building the quote string */
+void cspeed_build_quote_string(zval *array, zval *result);                       
 
-int check_file_exists(char *file_path);                                          /* Check whether the file is exists or not. */
+/* Check whether the file is exists or not. */
+int check_file_exists(char *file_path);                                          
 
-void recursive_call_parent_method(zend_class_entry *ce, char *method_name);      /* Calling the method from the top class to this */
+/* Calling the method from the top class to this */
+void recursive_call_parent_method(zend_class_entry *ce, char *method_name);      
 
-void recursive_call_parent_method_two(zval *obj, char *method_name);             /* Want obj usefull, use this instead before */
+/* Want obj usefull, use this instead before */
+void recursive_call_parent_method_two(zval *obj, char *method_name);             
+
+/* load the kernel_setting */
+void load_kernel_setting(zend_string *, zend_string *, char *);                  
+
+/* load the file with the namespace name */
+int cspeed_autoload_file(zend_string *, zval *, char *);
+
 #endif
 
 

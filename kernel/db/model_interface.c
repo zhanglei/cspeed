@@ -58,7 +58,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_limit, 0, 0, 1)
     ZEND_ARG_INFO(0, limit_conditions)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_query, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_create_command, 0, 0, 1)
     ZEND_ARG_INFO(0, raw_sql)
     ZEND_ARG_INFO(0, bind_params)
 ZEND_END_ARG_INFO();
@@ -103,7 +103,7 @@ CSPEED_METHOD(ModelInterface, limit) /*{{{ proto ModelInterface::limit() */
 
 }/*}}}*/
 
-CSPEED_METHOD(ModelInterface, query) /*{{{ proto ModelInterface::query() */
+CSPEED_METHOD(ModelInterface, createCommand) /*{{{ proto ModelInterface::createCommand() */
 {
 
 }/*}}}*/
@@ -121,7 +121,7 @@ static const zend_function_entry cspeed_model_functions[] = { /*{{{*/
     ZEND_ABSTRACT_ME(ModelInterface, having, arginfo_cspeed_model_having)
     ZEND_ABSTRACT_ME(ModelInterface, orderBy, arginfo_cspeed_model_order_by)
     ZEND_ABSTRACT_ME(ModelInterface, limit, arginfo_cspeed_model_limit)
-    ZEND_ABSTRACT_ME(ModelInterface, query, arginfo_cspeed_model_query)
+    ZEND_ABSTRACT_ME(ModelInterface, createCommand, arginfo_cspeed_model_create_command)
     ZEND_ABSTRACT_ME(ModelInterface, execute, arginfo_cspeed_model_execute)
     PHP_FE_END
 };/*}}}*/

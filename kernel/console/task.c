@@ -85,7 +85,7 @@ CSPEED_METHOD(Task, autoload)/*{{{ proto App::autoload The cspeed framework's au
         return;
     }
     /* To load the file */
-    cspeed_autoload_file(class_name_with_namespace, INTERNAL_FUNCTION_PARAM_PASSTHRU, getThis(), CSPEED_TASK_AUTOLOAD_ALIASES);
+    cspeed_autoload_file(class_name_with_namespace, getThis(), CSPEED_TASK_AUTOLOAD_ALIASES);
 }/*}}}*/
 
 CSPEED_METHOD(Task, run)/*{{{ proto Task::run($module, $controller, $action)*/

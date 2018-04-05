@@ -21,18 +21,23 @@
 #ifndef CSPEED_APP_H
 #define CSPEED_APP_H
 
-extern zend_class_entry *cspeed_app_ce;                                        /* The global CApp class entry */
+/* The global CApp class entry */
+extern zend_class_entry *cspeed_app_ce;
 
-#define CSPEED_APP_AUTOLOAD_ALIASES     "__cspeed_app_aliases"          /* The aliases which let the system to locate the file */
-#define CSPEED_APP_INSTANCE             "__app"                         /* Single App object */
+/* The aliases which let the system to locate the file */
+#define CSPEED_APP_AUTOLOAD_ALIASES     "__cspeed_app_aliases"          
 
-#define CSPEED_APP_EVENT_BEORE_REQUEST  "EVENT_BEFORE_REQUEST"          /* Event */
-#define CSPEED_APP_EVENT_AFTER_REQUEST  "EVENT_AFTER_REQUEST"           /* Event */
+/* Single App object */
+#define CSPEED_APP_INSTANCE             "__app"                         
 
-int cspeed_app_load_file(zend_string *class_name_with_namespace, zend_execute_data *, zval *, zval *app_obj);
+/* Event */
+#define CSPEED_APP_EVENT_BEORE_REQUEST  "EVENT_BEFORE_REQUEST"
 
-CSPEED_INIT(app);                                                       /* The init function for the CApp class */
+/* Event */
+#define CSPEED_APP_EVENT_AFTER_REQUEST  "EVENT_AFTER_REQUEST"
 
+/* The init function for the CApp class */
+CSPEED_INIT(app);                                                       
 
 #endif
 
