@@ -117,7 +117,7 @@ int handle_request(INTERNAL_FUNCTION_PARAMETERS)/*{{{ Handle the user input from
 
 void handle_method_request(zval *object_ptr, char *method_name, INTERNAL_FUNCTION_PARAMETERS)/*{{{ Handle the request */
 {
-    int continue_or_false = 0;
+    int continue_or_false = -1;
     trigger_events(object_ptr, strpprintf(0, "%s", CSPEED_APP_EVENT_BEORE_REQUEST));
     if (cspeed_request_is_method(method_name)) {
         continue_or_false = handle_request(INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -376,7 +376,6 @@ CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
         RETURN_ZVAL(getThis(), 1, NULL);
     } else {
         php_error_docref(NULL, E_ERROR, "class BoosInit not exists.");
-        RETURN_FALSE
     }
 }/*}}}*/
 

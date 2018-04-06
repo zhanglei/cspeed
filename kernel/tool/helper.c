@@ -128,7 +128,8 @@ int stringstr(char *str, char *pattern)
     return FALSE;
 }
 
-void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_type, zval *arr) /* {{{ php_simple_ini_parser_cb */
+/* {{{ php_simple_ini_parser_cb */
+void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_type, zval *arr)
 {
     switch (callback_type) {
 
@@ -182,7 +183,8 @@ void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
     }
 }/* }}} */
 
-void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, zval *arg3, int callback_type, zval *arr)/* {{{ php_ini_parser_cb_with_sections */
+/* {{{ php_ini_parser_cb_with_sections */
+void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, zval *arg3, int callback_type, zval *arr)
 {
     if (callback_type == ZEND_INI_PARSER_SECTION) {
         array_init(&BG(active_ini_file_section));
@@ -200,7 +202,8 @@ void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, zval *arg3, int cal
     }
 }/* }}} */
 
-void cspeed_parse_ini_file(char *file_name, char *node_name, char *node_key, zend_bool parse_section, zval *retval)/*{{{ parse the INI file, with the given key and node */
+/*{{{ parse the INI file, with the given key and node */
+void cspeed_parse_ini_file(char *file_name, char *node_name, char *node_key, zend_bool parse_section, zval *retval)
 {
     zend_file_handle fh;
     zend_ini_parser_cb_t ini_parser_cb;
@@ -258,7 +261,8 @@ void cspeed_parse_ini_file(char *file_name, char *node_name, char *node_key, zen
     }
 }
 
-void cspeed_build_equal_string(zval *array, char *begin_str, zval *result)/*{{{ Building the WHERE|HAVING strings */
+void 
+cspeed_build_equal_string(zval *array, char *begin_str, zval *result)/*{{{ Building the WHERE|HAVING strings */
 {
     zend_string *val_key;
     zval *var_value;
@@ -286,7 +290,8 @@ void cspeed_build_equal_string(zval *array, char *begin_str, zval *result)/*{{{ 
     free(temp_where_str);
 }/*}}}*/
 
-void cspeed_build_quote_string(zval *array, zval *result)/*{{{ Building the Quote string */
+void 
+cspeed_build_quote_string(zval *array, zval *result)/*{{{ Building the Quote string */
 {
     zval *value;
     smart_str field_str = {0};
@@ -306,16 +311,17 @@ void cspeed_build_quote_string(zval *array, zval *result)/*{{{ Building the Quot
     free(temp_select_str);
 }/*}}}*/
 
-int check_file_exists(char *file_path) /* Checking wheather the given file is exists or not. */
+int 
+check_file_exists(char *file_path) /* Checking wheather the given file is exists or not. */
 {
     if (access(file_path, F_OK) == -1) {
         php_error_docref(NULL, E_ERROR, "File: %s not exists.", file_path);
-        return FALSE;
     }
     return TRUE;
 }
 
-void recursive_call_parent_method(zend_class_entry *ce, char *method_name)/*{{{  Parent class's method to current ce */
+void 
+recursive_call_parent_method(zend_class_entry *ce, char *method_name)/*{{{  Parent class's method to current ce */
 {
     if (ce) {
         recursive_call_parent_method(ce->parent, method_name);
@@ -333,7 +339,8 @@ void recursive_call_parent_method(zend_class_entry *ce, char *method_name)/*{{{ 
     }
 }/*}}}*/
 
-void recursive_call_parent_method_two(zval *obj, char *method_name)/*{{{  Parent class's method to current ce */
+void 
+recursive_call_parent_method_two(zval *obj, char *method_name)/*{{{  Parent class's method to current ce */
 {
     if (obj) {
         if (Z_OBJCE_P(obj)->parent){
@@ -384,7 +391,7 @@ cspeed_autoload_file(zend_string *class_name_with_namespace, zval *obj, char *al
             php_error_docref(NULL, E_ERROR, "CSpeed framework not contain the class: `%s`.", ZSTR_VAL(class_name_with_namespace));
         }
 
-        if (has_exists) {   /* Exists the need alias */
+        if ( has_exists ) {   /* Exists the need alias */
             int real_file_path_size = (Z_STRLEN_P(has_exists) + ZSTR_LEN(class_name_with_namespace)
                                         - (slash_pos - ZSTR_VAL(class_name_with_namespace)) + 5);
             char *real_file_path = (char *)malloc(sizeof(char) * real_file_path_size); /* five means the .php & space*/
@@ -407,9 +414,8 @@ cspeed_autoload_file(zend_string *class_name_with_namespace, zval *obj, char *al
             free(current_alias);
             free(real_file_path);
         } else {            /* Not found the needing alias */
-            php_error_docref(NULL, E_ERROR, "Namespace alias: %s not found. please set it first before use.", current_alias);
             free(current_alias);
-            return FALSE;
+            php_error_docref(NULL, E_ERROR, "Namespace alias: %s not found. please set it first before use.", current_alias);
         }
     }
     return TRUE;

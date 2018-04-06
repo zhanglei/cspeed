@@ -62,7 +62,6 @@ CSPEED_METHOD(Client, __construct)/*{{{ proto Client::__construct($url)*/
         zend_update_property_string(cspeed_rpc_client_ce, getThis(), CSPEED_STRL(CSPEED_CLIENT_URL), ZSTR_VAL(url));
     } else {
         php_error_docref(NULL, E_ERROR, "Parameter must be a valid URL.");
-        return ;
     }
 }/*}}}*/
 
@@ -117,9 +116,8 @@ CSPEED_METHOD(Client, __call)/*{{{ proto Client::call($name, $params)*/
         res = curl_easy_perform(curl);
         /* Check for errors */ 
         if(res != CURLE_OK) {
-            php_error_docref(NULL, E_ERROR, "Calling the curl_easy_perform() failed: %s.", curl_easy_strerror(res));
             curl_easy_cleanup(curl);
-            return ;
+            php_error_docref(NULL, E_ERROR, "Calling the curl_easy_perform() failed: %s.", curl_easy_strerror(res));
         }
         /* After each operation increment the id by 1 */
         zend_update_property_long(cspeed_rpc_client_ce, getThis(), CSPEED_STRL(CSPEED_CLIENT_POST_ID), Z_LVAL_P(id) + 1);

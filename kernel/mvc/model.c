@@ -48,8 +48,7 @@ initialise_the_model_object(zval *model_object, zend_long new_record, INTERNAL_F
     zval *pdo_object = zend_read_static_property(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_PDO_OBJECT), 1);
 
     if (pdo_object == NULL || ZVAL_IS_NULL(pdo_object) ) {
-        php_error_docref(NULL, E_ERROR, "Please set the Adapter class to Di container.");
-        return ;
+        php_error_docref(NULL, E_ERROR, "Please set the Adapter class to \\Cs\\di\\Di container.");
     }
     /* Restore the PDO object into the Class property */
     zval *is_set_pdo = zend_read_property(cspeed_model_ce, model_object, CSPEED_STRL(CSPEED_MODEL_PDO_OBJECT), 1, NULL);
@@ -356,7 +355,6 @@ CSPEED_METHOD(Model, where)/*{{{ proto Model::where()*/
             CSPEED_STRL(CSPEED_MODEL_WHERE_COND), ZSTR_VAL(strpprintf(0, " WHERE %s", Z_STRVAL_P(where))));
     } else {
         php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
-        RETURN_FALSE
     }
     zval_ptr_dtor(where);
     RETURN_ZVAL(getThis(), 1, NULL);
@@ -384,7 +382,6 @@ CSPEED_METHOD(Model, andWhere)/*{{{ proto Model::andWhere()*/
         );
     } else {
         php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
-        RETURN_FALSE
     }
     zval_ptr_dtor(where);
     RETURN_ZVAL(getThis(), 1, NULL);
@@ -419,7 +416,6 @@ CSPEED_METHOD(Model, orderBy)/*{{{ proto Model::orderBy()*/
             ZSTR_VAL(strpprintf(0, " ORDER BY %s", Z_STRVAL_P(order_by))));
     } else {
         php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
-        RETURN_FALSE
     }
     zval_ptr_dtor(order_by);
     RETURN_ZVAL(getThis(), 1, NULL);
@@ -443,7 +439,6 @@ CSPEED_METHOD(Model, groupBy)/*{{{ proto Model::groupBy()*/
             ZSTR_VAL(strpprintf(0, " GROUP BY %s", Z_STRVAL_P(group_by))));
     } else {
         php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
-        RETURN_FALSE
     }
     zval_ptr_dtor(group_by);
     RETURN_ZVAL(getThis(), 1, NULL);
@@ -505,7 +500,6 @@ CSPEED_METHOD(Model, select)    /*{{{ proto Model::select($fields)*/
         zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_SELECT), Z_STRVAL_P(fields));
     } else {
         php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
-        RETURN_FALSE
     }
     zval_ptr_dtor(fields);
     RETURN_ZVAL(getThis(), 1, NULL);
@@ -592,7 +586,6 @@ CSPEED_METHOD(Model, delete)/*{{{ proto Model::delete()*/
     zval *pdo_object = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_PDO_OBJECT), 1, NULL);
     if (ZVAL_IS_NULL(pdo_object)) {
         php_error_docref(NULL, E_ERROR, "Invalid PDO instance.");
-        return ;
     }
     zval pdo_statement;
     trigger_events(getThis(), strpprintf(0, "%s", EVENT_BEFORE_DELETE));
@@ -632,7 +625,6 @@ CSPEED_METHOD(Model, setDb)/*{{{ proto Model::setDb('db')*/
         RETURN_FALSE
     } else {
         php_error_docref(NULL, E_ERROR, "Please set the Adapter object into the Di container first.");
-        RETURN_FALSE
     }
 }/*}}}*/
 

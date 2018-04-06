@@ -217,7 +217,7 @@ nest_again:
               Z_TRY_ADDREF(class_object);
               add_assoc_zval(stores, ZSTR_VAL(val_name), &class_object);
             } else {
-              zend_printf("Class %s not found.", Z_STRVAL_P(class_name));
+              php_error_docref(NULL, E_ERROR, "Class `%s` not found.", Z_STRVAL_P(class_name));
             }
           }
         }

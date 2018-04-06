@@ -99,7 +99,6 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
     }
     if (is_allowed == FALSE){
         php_error_docref(NULL, E_ERROR, "Module: `%s` are not allowed to access.", ZSTR_VAL(default_module));
-        return ;
     }
 
     /* After the module is allowed. to parsing the module is exists or not. */
@@ -119,7 +118,6 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
     zval *app_object = zend_read_static_property(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_INSTANCE), 1);
     if (ZVAL_IS_NULL(app_object)){
         php_error_docref(NULL, E_ERROR, "You must create a Cs\\App object first.");
-        return ;
     }
     if (cspeed_autoload_file(ns_class_name, app_object, CSPEED_APP_AUTOLOAD_ALIASES) == FALSE){
         return ;
@@ -134,7 +132,6 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
         object_init_ex(&controller_obj, controller_ptr);
     } else {
         php_error_docref(NULL, E_ERROR, "Controller class :`%s` not found.", ZSTR_VAL(default_controller));
-        return ;
     }
     CSPEED_G(core_router_default_controller) = zend_string_tolower(CSPEED_G(core_router_default_controller));
     /* Parsing the action in PATH_INFO */
@@ -215,7 +212,6 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
         } else {
             zend_string_release(action_append_action);
             php_error_docref(NULL, E_ERROR, "Controller class has not the :`%s` method.", ZSTR_VAL(action_append_action));
-            return ;
         }
         zend_string_release(action_append_action);
         /* To auto render the view file or not. */
@@ -318,7 +314,6 @@ void dispather_url()    /* {{{ Dispatcher the URL */
                             zval_ptr_dtor(&retval);
                             efree(ctr.line);
                             php_error_docref(NULL, E_ERROR, "Please install SAPI extension.");
-                            return ;
                         }
                     }
                 }

@@ -64,7 +64,7 @@ CSPEED_METHOD(Task, __construct)/*{{{ Task::construct()*/
     add_assoc_str(&all_aliases, "app", strpprintf(0, "%s/%s", path, ZSTR_VAL(CSPEED_G(core_application))));
     zend_update_property(cspeed_task_ce, getThis(), CSPEED_STRL(CSPEED_TASK_AUTOLOAD_ALIASES), &all_aliases);
 
-    /* Setting the default loader */
+    /* -- Begin the loader setting Setting the default loader */
     zval function_name, retval, callback;
     ZVAL_STRING(&function_name, "spl_autoload_register");
     array_init(&callback);

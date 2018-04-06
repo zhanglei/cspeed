@@ -61,8 +61,7 @@ CSPEED_METHOD(Server, handle)   /*{{{ proto Server::handle */
     }
     /* Only accept the POST method */
     if (!cspeed_request_is_method("POST")) {
-        php_error_docref(NULL, E_ERROR, "RPC Server only accept POST  request.");
-        return ;
+        php_error_docref(NULL, E_ERROR, "RPC Server only accept POST request.");
     }
     /* Obtain the RAW POST data */
     smart_str raw_data = {0};
@@ -87,7 +86,6 @@ CSPEED_METHOD(Server, handle)   /*{{{ proto Server::handle */
     } else {
         efree(ctr.line);
         php_error_docref(NULL, E_ERROR, "Please install SAPI extension.");
-        return ;
     }
     /* End of the HTTP header set */
 
