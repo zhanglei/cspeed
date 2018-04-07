@@ -59,7 +59,7 @@ char *cspeed_get_cwd(char *path)                    /*{{{ Return the current dir
     }
 }/*}}}*/
 
-
+/*{{{ proto Return the result of the reservsed slash char* */
 char *cspeed_reverse_slash_char(char *src)/*{{{ proto Return the result of the reservsed slash char* */
 {
     int i;

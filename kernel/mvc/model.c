@@ -223,6 +223,12 @@ set_model_ultimate_pdo(zval *this) /*{{{ To set the finally pdo object to do the
     }
 }/*}}}*/
 
+void
+set_executed_sql(zval *model_object, zend_string *sql)
+{
+    zend_update_property_str(cspeed_model_ce, model_object, CSPEED_STRL(CSPEED_MODEL_EXECUTED_SQL), sql);
+}
+
 /* {{{ All ARG-INFO for the Model class */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -280,6 +286,9 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_get_adapter, 0, 0, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_get_executed_sql, 0, 0, 0)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 CSPEED_METHOD(Model, __construct)/*{{{ proto Model::construct()*/
@@ -317,12 +326,9 @@ CSPEED_METHOD(Model, __set)/*{{{ proto Model::__set($name, $value) The magic fun
         } else if ( Z_TYPE_P(value) == IS_STRING ) {
             add_assoc_string(magic_datas, ZSTR_VAL(key), Z_STRVAL_P(value));
         }
-    } else {
-        RETURN_FALSE
     }
     zend_string_release(key);
     zval_ptr_dtor(value);
-    RETURN_TRUE
 }/*}}}*/
 
 CSPEED_METHOD(Model, find)/*{{{ proto Model::find() To do the update() method */
@@ -475,6 +481,10 @@ CSPEED_METHOD(Model, one)/*{{{ proto Model::one()*/
     cspeed_pdo_statement_set_fetch_mode(&pdo_statement, 2, &ret);
     zval retval;
     cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
+
+    /* Set the SQL to model for analysing */
+    set_executed_sql(getThis(), raw_sql);
+
     reset_model_sql(getThis());
     if (!output_sql_errors(&pdo_statement)){
         zval result;
@@ -524,6 +534,10 @@ CSPEED_METHOD(Model, all)/*{{{ proto Model::all()*/
     cspeed_pdo_statement_set_fetch_mode(&pdo_statement, 2, &ret);
     zval retval;
     cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
+    
+    /* Set the SQL to model for analysing */
+    set_executed_sql(getThis(), raw_sql);
+
     reset_model_sql(getThis());
     if (!output_sql_errors(&pdo_statement)){
         zval result;
@@ -564,6 +578,10 @@ CSPEED_METHOD(Model, save)/*{{{ proto Model::save()*/
     cspeed_pdo_prepare(pdo_object, ZSTR_VAL(execute_sql), &pdo_statement);
     zval retval;
     cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
+
+    /* Set the SQL to model for analysing */
+    set_executed_sql(getThis(), execute_sql);
+
     trigger_events(getThis(), strpprintf(0, "%s", EVENT_AFTER_SAVE));
     reset_model_sql(getThis());
     if (!output_sql_errors(&pdo_statement)){
@@ -592,6 +610,10 @@ CSPEED_METHOD(Model, delete)/*{{{ proto Model::delete()*/
     cspeed_pdo_prepare(pdo_object, ZSTR_VAL(execute_sql), &pdo_statement);
     zval retval;
     cspeed_pdo_statement_execute(&pdo_statement, NULL, &retval);
+
+    /* Set the SQL to model for analysing */
+    set_executed_sql(getThis(), execute_sql);
+
     trigger_events(getThis(), strpprintf(0, "%s", EVENT_AFTER_DELETE));
     reset_model_sql(getThis());
     if (!output_sql_errors(&pdo_statement)){
@@ -656,6 +678,12 @@ CSPEED_METHOD(Model, getAdapter)
     RETURN_ZVAL(adapter_object, 1, 0);
 }
 
+CSPEED_METHOD(Model, getExecutedSql)
+{
+    zval *executed_sql = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_EXECUTED_SQL), 1, NULL);
+    RETURN_ZVAL(executed_sql, 1, NULL);
+}
+
 /*{{{ All functions definitions */
 static const zend_function_entry cspeed_model_functions[] = {
     CSPEED_ME(Model, __construct, arginfo_cspeed_model_construct, ZEND_ACC_PUBLIC)
@@ -674,6 +702,7 @@ static const zend_function_entry cspeed_model_functions[] = {
     CSPEED_ME(Model, setDb, arginfo_cspeed_model_set_db, ZEND_ACC_PUBLIC)
     CSPEED_ME(Model, getDb, arginfo_cspeed_model_get_db, ZEND_ACC_PUBLIC)
     CSPEED_ME(Model, getAdapter, arginfo_cspeed_model_get_adapter, ZEND_ACC_PUBLIC)
+    CSPEED_ME(Model, getExecutedSql, arginfo_cspeed_model_get_executed_sql, ZEND_ACC_PUBLIC)
 
     PHP_FE_END
 };/*}}}*/
@@ -702,6 +731,7 @@ CSPEED_INIT(model)  /*{{{ Load the module function*/
     zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_SELECT), "*", ZEND_ACC_PRIVATE);
     zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_GROUP_BY), "", ZEND_ACC_PRIVATE);
     zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_TABLE_NAME), "", ZEND_ACC_PRIVATE);
+    zend_declare_property_string(cspeed_model_ce, CSPEED_STRL(CSPEED_MODEL_EXECUTED_SQL), "", ZEND_ACC_PRIVATE);
 
     zend_declare_class_constant_string(cspeed_model_ce, CSPEED_STRL(EVENT_BEFORE_SAVE), EVENT_BEFORE_SAVE);
     zend_declare_class_constant_string(cspeed_model_ce, CSPEED_STRL(EVENT_AFTER_SAVE), EVENT_AFTER_SAVE);

@@ -150,4 +150,12 @@ class Model extends \Cs\tool\Component
     {
         return new \Cs\db\pdo\Adapter();
     }
+
+    /**
+     * Return the Previous Executed SQL
+     */
+    function getExecutedSql()
+    {
+
+    }
 }
