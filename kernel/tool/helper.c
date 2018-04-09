@@ -550,6 +550,38 @@ load_kernel_setting(zend_string *ini_config_file, zend_string *ini_config_node_n
     }
 }
 
+void parameter_filter(zval *filter, zval *parameter)
+{
+    if ( filter ) {
+        if ( Z_TYPE_P(filter) == IS_STRING ) {
+            /* function exists call the function */
+            zend_function *func= zend_hash_find_ptr(EG(function_table), Z_STR_P(filter));
+            if (func && (func->type != ZEND_INTERNAL_FUNCTION ||
+                    func->internal_function.handler != zif_display_disabled_function)) {
+                zval ret_val;
+                zval params[] = { *parameter };
+                call_user_function(EG(function_table), NULL, filter, &ret_val, 1, params);
+                Z_TRY_ADDREF_P(&ret_val);
+                ZVAL_COPY_VALUE(parameter, &ret_val);
+            } else {
+                php_error_docref(NULL, E_ERROR, "function: `%s` not exists.", Z_STRVAL_P(filter));
+            }
+        } else if ( Z_TYPE_P(filter) == IS_OBJECT) {
+            // Check the object is callable or not.
+            zend_string *error_handler_name = NULL;
+            if ( !zend_is_callable(filter, 0, error_handler_name) ) {
+                php_error_docref(NULL, E_ERROR, "The argument must to be a valid callback.");
+            }
+            zval ret_val;
+            zval params[] = { *parameter };
+            call_user_function(EG(function_table), NULL, filter, &ret_val, 1, params);
+            Z_TRY_ADDREF_P(&ret_val);
+            ZVAL_COPY_VALUE(parameter, &ret_val);
+        } else {
+            php_error_docref(NULL, E_ERROR, "The argument must be valid function name or callable.");
+        }
+    }
+}
 
 /*
  * Local variables:

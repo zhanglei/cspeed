@@ -58,6 +58,9 @@ void load_kernel_setting(zend_string *, zend_string *, char *);
 /* load the file with the namespace name */
 int cspeed_autoload_file(zend_string *, zval *, char *);
 
+/* filter the parameter with the callable or valid function */
+void parameter_filter(zval *filter, zval *parameter);
+
 #endif
 
 

@@ -358,16 +358,6 @@ CSPEED_METHOD(Request, isOptions)
  */
 CSPEED_METHOD(Request, get)
 {
-/*    zend_string *get_key = NULL;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &get_key) == FAILURE) {
-        return ;
-    }
-    zval *get_data = cspeed_request_get( get_key == NULL ? NULL : ZSTR_VAL(get_key) );
-    if (get_data) {
-        RETURN_ZVAL(get_data, 1, 0);
-    } else {
-        RETURN_NULL()
-    }*/
     zend_string *get_key = NULL;
     zval *filter = NULL;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|Sz", &get_key, &filter) == FAILURE) {
@@ -375,33 +365,7 @@ CSPEED_METHOD(Request, get)
     }
     zval *get_data = cspeed_request_get( get_key == NULL ? NULL : ZSTR_VAL(get_key) );
     if (get_data) {
-        if ( filter ) {
-            if ( Z_TYPE_P(filter) == IS_STRING ) {
-                /* function exists call the function */
-                zend_function *func= zend_hash_find_ptr(EG(function_table), Z_STR_P(filter));
-                if (func && (func->type != ZEND_INTERNAL_FUNCTION ||
-                        func->internal_function.handler != zif_display_disabled_function)) {
-                    zval ret_val;
-                    zval params = { *get_data };
-                    call_user_function(EG(function_table), NULL, filter, &ret_val, 1, params);
-                    RETURN_ZVAL(&ret_val, 1, NULL);
-                } else {
-                    php_error_docref(NULL, E_ERROR, "function: `%s` not exists.", Z_STRVAL_P(filter));
-                }
-            } else if ( Z_TYPE_P(filter) == IS_OBJECT) {
-                // Check the object is callable or not.
-                zend_string *error_handler_name = NULL;
-                if ( !zend_is_callable(filter, 0, error_handler_name) ) {
-                    php_error_docref(NULL, E_ERROR, "The argument must to be a valid callback.");
-                }
-                zval ret_val;
-                zval params = { *get_data };
-                call_user_function(EG(function_table), NULL, filter, &ret_val, 1, params);
-                RETURN_ZVAL(&ret_val, 1, NULL);
-            } else {
-                php_error_docref(NULL, E_ERROR, "The argument must be valid function name or callable.");
-            }
-        }
+        parameter_filter(filter, get_data);
         RETURN_ZVAL(get_data, 1, 0);
     } else {
         RETURN_NULL()
@@ -412,16 +376,6 @@ CSPEED_METHOD(Request, get)
  */
 CSPEED_METHOD(Request, getPost)
 {
-/*    zend_string *post_key = NULL;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &post_key) == FAILURE) {
-        return ;
-    }
-    zval *post_data = cspeed_request_post( post_key == NULL ? NULL : ZSTR_VAL( post_key ) );
-    if (post_data) {
-        RETURN_ZVAL(post_data, 1, 0);
-    } else {
-        RETURN_NULL()
-    }*/
     zend_string *post_key = NULL;
     zval *filter = NULL;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|Sz", &post_key) == FAILURE) {
@@ -429,33 +383,7 @@ CSPEED_METHOD(Request, getPost)
     }
     zval *post_data = cspeed_request_post( post_key == NULL ? NULL : ZSTR_VAL( post_key ) );
     if (post_data) {
-        if ( filter ) {
-            if ( Z_TYPE_P(filter) == IS_STRING ) {
-                /* function exists call the function */
-                zend_function *func= zend_hash_find_ptr(EG(function_table), Z_STR_P(filter));
-                if (func && (func->type != ZEND_INTERNAL_FUNCTION ||
-                        func->internal_function.handler != zif_display_disabled_function)) {
-                    zval ret_val;
-                    zval params = { *post_data };
-                    call_user_function(EG(function_table), NULL, filter, &ret_val, 1, params);
-                    RETURN_ZVAL(&ret_val, 1, NULL);
-                } else {
-                    php_error_docref(NULL, E_ERROR, "function: `%s` not exists.", Z_STRVAL_P(filter));
-                }
-            } else if ( Z_TYPE_P(filter) == IS_OBJECT) {
-                // Check the object is callable or not.
-                zend_string *error_handler_name = NULL;
-                if ( !zend_is_callable(filter, 0, error_handler_name) ) {
-                    php_error_docref(NULL, E_ERROR, "The argument must to be a valid callback.");
-                }
-                zval ret_val;
-                zval params = { *post_data };
-                call_user_function(EG(function_table), NULL, filter, &ret_val, 1, params);
-                RETURN_ZVAL(&ret_val, 1, NULL);
-            } else {
-                php_error_docref(NULL, E_ERROR, "The argument must be valid function name or callable.");
-            }
-        }
+        parameter_filter(filter, post_data);
         RETURN_ZVAL(post_data, 1, 0);
     } else {
         RETURN_NULL()
