@@ -280,7 +280,7 @@ $task = new \Cs\console\Task();
 $task = new \Cs\console\Task("xxx/xxx.ini", "dev");
 
 // 运行命令行
-$task->run($args[1]);
+$task->run($argv[1]);
 
 ```
 bash切换到本脚本的目录，键入如下的命令即可：
