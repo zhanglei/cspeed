@@ -182,18 +182,29 @@ class Request
 
     /**
      * Get the $_GET parameters
-     * @return string|array|mixed
+     * @param $key string                    The $_GET key which you want to get the value
+     * @param $filterClosure string|\Closure The filter which you want to filter the data, such as:
+     * <pre>
+     *  $request = new \Cs\net\Request();
+     *  $data = $request->get('age', function($age){
+     *   // TODO.
+     * });
+     *
+     * $idCard = $request->get('idcard', 'strtoupper');
+     * </pre>
      */
-    function get()
+    function get($key, $filterClosure)
     {
 
     }
 
     /**
      * Get the $_POST parameters
+     * @param $key              string          The $_POST key which you want to get the value from
+     * @param $filterClosure    string|\Closure The filter which you want to filter the data
      * @return string|array|mixed
      */
-    function getPost()
+    function getPost($key, $filterClosure)
     {
 
     }
