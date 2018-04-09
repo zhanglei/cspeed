@@ -85,7 +85,7 @@ class Adapter implements ModelInterface
     }
 
     /**
-     * @param \Cs\db\The $rawSql
+     * @param string $rawSql
      * @param array $bindParams
      * @return $this|Adapter
      */
@@ -100,11 +100,10 @@ class Adapter implements ModelInterface
      */
     function execute()
     {
-
     }
 
     /**
-     * @param $whereCondition    The Where condition which can be add the where condition to the current WHERE condition
+     * @param  array|string $whereCondition The Where condition which can be add the where condition to the current WHERE condition
      * @return $this|Adapter
      */
     function andWhere($whereCondition)
@@ -117,7 +116,6 @@ class Adapter implements ModelInterface
      */
     function begin()
     {
-
     }
 
     /**
@@ -125,7 +123,6 @@ class Adapter implements ModelInterface
      */
     function rollback()
     {
-
     }
 
     /**
@@ -133,7 +130,6 @@ class Adapter implements ModelInterface
      */
     function commit()
     {
-
     }
 
     /**
@@ -142,7 +138,6 @@ class Adapter implements ModelInterface
      */
     function lastInsertId()
     {
-
     }
 
     /**
@@ -151,15 +146,13 @@ class Adapter implements ModelInterface
      */
     function isInTransaction()
     {
-
     }
 
     /**
-     * Return the effected row count
+     * Return the effected row counts
      */
     function rowCount()
     {
-
     }
 
     /**
@@ -167,7 +160,6 @@ class Adapter implements ModelInterface
      */
     function find()
     {
-
     }
 
     /**
@@ -175,7 +167,6 @@ class Adapter implements ModelInterface
      */
     function findAll()
     {
-
     }
 
 }

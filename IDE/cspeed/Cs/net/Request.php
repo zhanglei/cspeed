@@ -12,14 +12,15 @@ class Request
 {
     /**
      * Get the HTTP_HOST info
+     * @return string
      */
     function getHttpHost()
     {
-
     }
 
     /**
      * Get the HTTP USER AGENT
+     * @return string
      */
     function getHttpUserAgent()
     {
@@ -28,6 +29,7 @@ class Request
 
     /**
      * Get the SERVER_NAME
+     * @return string
      */
     function getServerName()
     {
@@ -36,6 +38,7 @@ class Request
 
     /**
      * Get the SERVER_ADDR
+     * @return string
      */
     function getServerAddr()
     {
@@ -44,6 +47,7 @@ class Request
 
     /**
      * Get the REMOTE_PORT
+     * @return string
      */
     function getRemotePort()
     {
@@ -52,6 +56,7 @@ class Request
 
     /**
      * Get the REMOTE_ADDR
+     * @return string
      */
     function getRemoteAddr()
     {
@@ -60,6 +65,7 @@ class Request
 
     /**
      * Get the REQUEST_SCHEME
+     * @return string
      */
     function getReqeustScheme()
     {
@@ -68,6 +74,7 @@ class Request
 
     /**
      * Get the SERVER_PROTOCOL
+     * @return string
      */
     function getServerProtocol()
     {
@@ -76,6 +83,7 @@ class Request
 
     /**
      * Get the DOCUMENT_ROOT
+     * @return string
      */
     function getDocumentRoot()
     {
@@ -84,6 +92,7 @@ class Request
 
     /**
      * Get the REQUEST_URI
+     * @return string
      */
     function getRequestUri()
     {
@@ -92,6 +101,7 @@ class Request
 
     /**
      * GET the SCRIPT_NAME
+     * @return string
      */
     function getScriptName()
     {
@@ -100,6 +110,7 @@ class Request
 
     /**
      * GET the PATH_INFO
+     * @return string
      */
     function getPathInfo()
     {
@@ -108,6 +119,7 @@ class Request
 
     /**
      * GET THE QUERY_STRING
+     * @return string
      */
     function getQueryString()
     {
@@ -116,6 +128,7 @@ class Request
 
     /**
      * Whether is GET request or not
+     * @return bool
      */
     function isGet()
     {
@@ -124,6 +137,7 @@ class Request
 
     /**
      * Whether is PUT request or not
+     * @return bool
      */
     function isPut()
     {
@@ -132,6 +146,7 @@ class Request
 
     /**
      * Whether is PATCH request or not
+     * @return bool
      */
     function isPatch()
     {
@@ -140,6 +155,7 @@ class Request
 
     /**
      * Whether is DELETE request or not
+     * @return bool
      */
     function isDelete()
     {
@@ -148,6 +164,7 @@ class Request
 
     /**
      * Whether is HEAD request or not
+     * @return bool
      */
     function isHead()
     {
@@ -156,6 +173,7 @@ class Request
 
     /**
      * Whether is OPTIONS request or not
+     * @return bool
      */
     function isOptions()
     {
@@ -164,6 +182,7 @@ class Request
 
     /**
      * Get the $_GET parameters
+     * @return string|array|mixed
      */
     function get()
     {
@@ -172,6 +191,7 @@ class Request
 
     /**
      * Get the $_POST parameters
+     * @return string|array|mixed
      */
     function getPost()
     {

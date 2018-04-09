@@ -27,8 +27,8 @@ class App extends tool\Component
 
     /**
      * Match GET request
-     * @param $url          The url which you want to match from the request
-     * @param $closure      The Closure will be invoked when the matching process success
+     * @param string   $url     The url which you want to match from the request
+     * @param \Closure $closure The Closure will be invoked when the matching process success
      */
     function get($url, $closure)
     {
@@ -36,8 +36,8 @@ class App extends tool\Component
 
     /**
      * Match POST request
-     * @param $url          The url which you want to match from the request
-     * @param $closure      The Closure will be invoked when the matching process success
+     * @param string   $url     The url which you want to match from the request
+     * @param \Closure $closure The Closure will be invoked when the matching process success
      */
     function post($url, $closure)
     {
@@ -45,8 +45,8 @@ class App extends tool\Component
 
     /**
      * Match PUT request
-     * @param $url          The url which you want to match from the request
-     * @param $closure      The Closure will be invoked when the matching process success
+     * @param string   $url          The url which you want to match from the request
+     * @param \Closure $closure      The Closure will be invoked when the matching process success
      */
     function put($url, $closure)
     {
@@ -54,8 +54,8 @@ class App extends tool\Component
 
     /**
      * Match PATCH request
-     * @param $url          The url which you want to match from the request
-     * @param $closure      The Closure will be invoked when the matching process success
+     * @param string   $url          The url which you want to match from the request
+     * @param \Closure $closure      The Closure will be invoked when the matching process success
      */
     function patch($url, $closure)
     {
@@ -63,8 +63,8 @@ class App extends tool\Component
 
     /**
      * Match DELETE request
-     * @param $url          The url which you want to match from the request
-     * @param $closure      The Closure will be invoked when the matching process success
+     * @param string   $url          The url which you want to match from the request
+     * @param \Closure $closure      The Closure will be invoked when the matching process success
      */
     function delete($url, $closure)
     {
@@ -72,8 +72,8 @@ class App extends tool\Component
 
     /**
      * Match HEAD request
-     * @param $url          The url which you want to match from the request
-     * @param $closure      The Closure will be invoked when the matching process success
+     * @param string   $url          The url which you want to match from the request
+     * @param \Closure $closure      The Closure will be invoked when the matching process success
      */
     function head($url, $closure)
     {
@@ -81,8 +81,8 @@ class App extends tool\Component
 
     /**
      * Match OPTIONS request
-     * @param $url          The url which you want to match from the request
-     * @param $closure      The Closure will be invoked when the matching process success
+     * @param string   $url          The url which you want to match from the request
+     * @param \Closure $closure      The Closure will be invoked when the matching process success
      */
     function options($url, $closure)
     {
@@ -90,7 +90,7 @@ class App extends tool\Component
 
     /**
      * Autoload function, invoked by CSpeed extension
-     * @param $className WHICH file you want to load
+     * @param string $className WHICH file you want to load
      */
     private function autoload($className)
     {
@@ -98,8 +98,8 @@ class App extends tool\Component
 
     /**
      * Setting the alias which you want let the CSpeed to load the class file automatically
-     * @param $aliasKey         The alias key
-     * @param $aliasFullPath    The full path assigned by the alias key
+     * @param string $aliasKey         The alias key, must be begin with '@' character.
+     * @param string $aliasFullPath    The full path assigned by the alias key
      */
     function setAlias($aliasKey, $aliasFullPath)
     {
@@ -129,10 +129,9 @@ class App extends tool\Component
 
     /**
      * To use the Composer loade
-     * @param $file
+     * @param string $file
      */
     function setComposerLoader($file)
     {
-
     }
 }

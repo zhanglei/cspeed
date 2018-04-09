@@ -12,9 +12,9 @@ class Server extends \Cs\mvc\Controller
 {
     /**
      * To handle the RPC service
+     * @param $obj object The object which to be setted as a RPC-server.
      */
     public function handle($obj)
     {
-
     }
 }

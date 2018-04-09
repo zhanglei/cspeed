@@ -19,8 +19,8 @@ class Router
 
     /**
      * To add a Router URL
-     * @param $destUrl The URL to match the browser's PATH_INFO
-     * @param $toUrl   The URL after matching, to redirect
+     * @param $destUrl string The URL to match the browser's PATH_INFO
+     * @param $toUrl   string The URL after matching, to redirect
      */
     function add($destUrl, $toUrl)
     {
@@ -28,7 +28,7 @@ class Router
 
     /**
      * Adding the Router URL from the INI file
-     * @param $iniFile The ini file name
+     * @param $iniFile string The ini file name
      */
     function addFromIni($iniFile)
     {
@@ -36,7 +36,7 @@ class Router
 
     /**
      * To add the router from the given array
-     * @param $arrayRouters The Router's which you want to add to
+     * @param $arrayRouters array The Router's which you want to add to
      */
     function addFromArray($arrayRouters)
     {

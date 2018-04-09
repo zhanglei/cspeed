@@ -62,7 +62,7 @@ interface ModelInterface
     function limit($count, $offset);
 
     /**
-     * @param $rawSql               The raw SQL you want to Query|Execute
+     * @param string $rawSql        The raw SQL you want to Query|Execute
      * @param array $bindParams     The binding parameters you want to bind to the SQL
      * @return ModelInterface
      */

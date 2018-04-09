@@ -20,8 +20,8 @@ class Component
 
     /**
      * To add an event to the object
-     * @param $eventName        The EVENT_NAME which you want to add to the event_queue_lists
-     * @param $eventCallBack    The EVENT callback invoked when the event is triggered.
+     * @param $eventName      string    The EVENT_NAME which you want to add to the event_queue_lists
+     * @param $eventCallBack  \Closure  The EVENT callback invoked when the event is triggered.
      */
     function on($eventName, $eventCallBack)
     {
@@ -29,8 +29,8 @@ class Component
 
     /**
      * To detach the event with the given event_name
-     * @param $eventName                        The event which you want to detach
-     * @param string|NULL $eventCallBack        The handler associated with the event_name,NULL means to remove all
+     * @param string        $eventName      The event which you want to detach
+     * @param \Closure|NULL $eventCallBack  The handler associated with the event_name,NULL means to remove all
      */
     function off($eventName, $eventCallBack = NULL)
     {
@@ -38,7 +38,7 @@ class Component
 
     /**
      * To trigger the event named `$eventName`
-     * @param $eventName        The event which you want to trigger
+     * @param string $eventName  The event which you want to trigger
      */
     function trigger($eventName)
     {

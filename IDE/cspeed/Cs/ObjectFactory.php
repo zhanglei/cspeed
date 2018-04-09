@@ -10,11 +10,17 @@ namespace Cs;
 
 class ObjectFactory
 {
+    /**
+     * To initialise the ObjectFactory Object
+     * @param string $phpConfigFilePath The path of the ObjectFactory config file path
+     */
     public function init($phpConfigFilePath){
-
     }
 
+    /**
+     * Get the object from the ObjectFactory
+     * @param string $objectId The object id from the ObjectFactory
+     */
     public function getObject($objectId){
-
     }
 }

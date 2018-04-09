@@ -19,8 +19,8 @@ class View
 
     /**
      * Render the view file
-     * @param $templateFileName     Which the file you want to render
-     * @param $variables            The variables which you may use in template
+     * @param $templateFileName string          Which the file you want to render
+     * @param $variables        array|mixed     The variables which you may use in template
      */
     function render($templateFileName, $variables)
     {
@@ -29,7 +29,7 @@ class View
 
     /**
      * Setting the suffix name, The default suffix is "phtml"
-     * @param $suffixName           Which suffix you want to use
+     * @param $suffixName  string  Which suffix you want to use
      */
     function setSuffix($suffixName)
     {
@@ -38,49 +38,44 @@ class View
 
     /**
      * Add one variables to the View template file
-     * @param $varName              The var name you use in the view template file to equals the controller's $varValue
-     * @param $varValue
+     * @param $varName    string  The var name you use in the view template file to equals the controller's $varValue
+     * @param $varValue   mixed
      */
     function setVar($varName, $varValue)
     {
-
     }
 
     /**
      * Return the view template file rendering result
-     * @param $templateFileName
-     * @param $variables
+     * @param $templateFileName string
+     * @param $variables        string|array|mixed
      */
     function getRender($templateFileName, $variables)
     {
-
     }
 
     /**
      * Set the View Dir, The default value is '../views'
-     * @param $viewDir
+     * @param $viewDir string
      */
     function setViewDir($viewDir)
     {
-
     }
 
     /**
      * Set the Module Dir
-     * @param $moduleDir
+     * @param $moduleDir string
      */
     function setModuleDir($moduleDir)
     {
-
     }
 
     /**
      * As same as the render function, and will changed in the kernel C code, but the PHP level work usually as before
-     * @param $templateFileName
-     * @param $variables
+     * @param $templateFileName string
+     * @param $variables        string|array|mixed
      */
     function partial($templateFileName, $variables)
     {
-
     }
 }

@@ -27,8 +27,8 @@ class Model extends \Cs\tool\Component
 
     /**
      * Use the magic to realise the ActiveRecord
-     * @param $name     The field which you want to map with the SQL field
-     * @param $value    The value which you want to store to the DB engine
+     * @param string $name     The field which you want to map with the SQL field
+     * @param mixed  $value    The value which you want to store to the DB engine
      */
     public function __set($name, $value)
     {
@@ -130,8 +130,9 @@ class Model extends \Cs\tool\Component
 
     /**
      * Set the current model using which Db adapter connection.
+     * @param string $dbName The Adapter Di container key index     *
      */
-    function setDb()
+    function setDb($dbName)
     {
     }
 
