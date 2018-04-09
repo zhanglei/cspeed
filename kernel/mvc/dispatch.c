@@ -84,6 +84,7 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
     if (UNEXPECTED((temp_mca_value = zend_hash_index_find(Z_ARRVAL_P(path_info_array), 1)) != NULL)) {
         CSPEED_G(core_router_default_module) = zend_string_dup(Z_STR_P(temp_mca_value), 0);
         default_module = zend_string_copy(Z_STR_P(temp_mca_value));
+        zend_hash_index_del(Z_ARRVAL_P(path_info_array), 1);
     }
 
     /* To check wheather the module is allowed or not. */
