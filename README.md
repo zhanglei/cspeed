@@ -396,14 +396,14 @@ class BootInit implements Cs\BootInit
 目录结构如下：
 
 ```php
-+app
- ++models
-   ++read
-   	  ++User
-   	  ++Info
- 	++write
- 	  ++User
- 	  ++Info
+++app
+  ++models
+    ++read
+      ++User
+      ++Info
+    ++write
+      ++User
+      ++Info
 ```
 
 在 **CSpeed** 中，如果需要达到上面的代码架构，很简单，用户只需要在模型的构造函数里面，绑定相应的数据库即可。如：
