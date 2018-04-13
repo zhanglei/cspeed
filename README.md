@@ -472,6 +472,20 @@ CSpeed 框架支持 **配置文件加载路由** 与直接 **添加路由** 来�
 :id:									 表示 ([0-9]+)
 ```
 
+**2、添加路由**
+
+```php
+$router->add(
+    '/back/:action:/:id:',
+    '/shop/list/$1'
+);
+$router->add(
+    '/shop/:controller:/:action:/:any:',
+    '/get/\1/\2/\3'
+);
+$router->addFromIni('router.ini');
+```
+
 ### 7、命令行模式支持 ###
 
 注意：**CSpeed** 框架支持的命令行模式的控制器类是不支持使用命名空间的控制器类。
@@ -633,6 +647,27 @@ Percentage of the requests served within a certain time (ms)
 ## PhpStorm 代码提示 ##
 
 如果用户需要使用 **PhpStorm** 的代码提示功能，只需要下载源码，然后根据 **IDE** 中的 **README.md** 文档要求操作即可
+
+## CSpeed 核心配置 ##
+
+```php
+[core]
+core.application                = '../app'               ; WEB目录
+core.bootstrap                  = '../app/bootstrap.php' ; 指定bootstrap 类目录
+core.bootstrap.method.string    = '__init'               ; 指定Bootstrap类的初始化方法的前缀 
+core.router.modules             =  index,home,back       ; 注册多模块
+core.router.default.module      =  index                 ; 默认模块
+core.router.default.controller  =  index                 ; 默认控制器
+core.router.default.action      =  index                 ; 默认方法
+core.view.ext                   =  phtml                 ; 视图文件后缀
+core.view.auto.render           =  0                     ; 是否自动渲染视图，１：自动渲染、０：不渲染
+core.url.pattern                = '.html'                ; 伪静态设置
+
+[db]
+db.master.dsn                   =  'mysql:host=localhost;port=3306;dbname=supjos'    ; 数据库类型
+db.master.username              =  root                                              ; 数据库用户名
+db.master.password              =  3333                                              ; 数据库密码
+```
 
 ## QQ群交流 ##
 
