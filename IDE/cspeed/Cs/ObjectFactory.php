@@ -14,7 +14,7 @@ class ObjectFactory
      * To initialise the ObjectFactory Object
      * @param string $phpConfigFilePath The path of the ObjectFactory config file path
      */
-    public function init($phpConfigFilePath){
+    public function __construct($phpConfigFilePath){
     }
 
     /**

@@ -32,11 +32,8 @@
 #include "kernel/tool/require.h"
 #include "kernel/object_factory.h"
 
-ZEND_BEGIN_ARG_INFO_EX(arg_info_objectf_init, 0, 0, 1)
-    ZEND_ARG_INFO(0, config_file)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arg_info_objectf_construct, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arg_info_objectf_construct, 0, 0, 1)
+  ZEND_ARG_INFO(0, config_file)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arg_info_objectf_get_object, 0, 0, 1)
@@ -52,10 +49,7 @@ CSPEED_METHOD(ObjectFactory, __construct)
       zend_update_property(cspeed_object_factory_ce, getThis(), CSPEED_STRL(OBJECT_FACTORY_STORE), &magic_datas);
       zval_ptr_dtor(&magic_datas);
   }
-}
 
-CSPEED_METHOD(ObjectFactory, init)
-{
   zend_string *file_path;
   if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &file_path) == FAILURE) {
     return ;
@@ -222,9 +216,7 @@ nest_again:
           }
         }
     } ZEND_HASH_FOREACH_END();
-    RETURN_TRUE;
   }
-  RETURN_FALSE;
 }
 
 CSPEED_METHOD(ObjectFactory, getObject)
@@ -245,7 +237,6 @@ CSPEED_METHOD(ObjectFactory, getObject)
 }
 
 static const zend_function_entry cspeed_object_factory_functions[] = {
-  CSPEED_ME(ObjectFactory, init, arg_info_objectf_init, ZEND_ACC_PUBLIC)
   CSPEED_ME(ObjectFactory, __construct, arg_info_objectf_construct, ZEND_ACC_PUBLIC)
   CSPEED_ME(ObjectFactory, getObject, arg_info_objectf_get_object, ZEND_ACC_PUBLIC)
 

@@ -164,10 +164,10 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
     array_init(&key_sets);
     array_init(&value_sets);
     ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(path_info_array), index, value){
-        if ( (index != 0) && (index % 2 == 0) ){    /* Key name*/
+        if ( (index != 0) && ((index & 1) == 0) ){    /* Key name*/
             add_next_index_zval(&key_sets, value);
         }
-        if ( (index != 0) && (index % 2 != 0) ) {   /* Key value */
+        if ( (index != 0) && ((index & 1) != 0) ) {   /* Key value */
             add_next_index_zval(&value_sets, value);
         }
     } ZEND_HASH_FOREACH_END();
