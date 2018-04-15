@@ -134,6 +134,15 @@ class Model extends \Cs\tool\Component
     }
 
     /**
+     * Return the array format of the ResultSet
+     * @return $this
+     */
+    function asArray()
+    {
+        return $this;
+    }
+
+    /**
      * Set the current model using which Db adapter connection.
      * @param string $dbName The Adapter Di container key index     *
      */
