@@ -61,6 +61,12 @@ int cspeed_autoload_file(zend_string *, zval *, char *);
 /* filter the parameter with the callable or valid function */
 void parameter_filter(zval *filter, zval *parameter);
 
+/* Add the property to the object */
+void add_object_property(zval *object, zval *properties);
+
+/* Add the properties to the object */
+void add_multi_object_property(zval *object, zval *multi_properties, zval *ret_val);
+
 #endif
 
 

@@ -66,17 +66,19 @@ CSPEED_METHOD(ObjectFactory, __construct)
   ) {
       zend_string *val_name;
       zval *val_value;
+
+      /* To autoload the class file with the psr4 */
+      zval *app_object = zend_read_static_property(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_INSTANCE), 1);
+      if ( !app_object || ZVAL_IS_NULL(app_object) || (Z_TYPE_P(app_object) != IS_OBJECT) ) {
+        php_error_docref(NULL, E_ERROR, "Please do the IOC job in the \\Cs\\App inside.");
+      }
+            
       ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL(result), val_name, val_value) {
         
         /* TO DO.. */
         if (Z_TYPE_P(val_value) == IS_ARRAY) {
           zval *class_name = zend_hash_find(Z_ARRVAL_P(val_value), strpprintf(0, "%s", "class"));
           if (class_name && CSPEED_STRING_NOT_EMPTY(Z_STRVAL_P(class_name))) {
-            /* To autoload the class file with the psr4 */
-            zval *app_object = zend_read_static_property(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_INSTANCE), 1);
-            if ( !app_object || ZVAL_IS_NULL(app_object) || (Z_TYPE_P(app_object) != IS_OBJECT) ) {
-              php_error_docref(NULL, E_ERROR, "Please do the IOC job in the \\Cs\\App inside.");
-            }
 
             /* After include the file do the create job for each class */
             zend_class_entry *class_ce;

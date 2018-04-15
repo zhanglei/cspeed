@@ -102,16 +102,21 @@ class Model extends \Cs\tool\Component
 
     /**
      * ONE record in the ResultSet
+     * @return $this
      */
     function one()
     {
+        return $this;
     }
 
     /**
      * ALL record in the ResultSet
+     * Each element of the result array was a Model object.
+     * @return array
      */
     function all()
     {
+        return [];
     }
 
     /**

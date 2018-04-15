@@ -225,8 +225,6 @@ void cspeed_pdo_statement_set_fetch_mode(zval *pdostatement_obj, int fetch_style
 
 
 
-
-
 /*
  * Local variables:
  * tab-width: 4

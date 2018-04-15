@@ -38,6 +38,7 @@ extern zend_class_entry *cspeed_model_ce;                                      /
 #define CSPEED_MODEL_COLUMNS            "__columns"                     /* Columns */
 #define CSPEED_MODEL_PRIMARY            "__primary_key"                 /* The primary key */
 #define CSPEED_MODEL_EXECUTED_SQL       "__executed_sql"                /* The executed SQL */
+#define CSPEED_MODEL_ARRAY_DATA         "__array_data"                  /* The array data */
 
 #define EVENT_BEFORE_SAVE               "EVENT_BEFORE_SAVE"             /* BEFORE_SAVE */
 #define EVENT_AFTER_SAVE                "EVENT_AFTER_SAVE"              /* AFTER_SAVE */

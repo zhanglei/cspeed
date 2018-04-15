@@ -71,6 +71,7 @@ void cspeed_pdo_statement_row_count(zval *pdostatement_obj, zval *retval);
 /* Set the fetch mode */
 void cspeed_pdo_statement_set_fetch_mode(zval *pdostatement_obj, int fetch_style, zval *retval);
 
+
 #endif
 
 /*

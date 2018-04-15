@@ -28,6 +28,7 @@
 #include "php_cspeed.h"
 #include "kernel/tool/helper.h"
 #include "ext/standard/php_dir.h"
+#include "kernel/mvc/model.h"
 #include "ext/standard/basic_functions.h"
 
 #include "zend.h"
@@ -277,6 +278,8 @@ cspeed_build_equal_string(zval *array, char *begin_str, zval *result)/*{{{ Build
                 smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, "%d", Z_LVAL_P(var_value))));
             } else if (Z_TYPE_P(var_value) == IS_STRING) {
                 smart_str_appends(&where_str, Z_STRVAL_P(var_value));
+            } else if ( Z_TYPE_P(var_value) == IS_DOUBLE ) {
+                smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, "%f", Z_DVAL_P(var_value))));
             }
             smart_str_appends(&where_str, "' AND ");
         }
@@ -365,8 +368,12 @@ cspeed_autoload_file(zend_string *class_name_with_namespace, zval *obj, char *al
         class_name_with_namespace = strpprintf(0, "%s", ZSTR_VAL(class_name_with_namespace) + 1);
     }
 
+    if (zend_hash_find_ptr(EG(class_table), zend_string_tolower(class_name_with_namespace)) != NULL) {
+        return TRUE;
+    }
+
     char *slash_pos = strchr(ZSTR_VAL(class_name_with_namespace), '\\');
-    
+
     if (slash_pos == NULL) { /* No slash find */
         zend_string *real_file_path = strpprintf(0, "./%s.php", ZSTR_VAL(class_name_with_namespace));
         check_file_exists(ZSTR_VAL(real_file_path));
@@ -375,6 +382,7 @@ cspeed_autoload_file(zend_string *class_name_with_namespace, zval *obj, char *al
         }
         zend_string_release(real_file_path);
     } else {                 /* find the slash */
+
         char *current_alias = (char *)malloc(sizeof(char) * (slash_pos - ZSTR_VAL(class_name_with_namespace) + 1));
         memset(current_alias, 0, (slash_pos - ZSTR_VAL(class_name_with_namespace) + 1));
         memcpy(current_alias, ZSTR_VAL(class_name_with_namespace), (slash_pos - ZSTR_VAL(class_name_with_namespace)));
@@ -550,7 +558,8 @@ load_kernel_setting(zend_string *ini_config_file, zend_string *ini_config_node_n
     }
 }
 
-void parameter_filter(zval *filter, zval *parameter)
+void 
+parameter_filter(zval *filter, zval *parameter)
 {
     if ( filter ) {
         if ( Z_TYPE_P(filter) == IS_STRING ) {
@@ -582,6 +591,82 @@ void parameter_filter(zval *filter, zval *parameter)
         }
     }
 }
+
+void 
+add_object_property(zval *object, zval *properties) /*{{{ Add the properties to the object */
+{
+    if ( !ZVAL_IS_NULL(object) && ( Z_TYPE_P(properties) == IS_ARRAY ) 
+        && zend_hash_num_elements( Z_ARRVAL_P(properties) )  ) {
+        // zend_merge_properties(object, Z_ARRVAL_P(properties));
+        
+        zend_string *val_key; zval *val_value;
+
+        ZEND_HASH_FOREACH_STR_KEY_VAL( Z_ARRVAL_P(properties), val_key, val_value ) {
+            zend_property_info *property_info = zend_hash_find_ptr(&(Z_OBJCE_P(object))->properties_info, val_key);
+            if ( property_info != NULL ) {
+                if ( (property_info->flags & ZEND_ACC_SHADOW) 
+                    || (property_info->flags & ZEND_ACC_PUBLIC)
+                    || (property_info->flags & ZEND_ACC_PROTECTED)
+                    || (property_info->flags & ZEND_ACC_PRIVATE)
+                ) {
+                    zend_update_property(Z_OBJCE_P(object), object, CSPEED_STRL(ZSTR_VAL(val_key)), val_value);
+                } 
+            } else {
+                if ( !Z_OBJ_P(object)->properties ) {
+                    rebuild_object_properties( Z_OBJ_P(object) );
+                }
+                zend_hash_add_new(Z_OBJ_P(object)->properties, (val_key), val_value);
+            }
+
+        } ZEND_HASH_FOREACH_END();
+    }
+} /*}}}*/
+
+void
+copy_object_properties(zval *dest_object, zval *src_object)
+{
+    zval *prop;
+    zend_string *key;
+    zend_property_info *property_info;
+
+    ZEND_HASH_FOREACH_STR_KEY_VAL(&(Z_OBJCE_P(src_object))->properties_info, key, prop) {
+        if ( Z_OBJCE_P(dest_object) != Z_OBJCE_P(src_object) ) {
+            return ;
+        }
+        zval *value = zend_read_property(cspeed_model_ce, src_object, CSPEED_STRL(ZSTR_VAL(key)), 1, NULL);
+        if ( !ZVAL_IS_NULL(value) ) {
+            zend_update_property(cspeed_model_ce, dest_object, CSPEED_STRL(ZSTR_VAL(key)), value);
+        }
+    } ZEND_HASH_FOREACH_END();
+}
+
+void
+add_multi_object_property(zval *object, zval *multi_properties, zval *ret_val) /*{{{ Add the properties to the object */
+{
+    if ( Z_TYPE_P(ret_val) != IS_ARRAY ) {
+        array_init(ret_val);
+    }
+
+    if ( !ZVAL_IS_NULL(object) && ( Z_TYPE_P(multi_properties) == IS_ARRAY ) 
+        && zend_hash_num_elements( Z_ARRVAL_P(multi_properties) )  ) {
+        zval *val_value;
+
+        ZEND_HASH_FOREACH_VAL( Z_ARRVAL_P(multi_properties), val_value ) {
+            if ( (Z_TYPE_P(val_value) == IS_ARRAY) && zend_hash_num_elements(Z_ARRVAL_P(val_value)) ) {
+                zval t_object;
+                object_and_properties_init(&t_object, Z_OBJCE_P(object), Z_OBJ_P(object)->properties);
+                copy_object_properties(&t_object, object);
+                zval_add_ref(val_value);
+                SEPARATE_ZVAL(val_value);
+                zend_update_property(cspeed_model_ce, &t_object, CSPEED_STRL(CSPEED_MODEL_ARRAY_DATA), val_value);
+                add_object_property(&t_object, val_value);
+                Z_TRY_ADDREF_P(&t_object);
+                add_next_index_zval(ret_val, &t_object);
+            }
+        } ZEND_HASH_FOREACH_END();
+    }
+}
+
 
 /*
  * Local variables:
