@@ -579,16 +579,16 @@ if ($good->where([ 'id' => 1 ])->save([
 $good = \app\models\Good::find();
 
 // 返回对象
-$lists = $good->orderBy(['id' => 'DESC'])->all();
+$lists = $good->orderBy(['id DESC', 'age ASC'])->all();
 
 // 返回数组
 $lists = $good->orderBy("id DESC")->asArray()->all();
 
 // 查询一条记录
-$lists = $good->orderBy(['id' => 'DESC'])->one();
+$lists = $good->orderBy(['id DESC', 'age ASC'])->one();
 
 //返回数组
-$lists = $good->orderBy(['id' => 'DESC'])->asArray()->one();
+$lists = $good->orderBy(['id DESC', 'age ASC'])->asArray()->one();
 ```
 
 **删除记录[D]：**

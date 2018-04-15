@@ -437,7 +437,6 @@ CSPEED_METHOD(Model, andWhere)/*{{{ proto Model::andWhere()*/
 
 CSPEED_METHOD(Model, orderBy)/*{{{ proto Model::orderBy()*/
 {
-    initialise_the_model_object(getThis(), -1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
     zval *order_by;
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &order_by) == FAILURE) {
         return ;
