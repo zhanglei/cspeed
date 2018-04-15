@@ -21,7 +21,7 @@
 #ifndef CSPEED_MODEL_H
 #define CSPEED_MODEL_H
 
-extern zend_class_entry *cspeed_model_ce;                                      /* The Model class */
+extern zend_class_entry *cspeed_model_ce;                               /* The Model class */
 
 #define CSPEED_MODEL_MAGIC_DATAS        "__cspeed_model_magic_datas"    /* The Model magic datas */
 #define CSPEED_MODEL_PDO_OBJECT         "__cspeed_model_pdo_object"     /* The PDO object */
@@ -34,11 +34,12 @@ extern zend_class_entry *cspeed_model_ce;                                      /
 #define CSPEED_MODEL_ULTIMATE_PDO       "__cspeed_model_ultimate_pdo"   /* The finaly pdo object to do the job */
 
 #define CSPEED_MODEL_ADAPTER            "__adapter"                     /* The current adapter related to this model */
-#define CSPEED_MODEL_COLUMNS_DETAIL     "__columns_detail"              /* Columns Details */
+#define CSPEED_MODEL_RESULT             "__result"                      /* Columns Details */
 #define CSPEED_MODEL_COLUMNS            "__columns"                     /* Columns */
 #define CSPEED_MODEL_PRIMARY            "__primary_key"                 /* The primary key */
 #define CSPEED_MODEL_EXECUTED_SQL       "__executed_sql"                /* The executed SQL */
 #define CSPEED_MODEL_ARRAY_DATA         "__array_data"                  /* The array data */
+#define CSPEED_MODEL_AS_ARRAY           "__as_array"                    /* The array data */
 
 #define EVENT_BEFORE_SAVE               "EVENT_BEFORE_SAVE"             /* BEFORE_SAVE */
 #define EVENT_AFTER_SAVE                "EVENT_AFTER_SAVE"              /* AFTER_SAVE */

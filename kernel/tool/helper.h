@@ -52,6 +52,9 @@ void recursive_call_parent_method(zend_class_entry *ce, char *method_name);
 /* Want obj usefull, use this instead before */
 void recursive_call_parent_method_two(zval *obj, char *method_name);             
 
+/* invoke object's method with params */
+void call_method_with_object(zval *object, char *method_name, uint32_t param_counts, zval params[], zval *ret_val);
+
 /* load the kernel_setting */
 void load_kernel_setting(zend_string *, zend_string *, char *);                  
 

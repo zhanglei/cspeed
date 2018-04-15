@@ -361,6 +361,17 @@ recursive_call_parent_method_two(zval *obj, char *method_name)/*{{{  Parent clas
     }
 }/*}}}*/
 
+void
+call_method_with_object(zval *object, char *method_name, uint32_t param_counts, zval params[], zval *ret_val)
+{
+    if (CSPEED_METHOD_IN_OBJECT(object, method_name)){
+        zval function_name;
+        ZVAL_STRING(&function_name, method_name);
+        call_user_function(EG(function_table), object, &function_name, ret_val, param_counts, params);
+        zval_ptr_dtor(&function_name);
+    }
+}
+
 int 
 cspeed_autoload_file(zend_string *class_name_with_namespace, zval *obj, char *alias) /*{{{ Load file */
 {    
