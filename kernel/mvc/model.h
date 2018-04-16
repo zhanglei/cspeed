@@ -23,15 +23,15 @@
 
 extern zend_class_entry *cspeed_model_ce;                               /* The Model class */
 
-#define CSPEED_MODEL_MAGIC_DATAS        "__cspeed_model_magic_datas"    /* The Model magic datas */
-#define CSPEED_MODEL_PDO_OBJECT         "__cspeed_model_pdo_object"     /* The PDO object */
-#define CSPEED_MODEL_NEW_RECORD         "__cspeed_model_new_record"     /* Whether the record is new or not */
-#define CSPEED_MODEL_SELECT             "__cspeed_model_select"         /* The SELECT */
-#define CSPEED_MODEL_WHERE_COND         "__cspeed_model_where_cond"     /* WHERE conditions */
-#define CSPEED_MODEL_ORDER_BY           "__cspeed_model_order_by"       /* ORDER BY */
-#define CSPEED_MODEL_GROUP_BY           "__cspeed_model_group_by"       /* GROUP BY */
-#define CSPEED_MODEL_TABLE_NAME         "__cspeed_model_table_name"     /* Model table name */
-#define CSPEED_MODEL_ULTIMATE_PDO       "__cspeed_model_ultimate_pdo"   /* The finaly pdo object to do the job */
+#define CSPEED_MODEL_MAGIC_DATAS        "__magic_datas"                 /* The Model magic datas */
+#define CSPEED_MODEL_PDO_OBJECT         "__pdo_object"                  /* The PDO object */
+#define CSPEED_MODEL_NEW_RECORD         "__new_record"                  /* Whether the record is new or not */
+#define CSPEED_MODEL_SELECT             "__select"                      /* The SELECT */
+#define CSPEED_MODEL_WHERE_COND         "__where_cond"                  /* WHERE conditions */
+#define CSPEED_MODEL_ORDER_BY           "__order_by"                    /* ORDER BY */
+#define CSPEED_MODEL_GROUP_BY           "__group_by"                    /* GROUP BY */
+#define CSPEED_MODEL_TABLE_NAME         "__table_name"                  /* Model table name */
+#define CSPEED_MODEL_ULTIMATE_PDO       "__ultimate_pdo"                /* The finaly pdo object to do the job */
 
 #define CSPEED_MODEL_ADAPTER            "__adapter"                     /* The current adapter related to this model */
 #define CSPEED_MODEL_RESULT             "__result"                      /* Columns Details */

@@ -25,7 +25,7 @@
 extern zend_class_entry *cspeed_app_ce;
 
 /* The aliases which let the system to locate the file */
-#define CSPEED_APP_AUTOLOAD_ALIASES     "__cspeed_app_aliases"          
+#define CSPEED_APP_AUTOLOAD_ALIASES     "__autoload_alias"          
 
 /* Single App object */
 #define CSPEED_APP_INSTANCE             "__app"                         

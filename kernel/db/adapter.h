@@ -23,19 +23,19 @@
 
 extern zend_class_entry *cspeed_adapter_ce;
 
-#define CSPEED_DB_PDO_OBJECT            "__cspeed_db_pdo"               /* The Db's pdo object */
-#define CSPEED_DB_THIS_PDO              "__cspeed_adapter_this_pdo"     /* The Db's pdo object attach to the Adapter */
-#define CSPEED_DB_THIS_ADAPTER          "__cspeed_adapter"              /* The current Adapter object */
+#define CSPEED_DB_PDO_OBJECT            "__db_pdo"               /* The Db's pdo object */
+#define CSPEED_DB_THIS_PDO              "__adapter_this_pdo"     /* The Db's pdo object attach to the Adapter */
+#define CSPEED_DB_THIS_ADAPTER          "__adapter"              /* The current Adapter object */
 
-#define CSPEED_ADAPTER_SELECT           "__cspeed_adapter_select"       /* The select fields */
-#define CSPEED_ADAPTER_FROM             "__cspeed_adapter_from"         /* The from fields */
-#define CSPEED_ADAPTER_WHERE            "__cspeed_adapter_where"        /* The where fields */
-#define CSPEED_ADAPTER_GROUP_BY         "__cspeed_adapter_group_by"     /* Group By */
-#define CSPEED_ADAPTER_ORDER_BY         "__cspeed_adapter_order_by"     /* Order By */
-#define CSPEED_ADAPTER_HAVING           "__cspeed_adapter_having"       /* Having */
-#define CSPEED_ADAPTER_LIMIT            "__cspeed_adapter_limit"        /* Limit */
-#define CSPEED_ADAPTER_RAW_SQL          "__cspeed_adapter_raw_sql"      /* Raw Sql */
-#define CSPEED_ADAPTER_BIND_PARAMS      "__cspeed_adapter_bind_params"  /* Raw Sql */
+#define CSPEED_ADAPTER_SELECT           "__select"               /* The select fields */
+#define CSPEED_ADAPTER_FROM             "__from"                 /* The from fields */
+#define CSPEED_ADAPTER_WHERE            "__where"                /* The where fields */
+#define CSPEED_ADAPTER_GROUP_BY         "__group_by"             /* Group By */
+#define CSPEED_ADAPTER_ORDER_BY         "__order_by"             /* Order By */
+#define CSPEED_ADAPTER_HAVING           "__having"               /* Having */
+#define CSPEED_ADAPTER_LIMIT            "__limit"                /* Limit */
+#define CSPEED_ADAPTER_RAW_SQL          "__raw_sql"              /* Raw Sql */
+#define CSPEED_ADAPTER_BIND_PARAMS      "__bind_params"          /* Raw Sql */
 
 zend_bool output_sql_errors(zval *pdo_statement);               /* Output the SQL error */
 
