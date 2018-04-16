@@ -587,7 +587,7 @@ parameter_filter(zval *filter, zval *parameter)
                 php_error_docref(NULL, E_ERROR, "function: `%s` not exists.", Z_STRVAL_P(filter));
             }
         } else if ( Z_TYPE_P(filter) == IS_OBJECT) {
-            // Check the object is callable or not.
+            /* Check the object is callable or not. */
             zend_string *error_handler_name = NULL;
             if ( !zend_is_callable(filter, 0, error_handler_name) ) {
                 php_error_docref(NULL, E_ERROR, "The argument must to be a valid callback.");
@@ -608,7 +608,7 @@ add_object_property(zval *object, zval *properties) /*{{{ Add the properties to 
 {
     if ( !ZVAL_IS_NULL(object) && ( Z_TYPE_P(properties) == IS_ARRAY ) 
         && zend_hash_num_elements( Z_ARRVAL_P(properties) )  ) {
-        // zend_merge_properties(object, Z_ARRVAL_P(properties));
+        /* zend_merge_properties(object, Z_ARRVAL_P(properties)); */
         
         zend_string *val_key; zval *val_value;
 

@@ -191,7 +191,6 @@ initialise_the_model_object(zval *model_object, zend_long new_record, INTERNAL_F
 char *
 build_insert_field_datas(zval *this)  /*{{{ Building the INSERT FIELDS AND VALUE */
 {
-    // zval *magic_datas = zend_read_property(cspeed_model_ce, this, CSPEED_STRL(CSPEED_MODEL_MAGIC_DATAS), 1, NULL);
     zval magic_datas;
     array_init(&magic_datas);
     get_fields_from_object(this, &magic_datas);
@@ -240,7 +239,6 @@ char *
 build_update_sql(zval *this)  /*{{{*/
 {
     /* UPDATE xx SET a=3,b=3,d=2 */
-    // zval *magic_datas = zend_read_property(cspeed_model_ce, this, CSPEED_STRL(CSPEED_MODEL_MAGIC_DATAS), 1, NULL);
     zval magic_datas;
     array_init(&magic_datas);
     get_fields_from_object(this, &magic_datas);
@@ -280,7 +278,6 @@ build_update_sql(zval *this)  /*{{{*/
 void 
 build_delete_sql(zval *this)/* {{{ Build the DELETE where condition */
 {
-    // zval *magic_datas = zend_read_property(cspeed_model_ce, this, CSPEED_STRL(CSPEED_MODEL_MAGIC_DATAS), 1, NULL);
     zval magic_datas;
     array_init(&magic_datas);
     get_fields_from_object(this, &magic_datas);

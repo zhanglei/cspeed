@@ -100,7 +100,7 @@ CSPEED_METHOD(Client, __call)/*{{{ proto Client::call($name, $params)*/
             add_assoc_string(&post_data, "params", "");
         }
 
-        // /* JSON-encode */
+        /* JSON-encode */
         smart_str post_str = {0};
         php_json_encode(&post_str, &post_data, 0);
         smart_str_0(&post_str);
