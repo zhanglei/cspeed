@@ -650,6 +650,44 @@ Percentage of the requests served within a certain time (ms)
  100%     28 (longest request)
 ```
 
+## 附录·系统配置 ##
+
+**CSpeed系统全部采用 ini 格式的配置文件**
+
+```php
+[core]
+core.application                = ../app                                             ; WEB目录
+core.bootstrap                  = ../app/bootstrap.php                               ; 指定 BootInit 类目录
+core.bootstrap.method.string    = __init                                             ; 指定 BootInit 类的初始化方法的前缀
+core.router.modules             =  index,home,say,back                               ; 注册多模块
+core.router.default.module      =  index                                             ; 默认模块
+core.router.default.controller  =  index                                             ; 默认控制器
+core.router.default.action      =  index                                             ; 默认方法
+core.view.ext                   =  phtml                                             ; 视图文件后缀
+core.view.auto.render           =  1                                                 ; 是否自动渲染视图，１：自动渲染、０：不渲染
+core.url.pattern                = '.html'
+
+[db]
+db.master.dsn                   =  "mysql:host=localhost;port=3306;dbname=supjos"    ; 数据库类型
+db.master.username              =  root                                              ; 数据库用户名
+db.master.password              =  3333                                              ; 数据库密码
+
+[dev:core]
+core.application                = ../app                                             ; WEB目录
+core.bootstrap                  = ../app/bootstrap.php                               ; 指定 BootInit 类目录
+core.bootstrap.method.string    = __init                                             ; 指定 BootInit 类的初始化方法的前缀
+core.router.modules             =  index,home                                        ; 注册多模块
+core.router.default.module      =  index                                             ; 默认模块
+core.router.default.controller  =  Index                                             ; 默认控制器
+core.router.default.action      =  index                                             ; 默认方法
+core.view.ext                   =  xhtml                                             ; 视图文件后缀
+
+[dev:db]
+db.master.dsn                   =  "mysql:host=localhost;port=3306;dbname=supjos"    ; 数据库类型
+db.master.username              =  root                                              ; 数据库用户名
+db.master.password              =  3333                                              ; 数据库密码
+```
+
 ## PhpStorm 代码提示 ##
 
 如果用户需要使用 **PhpStorm** 的代码提示功能，只需要下载源码，然后根据 **IDE** 中的 **README.md** 文档要求操作即可

@@ -23,6 +23,7 @@ class Controller extends \Cs\tool\Component
 
     /**
      * @var $view \Cs\mvc\View
+     * [NOTE] $view object only exists when using the auto-rendering mode. otherwise null set.
      */
     public $view;
 
