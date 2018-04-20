@@ -319,9 +319,7 @@ void dispather_url()    /* {{{ Dispatcher the URL */
         } ZEND_HASH_FOREACH_END();
     }
 
-    if (can_free) {
-        free(path_info);
-    }
+    if ( can_free ) free(path_info);
 
     /*After Parsing the Router URL rules, parsing the PATH_INFO TO the Right Model|Controller|Action */
     parse_path_info(&path_info_array);
