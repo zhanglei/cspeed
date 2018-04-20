@@ -354,7 +354,8 @@ recursive_call_parent_method_two(zval *obj, char *method_name)/*{{{  Parent clas
         if (CSPEED_METHOD_IN_OBJECT(obj, method_name)){
             zval function_name, retval;
             ZVAL_STRING(&function_name, method_name);
-            call_user_function(NULL, obj, &function_name, &retval, 0, NULL);
+            zval params[] = { *obj };
+            call_user_function(NULL, obj, &function_name, &retval, 1, params);
             zval_ptr_dtor(&function_name);
             zval_ptr_dtor(&retval);
         }
