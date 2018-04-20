@@ -216,10 +216,8 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
         }
         zend_string_release(action_append_action);
         /* To auto render the view file or not. */
-        if (!ZVAL_IS_NULL(&view_object)) {
-            zval ret_val;
-            render_view_file(&view_object, strpprintf(0, "%s", ZSTR_VAL(CSPEED_G(core_router_default_action))), NULL, &ret_val);
-            zval_ptr_dtor(&ret_val);
+        if ( !ZVAL_IS_NULL(&view_object) ) {
+            render_view_file(&view_object, CSPEED_G(core_router_default_action), NULL, NULL);
         }
         /* Do the after_action work */
         trigger_events(&controller_obj, strpprintf(0, "%s", EVENT_AFTER_ACTION));
