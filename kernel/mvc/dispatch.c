@@ -218,8 +218,7 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
         /* To auto render the view file or not. */
         if (!ZVAL_IS_NULL(&view_object)) {
             zval ret_val;
-            render_view_file(&view_object, strpprintf(0, "%s/%s", ZSTR_VAL(CSPEED_G(core_router_default_controller)), 
-                    ZSTR_VAL(CSPEED_G(core_router_default_action))), NULL, &ret_val);
+            render_view_file(&view_object, strpprintf(0, "%s", ZSTR_VAL(CSPEED_G(core_router_default_action))), NULL, &ret_val);
             zval_ptr_dtor(&ret_val);
         }
         /* Do the after_action work */
