@@ -148,7 +148,8 @@ PHP_RSHUTDOWN_FUNCTION(cspeed)
     zend_string_release(CSPEED_G(core_view_ext));
     zend_string_release(CSPEED_G(core_view_auto_render));
     zend_string_release(CSPEED_G(core_url_pattern));
-    zend_string_release(CSPEED_G(core_router_modules));
+    zend_hash_destroy(CSPEED_G(core_router_modules))
+    pefree(CSPEED_G(core_router_modules), GC_FLAGS(CSPEED_G(core_router_modules)) & IS_STR_PERSISTENT);
     pefree(CSPEED_G(di_object), GC_FLAGS(CSPEED_G(di_object)) & IS_STR_PERSISTENT);
     pefree(CSPEED_G(router_object), GC_FLAGS(CSPEED_G(router_object)) & IS_STR_PERSISTENT);
     /* Return SUCCESS */
