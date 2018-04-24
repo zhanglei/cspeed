@@ -38,7 +38,7 @@ class Router
      * To add the router from the given array
      * @param $arrayRouters array The Router's which you want to add to
      */
-    function addFromArray($arrayRouters)
+    function addFromArray($arrayRouters = [])
     {
     }
 }

@@ -614,7 +614,7 @@ CSPEED_METHOD(Model, save)/*{{{ proto Model::save()*/
     zend_string *execute_sql;
     if (Z_LVAL_P(new_record) == IS_TRUE) {
         /* INSERT INTO */
-        execute_sql = strpprintf(0, "INSERT INTO %s %s",          /* INSERT INTO xx (id, t, r) VALUES(33, 8, 99) */
+        execute_sql = strpprintf(0, "INSERT INTO %s %s",  /* INSERT INTO xx (id, t, r) VALUES(33, 8, 99) */
             Z_STRVAL_P(table_name),
             build_insert_field_datas(getThis())
         );

@@ -22,7 +22,7 @@ class View
      * @param $templateFileName string          Which the file you want to render
      * @param $variables        array|mixed     The variables which you may use in template
      */
-    function render($templateFileName, $variables)
+    function render($templateFileName, $variables = [])
     {
 
     }
@@ -50,7 +50,7 @@ class View
      * @param $templateFileName string
      * @param $variables        string|array|mixed
      */
-    function getRender($templateFileName, $variables)
+    function getRender($templateFileName, $variables = [])
     {
     }
 
@@ -75,7 +75,7 @@ class View
      * @param $templateFileName string
      * @param $variables        string|array|mixed
      */
-    function partial($templateFileName, $variables)
+    function partial($templateFileName, $variables = [])
     {
     }
 }

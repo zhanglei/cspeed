@@ -46,7 +46,7 @@ class Response
      * Set the response data to the JSON format
      * @param array $jsonArray
      */
-    function setJsonContent(array $jsonArray)
+    function setJsonContent($jsonArray = [])
     {
     }
 

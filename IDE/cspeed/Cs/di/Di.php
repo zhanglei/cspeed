@@ -21,14 +21,14 @@ class Di
      * @param  string $key      Which object-instance you want to get from the Di container
      * @return object|mixed
      */
-    function get($key)
+    function get($key = '')
     {
 
     }
 
     /**
      * @param $key     string    The key to identify the object|mixed
-     * @param $closure mixed     The closure which to return the object|mixed
+     * @param $closure \Closure     The closure which to return the object|mixed
      */
     function set($key, $closure)
     {
