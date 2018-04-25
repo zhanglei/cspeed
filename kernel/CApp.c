@@ -339,7 +339,6 @@ CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
         object_init_ex(&bootstrap_object, bootstrap_class_ptr);
         /* Found all methods starts with the __init string  */
         /* In the initialise job, you can setting the Di & Router */
-
         zval di_object, router_object;
         object_init_ex(&di_object, cspeed_di_ce);
         initialise_di_object_properties(&di_object);
