@@ -339,17 +339,13 @@ CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
         object_init_ex(&bootstrap_object, bootstrap_class_ptr);
         /* Found all methods starts with the __init string  */
         /* In the initialise job, you can setting the Di & Router */
-#if 0
+
         zval di_object, router_object;
         object_init_ex(&di_object, cspeed_di_ce);
         initialise_di_object_properties(&di_object);
 
         object_init_ex(&router_object, cspeed_router_ce);
         initialise_router_object_properties(&router_object);
-#endif
-        zval di_object, router_object;
-        ZVAL_OBJ(&di_object, CSPEED_G(di_object));
-        ZVAL_OBJ(&router_object, CSPEED_G(router_object));
 
         /* Begin to initialise */
         zend_string *bootstrap_function_name;
@@ -368,10 +364,10 @@ CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
         zval_ptr_dtor(&bootstrap_object);
         zval_add_ref(&di_object);
         zval_add_ref(&router_object);
-#if 0
+
         CSPEED_G(di_object) = Z_OBJ(di_object);
         CSPEED_G(router_object) = Z_OBJ(router_object);
-#endif
+
         /* Return the App class object to user, to do the next job. such as the router parsing and so on. */
         RETURN_ZVAL(getThis(), 1, NULL);
     } else {

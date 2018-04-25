@@ -206,6 +206,7 @@ build_insert_field_datas(zval *this)  /*{{{ Building the INSERT FIELDS AND VALUE
             smart_str_appends(&fields_str, ZSTR_VAL(var_key));
             smart_str_appendc(&fields_str, ',');                         /* After finished, the value is (id, i, t, */
             /* VALUES */
+            if ( Z_TYPE_P(var_value) == IS_OBJECT ) convert_to_string(var_value);
             if (Z_TYPE_P(var_value) == IS_LONG) {
                 smart_str_appends(&datas_str, ZSTR_VAL(strpprintf(0, "'%d'", Z_LVAL_P(var_value))));
                 smart_str_appendc(&datas_str, ',');
@@ -250,6 +251,7 @@ build_update_sql(zval *this)  /*{{{*/
         ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL(magic_datas), var_key, var_value) {
             smart_str_appends(&update_str, ZSTR_VAL(var_key));
             smart_str_appendc(&update_str, '=');
+            if (Z_TYPE_P(var_value) == IS_OBJECT) convert_to_string(var_value);
             if (Z_TYPE_P(var_value) == IS_LONG) {
                 smart_str_appends(&update_str, ZSTR_VAL(strpprintf(0, "'%d'", Z_LVAL_P(var_value))));
             } else if (Z_TYPE_P(var_value) == IS_STRING) {
@@ -399,7 +401,7 @@ CSPEED_METHOD(Model, where)/*{{{ proto Model::where()*/
         zval_ptr_dtor(&result);
     } else if ( where && ( Z_TYPE_P(where) == IS_STRING)) {
         zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_WHERE_COND), 
-                                                    ZSTR_VAL(strpprintf(0, " WHERE %s", Z_STRVAL_P(where))));
+                ZSTR_VAL(strpprintf(0, " WHERE %s", Z_STRVAL_P(where))));
     } else {
         php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
     }
@@ -421,14 +423,13 @@ CSPEED_METHOD(Model, andWhere)/*{{{ proto Model::andWhere()*/
         zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_WHERE_COND), 
             ZSTR_VAL(strpprintf(0, "%s AND %s ", Z_STRVAL_P(previous_where),  Z_STRVAL(result))));
         zval_ptr_dtor(&result);
-    } else if(where && ( Z_TYPE_P(where) == IS_STRING )){
+    } else if ( where && ( Z_TYPE_P(where) == IS_STRING )){
         zend_update_property_string(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_WHERE_COND), 
             ZSTR_VAL(strpprintf(0, "%s AND %s", Z_STRVAL_P(previous_where), Z_STRVAL_P(where)))
         );
     } else {
         php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
     }
-    zval_ptr_dtor(where);
     RETURN_ZVAL(getThis(), 1, NULL);
 }/*}}}*/
 
@@ -443,6 +444,7 @@ CSPEED_METHOD(Model, orderBy)/*{{{ proto Model::orderBy()*/
         smart_str order_by_str = {0};
         smart_str_appends(&order_by_str, " ORDER BY ");
         ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(order_by), var_value) {
+            if (Z_TYPE_P(var_value) == IS_OBJECT) convert_to_string(var_value);
             if (Z_TYPE_P(var_value) == IS_STRING) {
                 smart_str_appends(&order_by_str, Z_STRVAL_P(var_value));
                 smart_str_appendc(&order_by_str, ',');
@@ -461,7 +463,6 @@ CSPEED_METHOD(Model, orderBy)/*{{{ proto Model::orderBy()*/
     } else {
         php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
     }
-    zval_ptr_dtor(order_by);
     RETURN_ZVAL(getThis(), 1, NULL);
 }/*}}}*/
 
@@ -484,7 +485,6 @@ CSPEED_METHOD(Model, groupBy)/*{{{ proto Model::groupBy()*/
     } else {
         php_error_docref(NULL, E_ERROR, "Parameter can only be array or string.");
     }
-    zval_ptr_dtor(group_by);
     RETURN_ZVAL(getThis(), 1, NULL);
 }/*}}}*/
 

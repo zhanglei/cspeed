@@ -274,12 +274,13 @@ cspeed_build_equal_string(zval *array, char *begin_str, zval *result)/*{{{ Build
             smart_str_appendc(&where_str, '`');
             smart_str_appends(&where_str, ZSTR_VAL(val_key));
             smart_str_appends(&where_str, "`='");
+            if ( Z_TYPE_P(var_value) == IS_OBJECT ) convert_to_string(var_value);
             if (Z_TYPE_P(var_value) == IS_LONG){
                 smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, "%d", Z_LVAL_P(var_value))));
-            } else if (Z_TYPE_P(var_value) == IS_STRING) {
-                smart_str_appends(&where_str, Z_STRVAL_P(var_value));
             } else if ( Z_TYPE_P(var_value) == IS_DOUBLE ) {
                 smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, "%f", Z_DVAL_P(var_value))));
+            } else if ( Z_TYPE_P(var_value) == IS_STRING ){
+                smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, "%s", Z_STRVAL_P(var_value))));
             }
             smart_str_appends(&where_str, "' AND ");
         }
@@ -299,11 +300,12 @@ cspeed_build_quote_string(zval *array, zval *result)/*{{{ Building the Quote str
     zval *value;
     smart_str field_str = {0};
     ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), value) {
+        smart_str_appendc(&field_str, '`');
+        if ( Z_TYPE_P(value) == IS_OBJECT ) convert_to_string(value);
         if ( (Z_TYPE_P(value) == IS_STRING) && isalpha(*(Z_STRVAL_P(value))) ){
-            smart_str_appendc(&field_str, '`');
             smart_str_appends(&field_str, Z_STRVAL_P(value));
-            smart_str_appends(&field_str, "`,");
         }
+        smart_str_appends(&field_str, "`,");
     } ZEND_HASH_FOREACH_END();
     smart_str_0(&field_str);
     char *temp_select_str = (char *)malloc(sizeof(char) * ZSTR_LEN(field_str.s));
