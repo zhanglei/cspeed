@@ -265,24 +265,42 @@ void cspeed_parse_ini_file(char *file_name, char *node_name, char *node_key, zen
 void 
 cspeed_build_equal_string(zval *array, char *begin_str, zval *result)/*{{{ Building the WHERE|HAVING strings */
 {
-    zend_string *val_key;
     zval *var_value;
+    zend_string *val_key;
     smart_str where_str = {0};
     smart_str_appends(&where_str, begin_str);
     ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(array), val_key, var_value) {
         if (isalpha(*(ZSTR_VAL(val_key)))) {
-            smart_str_appendc(&where_str, '`');
-            smart_str_appends(&where_str, ZSTR_VAL(val_key));
-            smart_str_appends(&where_str, "`='");
-            if ( Z_TYPE_P(var_value) == IS_OBJECT ) convert_to_string(var_value);
-            if (Z_TYPE_P(var_value) == IS_LONG){
-                smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, "%d", Z_LVAL_P(var_value))));
-            } else if ( Z_TYPE_P(var_value) == IS_DOUBLE ) {
-                smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, "%f", Z_DVAL_P(var_value))));
-            } else if ( Z_TYPE_P(var_value) == IS_STRING ){
-                smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, "%s", Z_STRVAL_P(var_value))));
+            // if array
+            if ( Z_TYPE_P(var_value) == IS_ARRAY ) {
+                zend_string *relation_str; zval *relation_value;
+                ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(var_value), relation_str, relation_value) {
+                    if ( Z_TYPE_P(relation_value) == IS_OBJECT ) convert_to_string(relation_value);
+                    if ( Z_TYPE_P(relation_value) == IS_STRING ) {
+                        smart_str_appendc(&where_str, '`');
+                        smart_str_appends(&where_str, ZSTR_VAL(val_key));
+                        smart_str_appendc(&where_str, '`');
+                        // Join the relation-character
+                        smart_str_appends(&where_str, ZSTR_VAL(relation_str));
+                        smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, " '%s", Z_STRVAL_P(relation_value))));
+                        smart_str_appends(&where_str, "' AND ");
+                    }
+                } ZEND_HASH_FOREACH_END();
+            } else {
+            // if value
+                smart_str_appendc(&where_str, '`');
+                smart_str_appends(&where_str, ZSTR_VAL(val_key));
+                smart_str_appends(&where_str, "`='");
+                if ( Z_TYPE_P(var_value) == IS_OBJECT ) convert_to_string(var_value);
+                if (Z_TYPE_P(var_value) == IS_LONG){
+                    smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, "%d", Z_LVAL_P(var_value))));
+                } else if ( Z_TYPE_P(var_value) == IS_DOUBLE ) {
+                    smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, "%f", Z_DVAL_P(var_value))));
+                } else if ( Z_TYPE_P(var_value) == IS_STRING ){
+                    smart_str_appends(&where_str, Z_STRVAL_P(var_value));
+                }
+                smart_str_appends(&where_str, "' AND ");
             }
-            smart_str_appends(&where_str, "' AND ");
         }
     } ZEND_HASH_FOREACH_END();
     smart_str_0(&where_str);
