@@ -121,6 +121,19 @@ PHP_RINIT_FUNCTION(cspeed)
     CSPEED_G(core_view_ext) = zend_string_init(CSPEED_STRL(CORE_VIEW_EXT), 0);
     CSPEED_G(core_view_auto_render) = zend_string_init(CSPEED_STRL(CORE_VIEW_AUTO_RENDER), 0);
     CSPEED_G(core_url_pattern) = zend_string_init(CSPEED_STRL(CORE_URL_PATTERN), 0);
+
+    /* Initialise the Router object & Di object */
+    zval di_object, router_object;
+    object_init_ex(&di_object, cspeed_di_ce);
+    initialise_di_object_properties(&di_object);
+
+    object_init_ex(&router_object, cspeed_router_ce);
+    initialise_router_object_properties(&router_object);
+
+    CSPEED_G(di_object) = Z_OBJ(di_object);
+    CSPEED_G(router_object) = Z_OBJ(router_object);
+
+    /* Return the status */
     return SUCCESS;
 }
 /* }}} */
@@ -138,6 +151,13 @@ PHP_RSHUTDOWN_FUNCTION(cspeed)
     zend_string_release(CSPEED_G(core_view_ext));
     zend_string_release(CSPEED_G(core_view_auto_render));
     zend_string_release(CSPEED_G(core_url_pattern));
+
+    /* free the memory */
+    pefree(CSPEED_G(di_object), GC_FLAGS(CSPEED_G(di_object)) & IS_STR_PERSISTENT);
+    pefree(CSPEED_G(router_object), GC_FLAGS(CSPEED_G(router_object)) & IS_STR_PERSISTENT);
+    CSPEED_G(di_object) = NULL;
+    CSPEED_G(router_object) = NULL;
+
     /* Return SUCCESS */
     return SUCCESS;
 }
