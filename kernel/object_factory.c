@@ -68,6 +68,7 @@ CSPEED_METHOD(ObjectFactory, __construct)
     if ( (Z_TYPE(result) == IS_ARRAY) && zend_hash_num_elements(Z_ARRVAL(result)) ) {
         
         zval *val_value;
+        zval *ret_val;
         zend_string *val_name;
 
         /* To autoload the class file with the psr4 */
@@ -104,6 +105,16 @@ out_again:
                         
                         zval class_object;
                         object_init_ex(&class_object, class_ce);
+
+                        /* Check wheather the params is exists or not. */
+                        zval *parameters = zend_hash_find(Z_ARRVAL_P(val_value), strpprintf(0, "params"));
+                        if ( parameters ) {
+                            zend_fcall_info zfi;
+                            zfi->retval = ret_val;
+                            zend_fcall_info_args(&zfi, parameters);
+                            zend_call_function(&zfi, NULL);
+                            zend_fcall_info_args_clear(&zfi, 1);
+                        }
                         
                         /* After create the Object success, invoke the method with the `set` prefix. */
                         zval *properties = zend_hash_find(Z_ARRVAL_P(val_value), strpprintf(0, "properties"));
