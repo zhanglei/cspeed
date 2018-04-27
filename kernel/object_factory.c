@@ -53,9 +53,7 @@ CSPEED_METHOD(ObjectFactory, __construct)
     zval result;
     zend_string *file_path;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &file_path) == FAILURE) {
-        return ;
-    }
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &file_path) == FAILURE) return ;
     
     /* Check the Object_factory file is exists or not. */
     check_file_exists(ZSTR_VAL(file_path));
@@ -68,7 +66,6 @@ CSPEED_METHOD(ObjectFactory, __construct)
     if ( (Z_TYPE(result) == IS_ARRAY) && zend_hash_num_elements(Z_ARRVAL(result)) ) {
         
         zval *val_value;
-        zval *ret_val;
         zend_string *val_name;
 
         /* To autoload the class file with the psr4 */
@@ -108,12 +105,20 @@ out_again:
 
                         /* Check wheather the params is exists or not. */
                         zval *parameters = zend_hash_find(Z_ARRVAL_P(val_value), strpprintf(0, "params"));
-                        if ( parameters ) {
-                            zend_fcall_info zfi;
-                            zfi->retval = ret_val;
-                            zend_fcall_info_args(&zfi, parameters);
-                            zend_call_function(&zfi, NULL);
-                            zend_fcall_info_args_clear(&zfi, 1);
+                        if ( parameters && (Z_TYPE_P(parameters) == IS_ARRAY) && 
+                            zend_hash_num_elements(Z_ARRVAL_P(parameters)) ) {
+                            zval ret_val;
+                            uint32_t params_count = zend_hash_num_elements(Z_ARRVAL_P(parameters));
+                            zval *params = (zval *)malloc(sizeof(zval) * params_count);
+                            uint32_t n = 0;
+                            zval *val_para;
+                            ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(parameters), val_para) {
+                                ZVAL_COPY(&params[n], val_para);
+                                n++;
+                            } ZEND_HASH_FOREACH_END();
+                            call_method_with_object(&class_object, ZEND_CONSTRUCTOR_FUNC_NAME, params_count, params, &ret_val);
+                            zval_ptr_dtor(&ret_val);
+                            free(params);
                         }
                         
                         /* After create the Object success, invoke the method with the `set` prefix. */
