@@ -212,6 +212,9 @@ function getObject($key)
 return [
     'rsa' => [
         'class'      => '\app\models\User',
+        'params'     => [
+        	"hello", "CSpeed", "v2.1.11'
+        ],
         'properties' => [
             'name' => '\app\models\Tools',
             'two'  => '\app\models\Tools'
@@ -242,10 +245,21 @@ return [
 
 ```php
 class 表示：类对象，是一个包含命名空间的类名称
+params 表示构造函数传入的参数
 properties 表示：使用IOC setter方法注入的对象属性，是一个数组，数组的每一项对应于一个 setter 方法。
 values 表示：初始化类对象的属性值
 attrs 表示：哪种属性的类对象可以初始化，可选值：private、protected、private
 ```
+
+**params数组**
+
+```php
+'params'     => [
+	"hello", "CSpeed", "v2.1.11'
+]
+```
+**数组的每一项表示对应于类的构造函数的实际参数**
+
 
 **properties数组**
 
