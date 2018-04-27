@@ -108,17 +108,8 @@ out_again:
                         if ( parameters && (Z_TYPE_P(parameters) == IS_ARRAY) && 
                             zend_hash_num_elements(Z_ARRVAL_P(parameters)) ) {
                             zval ret_val;
-                            uint32_t params_count = zend_hash_num_elements(Z_ARRVAL_P(parameters));
-                            zval *params = (zval *)malloc(sizeof(zval) * params_count);
-                            uint32_t n = 0;
-                            zval *val_para;
-                            ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(parameters), val_para) {
-                                ZVAL_COPY(&params[n], val_para);
-                                n++;
-                            } ZEND_HASH_FOREACH_END();
-                            call_method_with_object(&class_object, ZEND_CONSTRUCTOR_FUNC_NAME, params_count, params, &ret_val);
+                            call_method_with_object_params(&class_object, ZEND_CONSTRUCTOR_FUNC_NAME, parameters, &ret_val);
                             zval_ptr_dtor(&ret_val);
-                            free(params);
                         }
                         
                         /* After create the Object success, invoke the method with the `set` prefix. */

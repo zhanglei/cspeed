@@ -393,6 +393,25 @@ call_method_with_object(zval *object, char *method_name, uint32_t param_counts, 
     }
 }
 
+void
+call_method_with_object_params(zval *object, char *method_name, zval *parameters, zval *ret_val)
+{
+    if ( Z_TYPE_P(parameters) != IS_ARRAY ) {
+        return ;
+    }
+    uint32_t params_count = zend_hash_num_elements(Z_ARRVAL_P(parameters));
+    if ( !params_count ) return ;
+    zval *params = (zval *)malloc(sizeof(zval) * params_count);
+    uint32_t n = 0;
+    zval *val_para;
+    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(parameters), val_para) {
+        ZVAL_COPY(&params[n], val_para);
+        n++;
+    } ZEND_HASH_FOREACH_END();
+    call_method_with_object(object, method_name, params_count, params, ret_val);
+    free(params);
+}
+
 int 
 cspeed_autoload_file(zend_string *class_name_with_namespace, zval *obj, char *alias) /*{{{ Load file */
 {    

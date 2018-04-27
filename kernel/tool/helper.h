@@ -55,6 +55,9 @@ void recursive_call_parent_method_two(zval *obj, char *method_name);
 /* invoke object's method with params */
 void call_method_with_object(zval *object, char *method_name, uint32_t param_counts, zval params[], zval *ret_val);
 
+/* invoke objects's method with the array params */
+void call_method_with_object_params(zval *object, char *method_name, zval *parameters, zval *ret_val);
+
 /* load the kernel_setting */
 void load_kernel_setting(zend_string *, zend_string *, char *);                  
 
