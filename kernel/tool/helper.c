@@ -610,7 +610,7 @@ parameter_filter(zval *filter, zval *parameter)
         } else if ( Z_TYPE_P(filter) == IS_OBJECT) {
             /* Check the object is callable or not. */
             zend_string *error_handler_name = NULL;
-            if ( !zend_is_callable(filter, 0, error_handler_name) ) {
+            if ( !zend_is_callable(filter, 0, &error_handler_name) ) {
                 php_error_docref(NULL, E_ERROR, "The argument must to be a valid callback.");
             }
             zval ret_val;

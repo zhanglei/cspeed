@@ -200,7 +200,7 @@ nest_again:
                                         } else {
                                             if (Z_TYPE(class_object) != IS_UNDEF && Z_OBJ_HANDLER(class_object, has_property)) {
                                                 zval property;
-                                                ZVAL_STR_COPY(&property, ZSTR_VAL(key_name));
+                                                ZVAL_STR_COPY(&property, key_name);
                                                 if (!Z_OBJ_HANDLER(class_object, has_property)(&class_object, &property, 2, NULL)) {
                                                     zval_ptr_dtor(&property);
                                                     continue;

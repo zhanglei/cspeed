@@ -70,6 +70,12 @@ void add_object_property(zval *object, zval *properties);
 /* Add the properties to the object */
 void add_multi_object_property(zval *object, zval *multi_properties, zval *ret_val);
 
+/* Return the substirng of the str */
+char *substr(char *str, int start, int length);
+
+/* Return the given pattern exists in str or not. */
+int stringstr(char *str, char *pattern);
+
 #endif
 
 
