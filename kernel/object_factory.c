@@ -87,7 +87,12 @@ CSPEED_METHOD(ObjectFactory, __construct)
                     zend_class_entry *class_ce;
 out_again:
                     if ( *(Z_STRVAL_P(class_name)) == '\\' ){
-                        class_ce = zend_hash_find_ptr(EG(class_table), zend_string_tolower(strpprintf(0, "%s", Z_STRVAL_P(class_name) + 1)));
+                        class_ce = zend_hash_find_ptr(EG(class_table), 
+                            zend_string_tolower(strpprintf(0, 
+                                "%s", 
+                                Z_STRVAL_P(class_name) + 1)
+                            )
+                        );
                     } else {
                         class_ce = zend_hash_find_ptr(EG(class_table), zend_string_tolower(Z_STR_P(class_name)));
                     }
@@ -131,7 +136,12 @@ out_again:
                                         zend_class_entry *class_ce_two;
 nest_again:
                                         if ( *(Z_STRVAL_P(key_value)) == '\\' ) {
-                                            class_ce_two = zend_hash_find_ptr(EG(class_table), zend_string_tolower(strpprintf(0, "%s", Z_STRVAL_P(key_value) + 1)));
+                                            class_ce_two = zend_hash_find_ptr(EG(class_table), 
+                                                zend_string_tolower(strpprintf(0, 
+                                                    "%s", 
+                                                    Z_STRVAL_P(key_value) + 1)
+                                                )
+                                            );
                                         } else {
                                             class_ce_two = zend_hash_find_ptr(EG(class_table), zend_string_tolower(Z_STR_P(key_value)));
                                         }
@@ -229,7 +239,10 @@ nest_again:
                         Z_TRY_ADDREF(class_object);
                         add_assoc_zval(stores, ZSTR_VAL(val_name), &class_object);
                     } else {
-                        php_error_docref(NULL, E_ERROR, "Class `%s` not found.", Z_STRVAL_P(class_name));
+                        php_error_docref(NULL, E_ERROR, 
+                            "Class `%s` not found.", 
+                            Z_STRVAL_P(class_name)
+                        );
                     }
                 }
             }

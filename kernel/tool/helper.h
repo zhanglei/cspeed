@@ -34,8 +34,7 @@ char *title_upper_string(char *src);
 char *title_lower_string(char *src);                                             
 
 /* Parse the ini file with the given node and key */
-void cspeed_parse_ini_file(char *file_name, char *node_name, 
-                           char *node_key, zend_bool, zval *retval);             
+void cspeed_parse_ini_file(char *file_name, char *node_name, char *node_key, zend_bool, zval *retval);             
 
 /* Building the string */
 void cspeed_build_equal_string(zval *array, char *begin_str, zval *result);      
