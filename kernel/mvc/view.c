@@ -173,8 +173,13 @@ CSPEED_METHOD(View, partial)         /*{{{ proto View::partial($file, $variables
 
     zval *suffix    = zend_read_property(cspeed_view_ce, getThis(), CSPEED_STRL(CSPEED_VIEW_SUFFIX), 1, NULL);
     
-    zend_string *real_path_file = strpprintf(0, "%s/%s/views/%s.%s", path, ZSTR_VAL(CSPEED_G(core_application)), 
-                    ZSTR_VAL(temp_file), ZSTR_VAL(CSPEED_G(core_view_ext)));
+    zend_string *real_path_file = strpprintf(0, 
+        "%s/%s/views/%s.%s", 
+        path, 
+        ZSTR_VAL(CSPEED_G(core_application)), 
+        ZSTR_VAL(temp_file), 
+        ZSTR_VAL(CSPEED_G(core_view_ext))
+    );
     
     zval *view_variables = zend_read_property(cspeed_view_ce, getThis(), CSPEED_STRL(CSPEED_VIEW_VARIABLES), 1, NULL);
     if (array_variables && ( Z_TYPE_P(view_variables) == IS_ARRAY ) ) {
@@ -185,9 +190,8 @@ CSPEED_METHOD(View, partial)         /*{{{ proto View::partial($file, $variables
         } ZEND_HASH_FOREACH_END();
     }
     check_file_exists(ZSTR_VAL(real_path_file));
-    if( cspeed_require_file(ZSTR_VAL(real_path_file), view_variables, getThis(), NULL) == FALSE) {
-        return ;
-    }
+    
+    cspeed_require_file(ZSTR_VAL(real_path_file), view_variables, getThis(), NULL);
 }/*}}}*/
 
 CSPEED_METHOD(View, getRender)      /*{{{ proto View::getRender($file, $variables)*/
