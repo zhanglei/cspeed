@@ -52,7 +52,12 @@ void initialise_router_object_properties(zval *router_object)   /*{{{ Initialise
 {
     zval all_routines;
     array_init(&all_routines);
-    zend_update_property(cspeed_router_ce, router_object, CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), &all_routines);
+    zend_update_property(
+        cspeed_router_ce, 
+        router_object, 
+        CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), 
+        &all_routines
+    );
 }/*}}}*/
 
 CSPEED_METHOD(Router, __construct)/*{{{ proto Router::__construct()*/
@@ -64,28 +69,77 @@ void preg_faker_routine_rule(zend_string *url, zval *retval)  /*{{{ Change the U
 {
     zval faker_pattern, real_pattern;
     array_init(&faker_pattern);
-    add_next_index_string(&faker_pattern, "#:action:#");
-    add_next_index_string(&faker_pattern, "#:any:#");
-    add_next_index_string(&faker_pattern, "#:controller:#");
-    add_next_index_string(&faker_pattern, "#:id:#");
-    add_next_index_string(&faker_pattern, "#:module:#");
+    add_next_index_string(
+        &faker_pattern, 
+        "#:action:#"
+    );
+    add_next_index_string(
+        &faker_pattern, 
+        "#:any:#"
+    );
+    add_next_index_string(
+        &faker_pattern, 
+        "#:controller:#"
+    );
+    add_next_index_string(
+        &faker_pattern, 
+        "#:id:#"
+    );
+    add_next_index_string(
+        &faker_pattern, 
+        "#:module:#"
+    );
 
     array_init(&real_pattern);
-    add_next_index_string(&real_pattern, "([^0-9-][a-zA-Z0-9-]*)");
-    add_next_index_string(&real_pattern, "([^/]+)");
-    add_next_index_string(&real_pattern, "([^0-9-][a-zA-Z0-9-]*)");
-    add_next_index_string(&real_pattern, "([0-9]+)");
-    add_next_index_string(&real_pattern, "([^0-9-][a-zA-Z0-9-]*)");
+    add_next_index_string(
+        &real_pattern, 
+        "([^0-9-][a-zA-Z0-9-]*)"
+    );
+    add_next_index_string(
+        &real_pattern, 
+        "([^/]+)"
+    );
+    add_next_index_string(
+        &real_pattern, 
+        "([^0-9-][a-zA-Z0-9-]*)"
+    );
+    add_next_index_string(
+        &real_pattern, 
+        "([0-9]+)"
+    );
+    add_next_index_string(
+        &real_pattern, 
+        "([^0-9-][a-zA-Z0-9-]*)"
+    );
 
     /* preg_replace */
     zval subject;
-    ZVAL_STRING(&subject, ZSTR_VAL(strpprintf(0, "#%s#", ZSTR_VAL(url))));
+    ZVAL_STRING(
+        &subject, 
+        ZSTR_VAL(
+            strpprintf(
+                0, 
+                "#%s#", 
+                ZSTR_VAL(url)
+            )
+        )
+    );
 
     zval preg_function_name;
-    ZVAL_STRING(&preg_function_name, "preg_replace");
+    ZVAL_STRING(
+        &preg_function_name, 
+        "preg_replace"
+    );
     zval params[] = { faker_pattern, real_pattern, subject };
     uint32_t param_count = 3;
-    call_user_function(CG(function_table), NULL, &preg_function_name, retval, param_count, params);
+    call_user_function(
+        CG(function_table), 
+        NULL, 
+        &preg_function_name, 
+        retval, 
+        param_count, 
+        params
+    );
 }/*}}}*/
 
 CSPEED_METHOD(Router, add)/*{{{ proto Router::add($url, $matcher)*/
@@ -97,8 +151,18 @@ CSPEED_METHOD(Router, add)/*{{{ proto Router::add($url, $matcher)*/
     if (CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(url))){
         zval real_subject;
         preg_faker_routine_rule(url, &real_subject);
-        zval *all_routines = zend_read_property(cspeed_router_ce, getThis(), CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), 1, NULL);
-        add_assoc_str(all_routines, Z_STRVAL(real_subject), real_url);
+        zval *all_routines = zend_read_property(
+            cspeed_router_ce, 
+            getThis(), 
+            CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), 
+            1, 
+            NULL
+        );
+        add_assoc_str(
+            all_routines, 
+            Z_STRVAL(real_subject), 
+            real_url
+        );
         RETURN_TRUE
     }
     RETURN_FALSE
@@ -114,30 +178,63 @@ CSPEED_METHOD(Router, addFromIni)   /*{{{ proto Router::addFromIni($ini_file)*/
         zval routers_from_ini;
         char path[MAXPATHLEN];
         cspeed_get_cwd(path);
-        zend_string *real_ini_file_path = strpprintf(0, "%s/%s", path, ZSTR_VAL(ini_file_path));
+        zend_string *real_ini_file_path = strpprintf(
+            0, 
+            "%s/%s", 
+            path, 
+            ZSTR_VAL(ini_file_path)
+        );
         
         check_file_exists( ZSTR_VAL(real_ini_file_path) );
         /* Do the parsing */
-        cspeed_parse_ini_file( ZSTR_VAL(real_ini_file_path) , NULL, NULL, 1, &routers_from_ini);
+        cspeed_parse_ini_file( 
+            ZSTR_VAL(real_ini_file_path) , 
+            NULL, 
+            NULL, 
+            1, 
+            &routers_from_ini
+        );
         /* *** */
         if ( ZVAL_IS_NULL(&routers_from_ini) && (Z_TYPE(routers_from_ini) != IS_ARRAY ) ){
-            php_error_docref(NULL, E_ERROR, "File : `%s` not valid.",  ZSTR_VAL(real_ini_file_path));
+            php_error_docref(
+                NULL, 
+                E_ERROR, 
+                "File : `%s` not valid.",  
+                ZSTR_VAL(real_ini_file_path)
+            );
             return ;
         }
         /* *** */
-        zval *all_routines = zend_read_property(cspeed_router_ce, getThis(), CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), 1, NULL);
+        zval *all_routines = zend_read_property(
+            cspeed_router_ce, 
+            getThis(), 
+            CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), 
+            1, 
+            NULL
+        );
         
         zend_string *pcre_url;zval *value;
         ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL(routers_from_ini), pcre_url, value){
             if ( CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(pcre_url)) && (Z_TYPE_P(value) == IS_STRING) ){
                 zval temp_real_url;
-                preg_faker_routine_rule(pcre_url, &temp_real_url);
+                preg_faker_routine_rule(
+                    pcre_url, 
+                    &temp_real_url
+                );
                 Z_TRY_ADDREF_P(value);
-                add_assoc_str(all_routines, Z_STRVAL(temp_real_url), Z_STR_P(value) );
+                add_assoc_str(
+                    all_routines, 
+                    Z_STRVAL(temp_real_url), 
+                    Z_STR_P(value)
+                );
             }
         } ZEND_HASH_FOREACH_END();
     } else {
-        php_error_docref(NULL, E_ERROR, "Parameter must be a valid file string path.");
+        php_error_docref(
+            NULL, 
+            E_ERROR, 
+            "Parameter must be a valid file string path."
+        );
         return ;
     }
 }/*}}}*/
@@ -149,14 +246,28 @@ CSPEED_METHOD(Router, addFromArray)/*{{{ proto Router::addFromArray()*/
         return ;
     }
     if (zend_hash_num_elements(Z_ARRVAL_P(config_array))) {
-        zval *all_routines = zend_read_property(cspeed_router_ce, getThis(), CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), 1, NULL);
+        zval *all_routines = zend_read_property(
+            cspeed_router_ce, 
+            getThis(), 
+            CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), 
+            1, 
+            NULL
+        );
         zend_string *pcre_url; zval *pcre_value;
         ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(config_array), pcre_url, pcre_value){
-            if (CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(pcre_url)) && (Z_TYPE_P(pcre_value) == IS_STRING) ) {
+            if (CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(pcre_url)) 
+                && (Z_TYPE_P(pcre_value) == IS_STRING) ) {
                 zval temp_real_url;
-                preg_faker_routine_rule(pcre_url, &temp_real_url);
+                preg_faker_routine_rule(
+                    pcre_url, 
+                    &temp_real_url
+                );
                 Z_TRY_ADDREF_P(pcre_value);
-                add_assoc_str(all_routines, Z_STRVAL(temp_real_url), Z_STR_P(pcre_value));
+                add_assoc_str(
+                    all_routines, 
+                    Z_STRVAL(temp_real_url), 
+                    Z_STR_P(pcre_value)
+                );
             }
         } ZEND_HASH_FOREACH_END();
         /*zend_hash_merge(Z_ARRVAL_P(all_routines), Z_ARRVAL_P(config_array), (copy_ctor_func_t) zval_add_ref, 0);*/
@@ -179,5 +290,15 @@ CSPEED_INIT(router) /*{{{ proto void router_init() */
     cspeed_router_ce = zend_register_internal_class(&ce);
 
     /* ALL static properties */
-    zend_declare_property_null(cspeed_router_ce, CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), ZEND_ACC_PUBLIC);
+    zend_declare_property_null(
+        cspeed_router_ce, 
+        CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), 
+        ZEND_ACC_PUBLIC
+    );
 }/*}}}*/
+
+
+
+
+
+

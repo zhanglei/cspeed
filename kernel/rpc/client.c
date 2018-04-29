@@ -59,9 +59,18 @@ CSPEED_METHOD(Client, __construct)/*{{{ proto Client::__construct($url)*/
         return ;
     }
     if (CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(url))) {
-        zend_update_property_string(cspeed_rpc_client_ce, getThis(), CSPEED_STRL(CSPEED_CLIENT_URL), ZSTR_VAL(url));
+        zend_update_property_string(
+            cspeed_rpc_client_ce, 
+            getThis(), 
+            CSPEED_STRL(CSPEED_CLIENT_URL), 
+            ZSTR_VAL(url)
+        );
     } else {
-        php_error_docref(NULL, E_ERROR, "Parameter must be a valid URL.");
+        php_error_docref(
+            NULL, 
+            E_ERROR, 
+            "Parameter must be a valid URL."
+        );
     }
 }/*}}}*/
 
@@ -78,7 +87,13 @@ CSPEED_METHOD(Client, __call)/*{{{ proto Client::call($name, $params)*/
     /* If init the cURL right. do the post */
     if( curl ) {
         /* Catching the URL setting in the construct method */
-        zval *url = zend_read_property(cspeed_rpc_client_ce, getThis(), CSPEED_STRL(CSPEED_CLIENT_URL), 1, NULL);
+        zval *url = zend_read_property(
+            cspeed_rpc_client_ce, 
+            getThis(), 
+            CSPEED_STRL(CSPEED_CLIENT_URL), 
+            1, 
+            NULL
+        );
         curl_easy_setopt(curl, CURLOPT_URL, Z_STRVAL_P(url));
 
         /* The data send to the Server */
@@ -87,7 +102,13 @@ CSPEED_METHOD(Client, __call)/*{{{ proto Client::call($name, $params)*/
         add_assoc_string(&post_data, "jsonrpc", "2.0");
 
         /* RPC-id */
-        zval *id = zend_read_property(cspeed_rpc_client_ce, getThis(), CSPEED_STRL(CSPEED_CLIENT_POST_ID), 1, NULL);
+        zval *id = zend_read_property(
+            cspeed_rpc_client_ce, 
+            getThis(), 
+            CSPEED_STRL(CSPEED_CLIENT_POST_ID), 
+            1, 
+            NULL
+        );
         add_assoc_zval(&post_data, "id", id);
 
         /* RPC-method */
@@ -104,7 +125,10 @@ CSPEED_METHOD(Client, __call)/*{{{ proto Client::call($name, $params)*/
         smart_str post_str = {0};
         php_json_encode(&post_str, &post_data, 0);
         smart_str_0(&post_str);
-        struct curl_slist *plist = curl_slist_append(NULL, "Content-Type:application/json;charset=UTF-8");  
+        struct curl_slist *plist = curl_slist_append(
+            NULL, 
+            "Content-Type:application/json;charset=UTF-8"
+        );  
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER,      plist);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS,      ZSTR_VAL(post_str.s));
         curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE,   ZSTR_LEN(post_str.s));
@@ -117,10 +141,20 @@ CSPEED_METHOD(Client, __call)/*{{{ proto Client::call($name, $params)*/
         /* Check for errors */ 
         if(res != CURLE_OK) {
             curl_easy_cleanup(curl);
-            php_error_docref(NULL, E_ERROR, "Calling the curl_easy_perform() failed: %s.", curl_easy_strerror(res));
+            php_error_docref(
+                NULL, 
+                E_ERROR, 
+                "Calling the curl_easy_perform() failed: %s.", 
+                curl_easy_strerror(res)
+            );
         }
         /* After each operation increment the id by 1 */
-        zend_update_property_long(cspeed_rpc_client_ce, getThis(), CSPEED_STRL(CSPEED_CLIENT_POST_ID), Z_LVAL_P(id) + 1);
+        zend_update_property_long(
+            cspeed_rpc_client_ce, 
+            getThis(), 
+            CSPEED_STRL(CSPEED_CLIENT_POST_ID), 
+            Z_LVAL_P(id) + 1
+        );
     }
     /* always cleanup */ 
     curl_easy_cleanup(curl);
@@ -146,8 +180,18 @@ CSPEED_INIT(client)/*{{{ proto void client_init()*/
     cspeed_rpc_client_ce = zend_register_internal_class(&ce);
 
     /* The URL which to send the RPC request */
-    zend_declare_property_string(cspeed_rpc_client_ce, CSPEED_STRL(CSPEED_CLIENT_URL), "", ZEND_ACC_PRIVATE);
-    zend_declare_property_long(cspeed_rpc_client_ce, CSPEED_STRL(CSPEED_CLIENT_POST_ID), 1, ZEND_ACC_PRIVATE);
+    zend_declare_property_string(
+        cspeed_rpc_client_ce, 
+        CSPEED_STRL(CSPEED_CLIENT_URL), 
+        "", 
+        ZEND_ACC_PRIVATE
+    );
+    zend_declare_property_long(
+        cspeed_rpc_client_ce, 
+        CSPEED_STRL(CSPEED_CLIENT_POST_ID), 
+        1, 
+        ZEND_ACC_PRIVATE
+    );
 }/*}}}*/
 
 

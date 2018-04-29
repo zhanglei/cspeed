@@ -38,8 +38,8 @@
 
 void cspeed_pdo_construct(zval *pdo_object, char *dsn, char *username, char *password, zval *options) /*{{{*/
 {
-    object_init_ex(pdo_object, php_pdo_get_dbh_ce());
     zval retval;
+    object_init_ex(pdo_object, php_pdo_get_dbh_ce());
     zval pdo_dsn, user_name, pass_word;
     ZVAL_STRING(&pdo_dsn, dsn);
     ZVAL_STRING(&user_name, username);

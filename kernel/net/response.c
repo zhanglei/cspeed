@@ -68,7 +68,12 @@ CSPEED_METHOD(Response, __construct)/*{{{ proto Response::__construct() Default 
 {
     zval header_variables;
     array_init(&header_variables);
-    zend_update_property(cspeed_response_ce, getThis(), CSPEED_STRL(CSPEED_RESPONSE_HEADER_VARIABLES), &header_variables);
+    zend_update_property(
+        cspeed_response_ce, 
+        getThis(), 
+        CSPEED_STRL(CSPEED_RESPONSE_HEADER_VARIABLES), 
+        &header_variables
+    );
 }
 /*}}}*/
 
@@ -78,8 +83,18 @@ CSPEED_METHOD(Response, setHeader)/*{{{ proto Response::setheader($key, $value)*
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &header_key, &header_value) == FAILURE){
         return ;
     }
-    zval *response_headers = zend_read_property(cspeed_response_ce, getThis(), CSPEED_STRL(CSPEED_RESPONSE_HEADER_VARIABLES), 1, NULL);
-    add_assoc_string(response_headers, ZSTR_VAL(header_key), ZSTR_VAL(header_value));
+    zval *response_headers = zend_read_property(
+        cspeed_response_ce, 
+        getThis(), 
+        CSPEED_STRL(CSPEED_RESPONSE_HEADER_VARIABLES), 
+        1, 
+        NULL
+    );
+    add_assoc_string(
+        response_headers, 
+        ZSTR_VAL(header_key), 
+        ZSTR_VAL(header_value)
+    );
 }
 /*}}}*/
 
@@ -89,21 +104,45 @@ CSPEED_METHOD(Response, unsetHeader)/*{{{ proto Response::unsetHeader($key)*/
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &header_key) == FAILURE){
         return ;
     }
-    zval *response_headers = zend_read_property(cspeed_response_ce, getThis(), CSPEED_STRL(CSPEED_RESPONSE_HEADER_VARIABLES), 1, NULL);
+    zval *response_headers = zend_read_property(
+        cspeed_response_ce, 
+        getThis(), 
+        CSPEED_STRL(CSPEED_RESPONSE_HEADER_VARIABLES), 
+        1, 
+        NULL
+    );
     zend_hash_del(Z_ARRVAL_P(response_headers), header_key);
 }
 /*}}}*/
 
 CSPEED_METHOD(Response, send) /*{{{ To send the response data plus the http header to request client */
 {
-    zval *response_data = zend_read_property(cspeed_response_ce, getThis(), CSPEED_STRL(CSPEED_RESPONSE_DATA), 1, NULL);
-    zval *response_http_headers = zend_read_property(cspeed_response_ce, getThis(), CSPEED_STRL(CSPEED_RESPONSE_HEADER_VARIABLES), 1, NULL);
+    zval *response_data = zend_read_property(
+        cspeed_response_ce, 
+        getThis(), 
+        CSPEED_STRL(CSPEED_RESPONSE_DATA), 
+        1, 
+        NULL
+    );
+    zval *response_http_headers = zend_read_property(
+        cspeed_response_ce, 
+        getThis(), 
+        CSPEED_STRL(CSPEED_RESPONSE_HEADER_VARIABLES),
+        1, 
+        NULL
+    );
     if (response_http_headers && ( Z_TYPE_P(response_http_headers) == IS_ARRAY )) {
         zend_string *var_name;
         zval*var_value;
         sapi_header_line ctr = {0};
         ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(response_http_headers), var_name, var_value){
-            ctr.line_len = spprintf(&(ctr.line), 0, "%s:%s", ZSTR_VAL(var_name), Z_STRVAL_P(var_value));
+            ctr.line_len = spprintf(
+                &(ctr.line), 
+                0, 
+                "%s:%s", 
+                ZSTR_VAL(var_name), 
+                Z_STRVAL_P(var_value)
+            );
             ctr.response_code = 200;                                           
             sapi_header_op(SAPI_HEADER_REPLACE, &ctr);                           
             efree(ctr.line);
@@ -130,11 +169,26 @@ CSPEED_METHOD(Response, setJsonContent)/*{{{ Set the response with the given for
     zval params[] = { *json_array };
     call_user_function(EG(function_table), NULL, &function_name, &retval_ptr, param_count, params);
 #endif
-    zend_update_property_string(cspeed_response_ce, getThis(), CSPEED_STRL(CSPEED_RESPONSE_DATA), ZSTR_VAL(json_str.s));
+    zend_update_property_string(
+        cspeed_response_ce, 
+        getThis(), 
+        CSPEED_STRL(CSPEED_RESPONSE_DATA), 
+        ZSTR_VAL(json_str.s)
+    );
     smart_str_free(&json_str);
 
-    zval *response_headers = zend_read_property(cspeed_response_ce, getThis(), CSPEED_STRL(CSPEED_RESPONSE_HEADER_VARIABLES), 1, NULL);
-    add_assoc_string(response_headers, "Content-Type", "application/json;charset=UTF-8");
+    zval *response_headers = zend_read_property(
+        cspeed_response_ce, 
+        getThis(), 
+        CSPEED_STRL(CSPEED_RESPONSE_HEADER_VARIABLES), 
+        1, 
+        NULL
+    );
+    add_assoc_string(
+        response_headers, 
+        "Content-Type", 
+        "application/json;charset=UTF-8"
+    );
 }
 /*}}}*/
 
@@ -145,7 +199,12 @@ CSPEED_METHOD(Response, setRawContent)/*{{{ Set the response with the given form
         return ;
     }
     if (json_array) {
-        zend_update_property(cspeed_response_ce, getThis(), CSPEED_STRL(CSPEED_RESPONSE_DATA), json_array);
+        zend_update_property(
+            cspeed_response_ce, 
+            getThis(), 
+            CSPEED_STRL(CSPEED_RESPONSE_DATA), 
+            json_array
+        );
     }
 }
 /*}}}*/
@@ -158,7 +217,13 @@ CSPEED_METHOD(Response, redirect)/*{{{ Set the response with the given format  *
     }
     if (CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(url))) {
         sapi_header_line ctr = {0};
-        ctr.line_len    = spprintf(&(ctr.line), 0, "%s %s", "Location:", ZSTR_VAL(url));
+        ctr.line_len    = spprintf(
+            &(ctr.line), 
+            0, 
+            "%s %s", 
+            "Location:", 
+            ZSTR_VAL(url)
+        );
         ctr.response_code   = 0;
         if (sapi_header_op(SAPI_HEADER_REPLACE, &ctr) == SUCCESS) {
             efree(ctr.line);            
@@ -191,8 +256,17 @@ CSPEED_INIT(response)
     INIT_NS_CLASS_ENTRY(ce, "Cs\\net", "Response", cspeed_response_functions);
     cspeed_response_ce = zend_register_internal_class(&ce);
 
-    zend_declare_property_null(cspeed_response_ce, CSPEED_STRL(CSPEED_RESPONSE_HEADER_VARIABLES), ZEND_ACC_PRIVATE);
-    zend_declare_property_string(cspeed_response_ce, CSPEED_STRL(CSPEED_RESPONSE_DATA), "", ZEND_ACC_PRIVATE);
+    zend_declare_property_null(
+        cspeed_response_ce, 
+        CSPEED_STRL(CSPEED_RESPONSE_HEADER_VARIABLES), 
+        ZEND_ACC_PRIVATE
+    );
+    zend_declare_property_string(
+        cspeed_response_ce, 
+        CSPEED_STRL(CSPEED_RESPONSE_DATA), 
+        "", 
+        ZEND_ACC_PRIVATE
+    );
 }/*}}}*/
 
 

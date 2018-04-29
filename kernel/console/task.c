@@ -46,7 +46,13 @@ ZEND_END_ARG_INFO()
 CSPEED_METHOD(Task, __construct)/*{{{ Task::construct()*/
 {
     zend_string *ini_config_file = NULL, *ini_config_node_name = NULL;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|SS", &ini_config_file, &ini_config_node_name) == FAILURE) {
+    if (zend_parse_parameters(
+            ZEND_NUM_ARGS() TSRMLS_CC, 
+            "|SS", 
+            &ini_config_file, 
+            &ini_config_node_name
+        ) == FAILURE)
+    {
         return ;
     }
     
@@ -54,25 +60,65 @@ CSPEED_METHOD(Task, __construct)/*{{{ Task::construct()*/
     cspeed_get_cwd(path);
 
     /* Load the kernel default setting from the ini config file */
-    load_kernel_setting(ini_config_file, ini_config_node_name, path);
+    load_kernel_setting(
+        ini_config_file, 
+        ini_config_node_name, 
+        path
+    );
 
     /* To define the autoload class */
     /* In the constructor initialise the aliases with the default alias named `app` */
-    zval *default_aliases = zend_read_property(cspeed_task_ce, getThis(), CSPEED_STRL(CSPEED_TASK_AUTOLOAD_ALIASES), 1, NULL);
+    zval *default_aliases = zend_read_property(
+        cspeed_task_ce, 
+        getThis(), 
+        CSPEED_STRL(CSPEED_TASK_AUTOLOAD_ALIASES), 
+        1, 
+        NULL
+    );
     zval all_aliases;
     array_init(&all_aliases);
-    add_assoc_str(&all_aliases, "app", strpprintf(0, "%s/%s", path, ZSTR_VAL(CSPEED_G(core_application))));
-    zend_update_property(cspeed_task_ce, getThis(), CSPEED_STRL(CSPEED_TASK_AUTOLOAD_ALIASES), &all_aliases);
+    add_assoc_str(
+        &all_aliases, 
+        "app", 
+        strpprintf(
+            0, 
+            "%s/%s", 
+            path, 
+            ZSTR_VAL(CSPEED_G(core_application))
+        )
+    );
+    zend_update_property(
+        cspeed_task_ce, 
+        getThis(), 
+        CSPEED_STRL(CSPEED_TASK_AUTOLOAD_ALIASES), 
+        &all_aliases
+    );
 
     /* -- Begin the loader setting Setting the default loader */
     zval function_name, retval, callback;
-    ZVAL_STRING(&function_name, "spl_autoload_register");
+    ZVAL_STRING(
+        &function_name, 
+        "spl_autoload_register"
+    );
     array_init(&callback);
-    add_next_index_zval(&callback, getThis());
-    add_next_index_string(&callback, "autoload");
+    add_next_index_zval(
+        &callback, 
+        getThis()
+    );
+    add_next_index_string(
+        &callback, 
+        "autoload"
+    );
     uint32_t param_count = 1;
     zval params[] = { callback };
-    call_user_function(CG(function_table), NULL, &function_name, &retval, param_count, params);
+    call_user_function(
+        CG(function_table), 
+        NULL, 
+        &function_name, 
+        &retval, 
+        param_count, 
+        params
+    );
     zval_ptr_dtor(&retval);
     /* --- end for the autoloader ---*/
 

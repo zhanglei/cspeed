@@ -55,18 +55,48 @@ cspeed_deal_reqeust(zend_string *url, zend_fcall_info *zfi, zend_fcall_info_cach
         /* The nested thing to get the preg mathces */
         zval nested_pattern, nested_pattern_string;
         array_init(&nested_pattern);
-        add_next_index_string(&nested_pattern, "#:action:#");
-        add_next_index_string(&nested_pattern, "#:any:#");
-        add_next_index_string(&nested_pattern, "#:controller:#");
-        add_next_index_string(&nested_pattern, "#:id:#");
-        add_next_index_string(&nested_pattern, "#:module:#");
+        add_next_index_string(
+            &nested_pattern, 
+            "#:action:#"
+        );
+        add_next_index_string(
+            &nested_pattern, 
+            "#:any:#"
+        );
+        add_next_index_string(
+            &nested_pattern, 
+            "#:controller:#"
+        );
+        add_next_index_string(
+            &nested_pattern, 
+            "#:id:#"
+        );
+        add_next_index_string(
+            &nested_pattern, 
+            "#:module:#"
+        );
 
         array_init(&nested_pattern_string);
-        add_next_index_string(&nested_pattern_string, "([^0-9-][a-zA-Z0-9-]*)");
-        add_next_index_string(&nested_pattern_string, "([^/]+)");
-        add_next_index_string(&nested_pattern_string, "([^0-9-][a-zA-Z0-9-]*)");
-        add_next_index_string(&nested_pattern_string, "([0-9]+)");
-        add_next_index_string(&nested_pattern_string, "([^0-9-][a-zA-Z0-9-]*)");
+        add_next_index_string(
+            &nested_pattern_string, 
+            "([^0-9-][a-zA-Z0-9-]*)"
+        );
+        add_next_index_string(
+            &nested_pattern_string, 
+            "([^/]+)"
+        );
+        add_next_index_string(
+            &nested_pattern_string, 
+            "([^0-9-][a-zA-Z0-9-]*)"
+        );
+        add_next_index_string(
+            &nested_pattern_string, 
+            "([0-9]+)"
+        );
+        add_next_index_string(
+            &nested_pattern_string, 
+            "([^0-9-][a-zA-Z0-9-]*)"
+        );
 
         zval url_pattern;
         ZVAL_STRING(&url_pattern, ZSTR_VAL(pattern));
@@ -75,13 +105,30 @@ cspeed_deal_reqeust(zend_string *url, zend_fcall_info *zfi, zend_fcall_info_cach
         zval preg_function_name;
         ZVAL_STRING(&preg_function_name, "preg_replace");
         zval preg_params[] = { nested_pattern, nested_pattern_string, url_pattern };
-        call_user_function(CG(function_table), NULL, &preg_function_name, &preg_replace_result, 3, preg_params);
+        call_user_function(
+            CG(function_table), 
+            NULL, 
+            &preg_function_name, 
+            &preg_replace_result, 
+            3, 
+            preg_params
+        );
 
         pcre_cache_entry *pce_regexp;
         if ((pce_regexp = pcre_get_compiled_regex_cache(Z_STR(preg_replace_result))) != NULL) {
             zval matches, subparts;
             ZVAL_NULL(&subparts);
-            php_pcre_match_impl(pce_regexp, CSPEED_STRL(path_info), &matches, &subparts, 0, 0, 0, 0);
+            
+            php_pcre_match_impl(
+                pce_regexp, 
+                CSPEED_STRL(path_info), 
+                &matches, 
+                &subparts, 
+                0, 
+                0, 
+                0, 
+                0
+            );
 
             if (!zend_hash_num_elements(Z_ARRVAL(subparts))) {
                 zval_ptr_dtor(&subparts);
@@ -118,11 +165,25 @@ int handle_request(INTERNAL_FUNCTION_PARAMETERS)/*{{{ Handle the user input from
 void handle_method_request(zval *object_ptr, char *method_name, INTERNAL_FUNCTION_PARAMETERS)/*{{{ Handle the request */
 {
     int continue_or_false = -1;
-    trigger_events(object_ptr, strpprintf(0, "%s", CSPEED_APP_EVENT_BEORE_REQUEST));
+    trigger_events(
+        object_ptr, 
+        strpprintf(
+            0, 
+            "%s", 
+            CSPEED_APP_EVENT_BEORE_REQUEST
+        )
+    );
     if (cspeed_request_is_method(method_name)) {
         continue_or_false = handle_request(INTERNAL_FUNCTION_PARAM_PASSTHRU);
     }
-    trigger_events(object_ptr, strpprintf(0, "%s", CSPEED_APP_EVENT_AFTER_REQUEST));
+    trigger_events(
+        object_ptr, 
+        strpprintf(
+            0, 
+            "%s", 
+            CSPEED_APP_EVENT_AFTER_REQUEST
+        )
+    );
     if ( continue_or_false >= 0 ) {
         /* Fix: if meet the suited regular url, the next will abandoned */
         php_request_shutdown(NULL);
@@ -194,11 +255,31 @@ void
 initialise_app_object(zval *app_object, char *path)
 {
     /* In the constructor initialise the aliases with the default alias named `app` */
-    zval *default_aliases = zend_read_property(cspeed_app_ce, app_object, CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), 1, NULL);
+    zval *default_aliases = zend_read_property(
+        cspeed_app_ce, 
+        app_object, 
+        CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), 
+        1, 
+        NULL
+    );
     zval all_aliases;
     array_init(&all_aliases);
-    add_assoc_str(&all_aliases, "app", strpprintf(0, "%s/%s", path, ZSTR_VAL(CSPEED_G(core_application))));
-    zend_update_property(cspeed_app_ce, app_object, CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), &all_aliases);
+    add_assoc_str(
+        &all_aliases, 
+        "app", 
+        strpprintf(
+            0, 
+            "%s/%s", 
+            path, 
+            ZSTR_VAL(CSPEED_G(core_application))
+        )
+    );
+    zend_update_property(
+        cspeed_app_ce, 
+        app_object, 
+        CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), 
+        &all_aliases
+    );
 
     /* Setting the default loader */
     zval function_name, retval, callback;
@@ -208,21 +289,41 @@ initialise_app_object(zval *app_object, char *path)
     add_next_index_string(&callback, "autoload");
     uint32_t param_count = 1;
     zval params[] = { callback };
-    call_user_function(CG(function_table), NULL, &function_name, &retval, param_count, params);
+    call_user_function(
+        CG(function_table), 
+        NULL, 
+        &function_name, 
+        &retval, 
+        param_count, 
+        params
+    );
     zval_ptr_dtor(&retval);
 }
 
 /* CApp class's methods */
 CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
 {
-    zval *is_new_app = zend_read_static_property(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_INSTANCE), 1);
+    zval *is_new_app = zend_read_static_property(
+        cspeed_app_ce, 
+        CSPEED_STRL(CSPEED_APP_INSTANCE), 
+        1
+    );
     if (!ZVAL_IS_NULL(is_new_app)) {
-        php_error_docref(NULL, E_ERROR, "An application is running.");
+        php_error_docref(
+            NULL, 
+            E_ERROR, 
+            "An application is running."
+        );
         return ;
     }
     /* Do the Prepare job */
     zend_string *ini_config_file = NULL, *ini_config_node_name = NULL;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|SS", &ini_config_file, &ini_config_node_name) == FAILURE) {
+    if (zend_parse_parameters(
+        ZEND_NUM_ARGS() TSRMLS_CC, 
+        "|SS", 
+        &ini_config_file, 
+        &ini_config_node_name
+    ) == FAILURE) {
         return ;
     }
     char path[MAXPATHLEN];
@@ -232,7 +333,11 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
     load_kernel_setting(ini_config_file, ini_config_node_name, path);
 
     /* Keep the App object */
-    zend_update_static_property(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_INSTANCE), getThis());
+    zend_update_static_property(
+        cspeed_app_ce, 
+        CSPEED_STRL(CSPEED_APP_INSTANCE), 
+        getThis()
+    );
 
     /* Initialise the standard app object */
     initialise_app_object(getThis(), path);
@@ -276,39 +381,83 @@ CSPEED_METHOD(App, options)/*{{{ proto App::options*/
 CSPEED_METHOD(App, autoload)/*{{{ proto App::autoload The cspeed framework's autoload system */
 {
     zend_string *class_name_with_namespace;             /* The class name which you want to load with the namespace */
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &class_name_with_namespace) == FAILURE) {
+    if (zend_parse_parameters(
+        ZEND_NUM_ARGS() TSRMLS_CC, 
+        "S", 
+        &class_name_with_namespace
+    ) == FAILURE) {
         return;
     }
     /* To load the file */
-    cspeed_autoload_file(class_name_with_namespace, getThis(), CSPEED_APP_AUTOLOAD_ALIASES);
+    cspeed_autoload_file(
+        class_name_with_namespace, 
+        getThis(), 
+        CSPEED_APP_AUTOLOAD_ALIASES
+    );
 }/*}}}*/
 
 CSPEED_METHOD(App, setAlias)/*{{{ proto App::setAlias() */
 {
     zend_string *alias_name, *alias_path;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &alias_name, &alias_path) == FAILURE) {
+    if (zend_parse_parameters(
+        ZEND_NUM_ARGS() TSRMLS_CC, 
+        "SS", 
+        &alias_name, 
+        &alias_path
+    ) == FAILURE) {
         return ;
     }
     if ( ( *ZSTR_VAL(alias_name) ) != '@') {
-        php_error_docref(NULL, E_ERROR, "Namespace alias must be start with @.");
+        php_error_docref(
+            NULL, 
+            E_ERROR, 
+            "Namespace alias must be start with @."
+        );
         RETURN_FALSE
     }
-    zval *all_default_aliases = zend_read_property(cspeed_app_ce, getThis(), 
-        CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), 1, NULL);
-    add_assoc_str(all_default_aliases, ZSTR_VAL(alias_name) + 1, alias_path);
+    zval *all_default_aliases = zend_read_property(
+        cspeed_app_ce, 
+        getThis(), 
+        CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES), 
+        1, 
+        NULL
+    );
+    add_assoc_str(
+        all_default_aliases, 
+        ZSTR_VAL(alias_name) + 1, 
+        alias_path
+    );
 }/*}}}*/
 
 CSPEED_METHOD(App, getApp)/*{{{ proto App::getApp()*/
 {
-    zval *app_object = zend_read_static_property(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_INSTANCE), 1);
+    zval *app_object = zend_read_static_property(
+        cspeed_app_ce, 
+        CSPEED_STRL(CSPEED_APP_INSTANCE), 
+        1
+    );
     RETURN_ZVAL(app_object, 1, 0);
 }/*}}}*/
 
 CSPEED_METHOD(App, run)/*{{{ proto App::run() */
 {
-    trigger_events(getThis(), strpprintf(0, "%s", CSPEED_APP_EVENT_BEORE_REQUEST));
+    trigger_events(
+        getThis(), 
+        strpprintf(
+            0, 
+            "%s", 
+            CSPEED_APP_EVENT_BEORE_REQUEST
+        )
+    );
     dispather_url();
-    trigger_events(getThis(), strpprintf(0, "%s", CSPEED_APP_EVENT_AFTER_REQUEST));
+    trigger_events(
+        getThis(), 
+        strpprintf(
+            0, 
+            "%s", 
+            CSPEED_APP_EVENT_AFTER_REQUEST
+        )
+    );
 }/*}}}*/
 
 CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
@@ -319,17 +468,33 @@ CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
     char path[MAXPATHLEN];
     cspeed_get_cwd(path);
     /* To check the file and or load it or not  */
-    zend_string *bootstrap_class_file = strpprintf(0, "%s/%s", path, ZSTR_VAL(CSPEED_G(core_bootstrap)));
+    zend_string *bootstrap_class_file = strpprintf(
+        0, 
+        "%s/%s", 
+        path, 
+        ZSTR_VAL(CSPEED_G(core_bootstrap))
+    );
     check_file_exists(ZSTR_VAL( bootstrap_class_file ));
     if (cspeed_require_file(ZSTR_VAL( bootstrap_class_file ), NULL, NULL, NULL) == FALSE){
         RETURN_FALSE
     }
     /* Found the Bootstrap class */
-    zend_class_entry *bootstrap_class_ptr = zend_hash_find_ptr(EG(class_table), 
-                    zend_string_tolower(zend_string_init(CSPEED_STRL(CORE_BOOTSTRAP_CLASS_NAME), 0)));
+    zend_class_entry *bootstrap_class_ptr = zend_hash_find_ptr(
+        EG(class_table), 
+        zend_string_tolower(
+            zend_string_init(
+                CSPEED_STRL(CORE_BOOTSTRAP_CLASS_NAME),
+                0
+            )
+        )
+    );
 
     if (!instanceof_function(bootstrap_class_ptr, cspeed_bootinit_ce)){
-        php_error_docref(NULL, E_ERROR, "BootInit class must implements interface \\Cs\\BootInit.");
+        php_error_docref(
+            NULL, 
+            E_ERROR, 
+            "BootInit class must implements interface \\Cs\\BootInit."
+        );
         RETURN_FALSE
     }
 
@@ -359,7 +524,14 @@ CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
                 ZVAL_STRING(&temp_function_name, ZSTR_VAL(bootstrap_function_name));
                 zval retval;
                 zval params[] = { di_object, router_object };
-                call_user_function(NULL, &bootstrap_object, &temp_function_name, &retval, 2, params);
+                call_user_function(
+                    NULL, 
+                    &bootstrap_object, 
+                    &temp_function_name, 
+                    &retval, 
+                    2, 
+                    params
+                );
                 zval_ptr_dtor(&retval);
                 zval_ptr_dtor(&temp_function_name);
             }
@@ -374,7 +546,11 @@ CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
         /* Return the App class object to user, to do the next job. such as the router parsing and so on. */
         RETURN_ZVAL(getThis(), 1, NULL);
     } else {
-        php_error_docref(NULL, E_ERROR, "class BoosInit not exists.");
+        php_error_docref(
+            NULL, 
+            E_ERROR, 
+            "class BoosInit not exists."
+        );
     }
 }/*}}}*/
 
@@ -392,7 +568,12 @@ CSPEED_METHOD(App, setComposerLoader) /*{{{ proto App::setComposerLoader($filePa
             check_file_exists(ZSTR_VAL(composer_file));
             cspeed_require_file(ZSTR_VAL(composer_file), NULL, NULL, NULL);
         } else {
-            zend_string *temp_file_path = strpprintf(0, "%s/%s", path, ZSTR_VAL(composer_file));
+            zend_string *temp_file_path = strpprintf(
+                0, 
+                "%s/%s", 
+                path, 
+                ZSTR_VAL(composer_file)
+            );
             check_file_exists(ZSTR_VAL(temp_file_path));
             cspeed_require_file(ZSTR_VAL(temp_file_path), NULL, NULL, NULL);
         }
@@ -430,11 +611,27 @@ CSPEED_INIT(app)
     /* To use the Event feature */
     zend_do_inheritance(cspeed_app_ce, cspeed_component_ce);
 
-    zend_declare_property_null(cspeed_app_ce,   CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES),   ZEND_ACC_PRIVATE);
-    zend_declare_property_null(cspeed_app_ce,   CSPEED_STRL(CSPEED_APP_INSTANCE),   ZEND_ACC_PRIVATE|ZEND_ACC_STATIC);
+    zend_declare_property_null(
+        cspeed_app_ce,   
+        CSPEED_STRL(CSPEED_APP_AUTOLOAD_ALIASES),   
+        ZEND_ACC_PRIVATE
+    );
+    zend_declare_property_null(
+        cspeed_app_ce,   
+        CSPEED_STRL(CSPEED_APP_INSTANCE),   
+        ZEND_ACC_PRIVATE|ZEND_ACC_STATIC
+    );
 
-    zend_declare_class_constant_string(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_EVENT_BEORE_REQUEST), CSPEED_APP_EVENT_BEORE_REQUEST);
-    zend_declare_class_constant_string(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_EVENT_AFTER_REQUEST), CSPEED_APP_EVENT_AFTER_REQUEST);
+    zend_declare_class_constant_string(
+        cspeed_app_ce, 
+        CSPEED_STRL(CSPEED_APP_EVENT_BEORE_REQUEST), 
+        CSPEED_APP_EVENT_BEORE_REQUEST
+    );
+    zend_declare_class_constant_string(
+        cspeed_app_ce, 
+        CSPEED_STRL(CSPEED_APP_EVENT_AFTER_REQUEST), 
+        CSPEED_APP_EVENT_AFTER_REQUEST
+    );
 }
 /*}}}*/
 

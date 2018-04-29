@@ -70,7 +70,11 @@ CSPEED_METHOD(Di, set) /*{{{ proto Di::set($key, function(){return new stdClass(
     }
 
     if (!CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(key))) {
-        php_error_docref(NULL, E_ERROR, "Parameter one must be a valid string index key.");
+        php_error_docref(
+          NULL, 
+          E_ERROR, 
+          "Parameter one must be a valid string index key."
+        );
         RETURN_FALSE
     }
     zval retval;
@@ -78,11 +82,25 @@ CSPEED_METHOD(Di, set) /*{{{ proto Di::set($key, function(){return new stdClass(
     zend_call_function(&zfi, &zfic);
 
     if (Z_TYPE(retval) == IS_OBJECT) {
-        zval *objects = zend_read_property(cspeed_di_ce, getThis(), CSPEED_STRL(CSPEED_DI_OBJECT), 1, NULL);
-        add_assoc_zval(objects, ZSTR_VAL(key), &retval);
+        zval *objects = zend_read_property(
+          cspeed_di_ce, 
+          getThis(), 
+          CSPEED_STRL(CSPEED_DI_OBJECT), 
+          1, 
+          NULL
+        );
+        add_assoc_zval(
+          objects, 
+          ZSTR_VAL(key), 
+          &retval
+        );
         RETURN_TRUE
     } else {
-        php_error_docref(NULL, E_ERROR, "Parameter must return a class object.");
+        php_error_docref(
+          NULL, 
+          E_ERROR, 
+          "Parameter must return a class object."
+        );
         RETURN_FALSE
     }
 
@@ -96,15 +114,33 @@ CSPEED_METHOD(Di, get) /*{{{ proto Di::get($key) */
     }
 
     if (!CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(key))) {
-        php_error_docref(NULL, E_ERROR, "Parameter must be a valid string key.");
+        php_error_docref(
+          NULL, 
+          E_ERROR, 
+          "Parameter must be a valid string key."
+        );
         RETURN_FALSE
     }
-    zval *objects = zend_read_property(cspeed_di_ce, getThis(), CSPEED_STRL(CSPEED_DI_OBJECT), 1, NULL);
-    zval *object = zend_hash_find(Z_ARRVAL_P(objects), key);
+    zval *objects = zend_read_property(
+      cspeed_di_ce, 
+      getThis(), 
+      CSPEED_STRL(CSPEED_DI_OBJECT), 
+      1, 
+      NULL
+    );
+    zval *object = zend_hash_find(
+      Z_ARRVAL_P(objects), 
+      key
+    );
     if (object) {
         RETURN_ZVAL(object, 1, NULL);
     } else {
-        php_error_docref(NULL, E_WARNING, "Class didn't has the value associated with '%s' index key.", ZSTR_VAL(key));
+        php_error_docref(
+          NULL, 
+          E_WARNING, 
+          "Class didn't has the value associated with '%s' index key.", 
+          ZSTR_VAL(key)
+        );
         RETURN_FALSE
     }
 }/*}}}*/

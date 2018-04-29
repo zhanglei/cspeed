@@ -38,7 +38,10 @@ zval *cspeed_request_get(const char *get_key)/*{{{ Get zval from $_GET */
     } else {
         /* const HashTable *ht, zend_string *key */
         zend_string *cspeed_get_key = zend_string_init(get_key, strlen(get_key), 0);
-        zval *result = zend_hash_find(Z_ARRVAL_P(get_variables), cspeed_get_key);
+        zval *result = zend_hash_find(
+            Z_ARRVAL_P(get_variables), 
+            cspeed_get_key
+        );
         zend_string_release(cspeed_get_key);
         return result;
     }
@@ -48,7 +51,10 @@ char *cspeed_request_get_str_key_val(const char *get_key) /*{{{ GET $_GET value*
 {
     zval *get_value = cspeed_request_get(get_key);
     if (get_value == NULL) {
-        php_error_docref(NULL, E_NOTICE, "Unknow index %s", get_key);
+        php_error_docref(NULL, E_NOTICE, 
+            "Unknow index %s", 
+            get_key
+        );
         return "";
     } else {
         return Z_STRVAL_P(get_value);
@@ -79,7 +85,12 @@ char *cspeed_request_server_str_key_val(const char *server_key) /*{{{ GET $_SERV
 {
     zval *server_value = cspeed_reqeust_server(server_key);
     if (server_value == NULL) {
-        php_error_docref(NULL, E_NOTICE, "Unknow index %s", server_key);
+        php_error_docref(
+            NULL, 
+            E_NOTICE, 
+            "Unknow index %s", 
+            server_key
+        );
         return "";
     } else {
         return Z_STRVAL_P(server_value);
@@ -105,7 +116,12 @@ char *cspeed_request_post_str_key_val(const char *post_key) /*{{{ GET $_POST val
 {
     zval *post_value = cspeed_request_post(post_key);
     if (post_value == NULL) {
-        php_error_docref(NULL, E_NOTICE, "Unknow index %s", post_key);
+        php_error_docref(
+            NULL, 
+            E_NOTICE, 
+            "Unknow index %s", 
+            post_key
+        );
         return "";
     } else {
         return Z_STRVAL_P(post_value);

@@ -74,12 +74,25 @@ int cspeed_require_file(const char * file_name, zval *variables, zval *called_ob
         } ZEND_HASH_FOREACH_END();
         require_call->symbol_table = symbol_tables;
     }
-    if (return_view && php_output_start_user(NULL, 0, PHP_OUTPUT_HANDLER_STDFLAGS) == FAILURE) {
-        php_error_docref(NULL, E_WARNING, "Failed to call ob_start().");
+    if (return_view && 
+      php_output_start_user(
+        NULL, 
+        0, 
+        PHP_OUTPUT_HANDLER_STDFLAGS
+      ) == FAILURE) {
+        php_error_docref(
+          NULL, 
+          E_WARNING, 
+          "Failed to call ob_start()."
+        );
         return FALSE;
     }
     zval result;
-    zend_init_execute_data(require_call, op_array, &result);
+    zend_init_execute_data(
+      require_call, 
+      op_array, 
+      &result
+    );
     ZEND_ADD_CALL_FLAG(require_call, ZEND_CALL_TOP);
     zend_execute_ex(require_call);
     zend_vm_stack_free_call_frame(require_call);
@@ -93,7 +106,11 @@ int cspeed_require_file(const char * file_name, zval *variables, zval *called_ob
     if (return_view) { /* Store the data into the return_view zval struct and discard the data in the output */
         if (php_output_get_contents(return_view) == FAILURE) {
             php_output_end();
-            php_error_docref(NULL, E_WARNING, "Can't fetch the ob_data.");
+            php_error_docref(
+              NULL, 
+              E_WARNING, 
+              "Can't fetch the ob_data."
+            );
             return FALSE;
         }
         if (php_output_discard() != SUCCESS ) {
@@ -133,7 +150,11 @@ int cspeed_require_php_file(const char * file_name, zval *retval)
           NULL, 
           NULL
     );
-    zend_init_execute_data(require_call, op_array, retval);
+    zend_init_execute_data(
+      require_call, 
+      op_array, 
+      retval
+    );
     ZEND_ADD_CALL_FLAG(require_call, ZEND_CALL_TOP);
     zend_execute_ex(require_call);
     zend_vm_stack_free_call_frame(require_call);

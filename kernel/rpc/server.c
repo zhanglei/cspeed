@@ -61,7 +61,11 @@ CSPEED_METHOD(Server, handle)   /*{{{ proto Server::handle */
     }
     /* Only accept the POST method */
     if (!cspeed_request_is_method("POST")) {
-        php_error_docref(NULL, E_ERROR, "RPC Server only accept POST request.");
+        php_error_docref(
+            NULL, 
+            E_ERROR, 
+            "RPC Server only accept POST request."
+        );
     }
     /* Obtain the RAW POST data */
     smart_str raw_data = {0};
@@ -74,18 +78,32 @@ CSPEED_METHOD(Server, handle)   /*{{{ proto Server::handle */
     smart_str_0(&raw_data);
     /* Parsing the data from the request, it must be JSON data */
     zval json_data;
-    php_json_decode(&json_data, CSPEED_STRL(ZSTR_VAL(raw_data.s)), 1, PHP_JSON_PARSER_DEFAULT_DEPTH);
+    php_json_decode(
+        &json_data, 
+        CSPEED_STRL(ZSTR_VAL(raw_data.s)), 
+        1, 
+        PHP_JSON_PARSER_DEFAULT_DEPTH
+    );
     smart_str_free(&raw_data);
 
     /* Set the HTTP head to application/json */
     sapi_header_line ctr = {0};
-    ctr.line_len         = spprintf(&(ctr.line), 0, "%s:%s", "Content-Type", "application/json;charset=UTF-8");
+    ctr.line_len         = spprintf(
+        &(ctr.line), 
+        0, 
+        "%s:%s", 
+        "Content-Type", "application/json;charset=UTF-8"
+    );
     ctr.response_code    = 0;
     if (sapi_header_op(SAPI_HEADER_REPLACE, &ctr) == SUCCESS) {
         efree(ctr.line);
     } else {
         efree(ctr.line);
-        php_error_docref(NULL, E_ERROR, "Please install SAPI extension.");
+        php_error_docref(
+            NULL, 
+            E_ERROR, 
+            "Please install SAPI extension."
+        );
     }
     /* End of the HTTP header set */
 
@@ -118,7 +136,10 @@ CSPEED_METHOD(Server, handle)   /*{{{ proto Server::handle */
         if (CSPEED_METHOD_IN_OBJECT(object, Z_STRVAL_P(&temp_func))){
             zval retval;
             trigger_events(object, strpprintf(0, EVENT_BEFORE_ACTION));
-            if (UNEXPECTED( ( params = zend_hash_str_find(Z_ARRVAL(json_data), CSPEED_STRL("params")) ) != NULL )) {
+            if (UNEXPECTED( ( params = zend_hash_str_find(
+                Z_ARRVAL(json_data), 
+                CSPEED_STRL("params")
+            ) ) != NULL )) {
                 call_user_function(NULL, object, &temp_func, &retval, 1, params);
             } else {
                 call_user_function(NULL, object, &temp_func, &retval, 0, NULL);

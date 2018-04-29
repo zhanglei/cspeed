@@ -47,21 +47,32 @@
 
 #include "main/SAPI.h"          /* for sapi */
 
-void auto_render_view_file(zend_class_entry *controller_ptr, zval *controller_obj, zval *view_object)/*{{{ Renderin the file automatically */
+/*{{{ Renderin the file automatically */
+void auto_render_view_file(zend_class_entry *controller_ptr, zval *controller_obj, zval *view_object)
 {
-    if ( strncasecmp(CORE_VIEW_NEED_RENDER, CSPEED_STRL( ZSTR_VAL( CSPEED_G(core_view_auto_render) ) ) ) == 0 ) {
+    if ( strncasecmp(
+            CORE_VIEW_NEED_RENDER, 
+            CSPEED_STRL( ZSTR_VAL( CSPEED_G(core_view_auto_render) ) )
+        ) == 0 ) {
         /* First, create the view object */
         object_init_ex(view_object, cspeed_view_ce);
         /* Initialise the view properties */
         initialise_view_object_properties(view_object);
         /* attach the CSpeed created view object to the Controller engine. */
-        zend_update_property(controller_ptr, controller_obj, CSPEED_STRL(CSPEED_VIEW_INSTANCE), view_object);
+        zend_update_property(
+            controller_ptr, 
+            controller_obj, 
+            CSPEED_STRL(CSPEED_VIEW_INSTANCE), 
+            view_object
+        );
     } else {
         ZVAL_NULL(view_object);
     }
 }/*}}}*/
 
-void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain the right Model|Controller|Action */
+
+/*{{{ Parsing the PATH_INFO to obtain the right Model|Controller|Action */
+void parse_path_info(zval *path_info_array)
 {   
     /* In ZTS, the web directory are not right. fix it. */
     char path[MAXPATHLEN];
@@ -92,18 +103,32 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
     if (zend_hash_num_elements(CSPEED_G(core_router_modules))) {
         zval *allowed_module;
         ZEND_HASH_FOREACH_VAL(CSPEED_G(core_router_modules), allowed_module){
-            if (memcmp(Z_STRVAL_P(allowed_module), CSPEED_STRL( ZSTR_VAL(default_module) )) == 0) {
+            if (memcmp(
+                    Z_STRVAL_P(allowed_module), 
+                    CSPEED_STRL( ZSTR_VAL(default_module) )
+                ) == 0) {
                 is_allowed = TRUE;
                 break;
             }
         } ZEND_HASH_FOREACH_END();
     }
     if (is_allowed == FALSE){
-        php_error_docref(NULL, E_ERROR, "Module: `%s` are not allowed to access.", ZSTR_VAL(default_module));
+        php_error_docref(
+            NULL, 
+            E_ERROR, 
+            "Module: `%s` are not allowed to access.", 
+            ZSTR_VAL(default_module)
+        );
     }
 
     /* After the module is allowed. to parsing the module is exists or not. */
-    temp_module_path = strpprintf(0, "%s/%s/modules/%s", cspeed_get_cwd(path), root_dir, ZSTR_VAL(default_module));
+    temp_module_path = strpprintf(
+        0, 
+        "%s/%s/modules/%s", 
+        cspeed_get_cwd(path), 
+        root_dir, 
+        ZSTR_VAL(default_module)
+    );
     
     /* Exists or not. */
     check_file_exists(ZSTR_VAL(temp_module_path));
@@ -114,25 +139,54 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
         zend_hash_index_del(Z_ARRVAL_P(path_info_array), 2);
     }
     title_upper_string(ZSTR_VAL(default_controller));
-    zend_string *ns_class_name = strpprintf(0, "app\\modules\\%s\\controllers\\%s",
-        ZSTR_VAL(default_module), ZSTR_VAL(default_controller));
-    zval *app_object = zend_read_static_property(cspeed_app_ce, CSPEED_STRL(CSPEED_APP_INSTANCE), 1);
+
+    zend_string *ns_class_name = strpprintf(
+        0, 
+        "app\\modules\\%s\\controllers\\%s",
+        ZSTR_VAL(default_module), 
+        ZSTR_VAL(default_controller)
+    );
+    zval *app_object = zend_read_static_property(
+        cspeed_app_ce, 
+        CSPEED_STRL(CSPEED_APP_INSTANCE), 
+        1
+    );
     if (ZVAL_IS_NULL(app_object)){
-        php_error_docref(NULL, E_ERROR, "You must create a Cs\\App object first.");
+        php_error_docref(
+            NULL, 
+            E_ERROR, 
+            "You must create a Cs\\App object first."
+        );
     }
-    if (cspeed_autoload_file(ns_class_name, app_object, CSPEED_APP_AUTOLOAD_ALIASES) == FALSE){
+    if (cspeed_autoload_file(
+            ns_class_name, 
+            app_object, 
+            CSPEED_APP_AUTOLOAD_ALIASES
+        ) == FALSE){
         return ;
     }
     /* After require the class from the controller file. create the controller object and do the initialise process */
     zval controller_obj;
-    zend_class_entry *controller_ptr = zend_hash_find_ptr(EG(class_table), zend_string_tolower(ns_class_name));
+    zend_class_entry *controller_ptr = zend_hash_find_ptr(
+        EG(class_table), 
+        zend_string_tolower(ns_class_name)
+    );
     if (controller_ptr) {
         if (!instanceof_function(controller_ptr, cspeed_controller_ce)){
-            php_error_docref(NULL, E_ERROR, "Controller class must extends from \\Cs\\mvc\\Controller class.");
+            php_error_docref(
+                NULL, 
+                E_ERROR, 
+                "Controller class must extends from \\Cs\\mvc\\Controller class."
+            );
         }
         object_init_ex(&controller_obj, controller_ptr);
     } else {
-        php_error_docref(NULL, E_ERROR, "Controller class :`%s` not found.", ZSTR_VAL(default_controller));
+        php_error_docref(
+            NULL, 
+            E_ERROR, 
+            "Controller class :`%s` not found.", 
+            ZSTR_VAL(default_controller)
+        );
     }
     CSPEED_G(core_router_default_controller) = zend_string_tolower(CSPEED_G(core_router_default_controller));
     /* Parsing the action in PATH_INFO */
@@ -146,18 +200,44 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
     if (CSPEED_G(di_object)){
         zval di_object;
         ZVAL_OBJ(&di_object, CSPEED_G(di_object));
-        zend_update_property(controller_ptr, &controller_obj, CSPEED_STRL(CSPEED_DI_INSTANCE), &di_object);
+        zend_update_property(
+            controller_ptr, 
+            &controller_obj, 
+            CSPEED_STRL(CSPEED_DI_INSTANCE), 
+            &di_object
+        );
     } else {
-        zend_update_property_null(controller_ptr, &controller_obj, CSPEED_STRL(CSPEED_DI_INSTANCE));
+        zend_update_property_null(
+            controller_ptr, 
+            &controller_obj, 
+            CSPEED_STRL(CSPEED_DI_INSTANCE)
+        );
     }
     if (CSPEED_G(router_object)){
         zval router_object;
-        ZVAL_OBJ(&router_object, CSPEED_G(router_object));
-        zend_update_property(controller_ptr, &controller_obj, CSPEED_STRL(CSPEED_ROUTER_INSTANCE), &router_object);
+        ZVAL_OBJ(
+            &router_object, 
+            CSPEED_G(router_object)
+        );
+        zend_update_property(
+            controller_ptr, 
+            &controller_obj, 
+            CSPEED_STRL(CSPEED_ROUTER_INSTANCE), 
+            &router_object
+        );
     } else {
-        zend_update_property_null(controller_ptr, &controller_obj, CSPEED_STRL(CSPEED_ROUTER_INSTANCE));
+        zend_update_property_null(
+            controller_ptr, 
+            &controller_obj, 
+            CSPEED_STRL(CSPEED_ROUTER_INSTANCE)
+        );
     }
-    zend_update_property_null(controller_ptr, &controller_obj, CSPEED_STRL(CSPEED_VIEW_INSTANCE));
+
+    zend_update_property_null(
+        controller_ptr, 
+        &controller_obj, 
+        CSPEED_STRL(CSPEED_VIEW_INSTANCE)
+    );
 
     /* To obtain the real value from the PATH-INFO */
     zval key_sets, value_sets;
@@ -185,13 +265,21 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
             } else {
                 continue;
             }
-            add_assoc_zval(global_get_variables, ZSTR_VAL(key), real_key_value);
+            add_assoc_zval(
+                global_get_variables, 
+                ZSTR_VAL(key), 
+                real_key_value
+            );
         }
     } ZEND_HASH_FOREACH_END();
 
     /* Auto render the view file */
     zval view_object;
-    auto_render_view_file(controller_ptr, &controller_obj, &view_object);
+    auto_render_view_file(
+        controller_ptr, 
+        &controller_obj, 
+        &view_object
+    );
 
     /* To call the parent initialise method to do the initialise */
     zend_class_entry *parent = controller_ptr;
@@ -201,26 +289,56 @@ void parse_path_info(zval *path_info_array)/*{{{ Parsing the PATH_INFO to obtain
 
     if (!instanceof_function(controller_ptr, cspeed_rpc_server_ce)){
         /* After running the initialise method. running the __beforeAction method */
-        trigger_events(&controller_obj, strpprintf(0, "%s", EVENT_BEFORE_ACTION));
+        trigger_events(&controller_obj, strpprintf(0, 
+            "%s", 
+            EVENT_BEFORE_ACTION)
+        );
         /* After adding the value into $_GET run the controller's action */
-        zend_string *action_append_action = strpprintf(0, "%sAction", ZSTR_VAL(default_action));
+        zend_string *action_append_action = strpprintf(0, 
+            "%sAction", 
+            ZSTR_VAL(default_action)
+        );
         if (CSPEED_METHOD_IN_OBJECT(&controller_obj, ZSTR_VAL(action_append_action))) {
             zval function_name, retval_ptr;
             ZVAL_STRING(&function_name, ZSTR_VAL(action_append_action));
-            call_user_function(NULL, &controller_obj, &function_name, &retval_ptr, 0, NULL);
+            call_user_function(
+                NULL, 
+                &controller_obj, 
+                &function_name, 
+                &retval_ptr, 
+                0, 
+                NULL
+            );
             zval_ptr_dtor(&function_name);
             zval_ptr_dtor(&retval_ptr);
         } else {
             zend_string_release(action_append_action);
-            php_error_docref(NULL, E_ERROR, "Controller class has not the :`%s` method.", ZSTR_VAL(action_append_action));
+            php_error_docref(
+                NULL, 
+                E_ERROR, 
+                "Controller class has not the :`%s` method.", 
+                ZSTR_VAL(action_append_action)
+            );
         }
         zend_string_release(action_append_action);
         /* To auto render the view file or not. */
         if ( !ZVAL_IS_NULL(&view_object) ) {
-            render_view_file(&view_object, CSPEED_G(core_router_default_action), NULL, NULL);
+            render_view_file(
+                &view_object, 
+                CSPEED_G(core_router_default_action), 
+                NULL, 
+                NULL
+            );
         }
         /* Do the after_action work */
-        trigger_events(&controller_obj, strpprintf(0, "%s", EVENT_AFTER_ACTION));
+        trigger_events(
+            &controller_obj, 
+            strpprintf(
+                0, 
+                "%s", 
+                EVENT_AFTER_ACTION
+            )
+        );
     }
     /* Release the unused memory */
     zval_ptr_dtor(&controller_obj);
@@ -242,7 +360,13 @@ void dispather_url()    /* {{{ Dispatcher the URL */
     int pattern_pos;
 
     /* To remove the url_pattern string */
-    if ( EXPECTED( ( pattern_pos = stringstr( path_info, ZSTR_VAL(CSPEED_G(core_url_pattern)) ) ) != FALSE ) ) {
+    if ( EXPECTED( 
+        ( pattern_pos = 
+            stringstr( 
+                path_info, 
+                ZSTR_VAL(CSPEED_G(core_url_pattern))
+            ) 
+        ) != FALSE ) ) {
         
         char *path_two = (char *)malloc(sizeof(char) * (pattern_pos + 1));
 
@@ -258,15 +382,23 @@ void dispather_url()    /* {{{ Dispatcher the URL */
 
     /* To cut the Query string for the url */
     if ( EXPECTED( (query_pos = strchr(path_info, '?')) != NULL ) ) {
-        path_info = substr(path_info, 0, query_pos - path_info);
+        path_info = substr(
+            path_info, 
+            0, 
+            query_pos - path_info
+        );
         can_free = TRUE;
     }
 
     /* To get the PATH_INFO array */
     zval path_info_array;
     array_init(&path_info_array);
-    php_explode(zend_string_init(CSPEED_STRL("/"), 0), zend_string_init(CSPEED_STRL(path_info), 0),
-                &path_info_array, ZEND_LONG_MAX);
+    php_explode(
+        zend_string_init(CSPEED_STRL("/"), 0), 
+        zend_string_init(CSPEED_STRL(path_info), 0),
+        &path_info_array, 
+        ZEND_LONG_MAX
+    );
 
     /* After parsing the PATH_INFO. to find the matched URL, if not. do the default process */
     zval router_zval_object;
@@ -277,8 +409,13 @@ void dispather_url()    /* {{{ Dispatcher the URL */
 
         ZVAL_OBJ(&router_zval_object, router_object);
         /* Foreach all routines, to find the matched URL and redirect to it */
-        zval *all_routines = zend_read_property(cspeed_router_ce, &router_zval_object, 
-            CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), 1, NULL);
+        zval *all_routines = zend_read_property(
+            cspeed_router_ce, 
+            &router_zval_object, 
+            CSPEED_STRL(CSPEED_ROUTER_ALL_ROUTINES), 
+            1, 
+            NULL
+        );
         
         zend_string *pcre_url;zval *value;
         ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(all_routines), pcre_url, value){
@@ -288,21 +425,52 @@ void dispather_url()    /* {{{ Dispatcher the URL */
                 if ((pce_regexp = pcre_get_compiled_regex_cache(pcre_url)) != NULL) {
                     zval matches, subparts;
                     ZVAL_NULL(&subparts);
-                    php_pcre_match_impl(pce_regexp, CSPEED_STRL(path_info), &matches, &subparts, 0, 0, 0, 0);
+                    php_pcre_match_impl(
+                        pce_regexp, 
+                        CSPEED_STRL(path_info), 
+                        &matches, 
+                        &subparts, 
+                        0, 
+                        0, 
+                        0, 
+                        0
+                    );
                     if (zend_hash_num_elements(Z_ARRVAL(subparts))) {
                      
                         zval function_name, retval, url_pattern, url_subject;
-                        ZVAL_STRING(&function_name, "preg_replace");
-                        ZVAL_STRING(&url_pattern, ZSTR_VAL(pcre_url));
-                        ZVAL_STRING(&url_subject,   path_info);
+                        ZVAL_STRING(
+                            &function_name, 
+                            "preg_replace"
+                        );
+                        ZVAL_STRING(
+                            &url_pattern, 
+                            ZSTR_VAL(pcre_url)
+                        );
+                        ZVAL_STRING(
+                            &url_subject, 
+                            path_info
+                        );
                         zval params[] = { url_pattern, *value, url_subject };
-                        call_user_function(EG(function_table), NULL, &function_name, &retval, 3, params);
+                        call_user_function(
+                            EG(function_table), 
+                            NULL, 
+                            &function_name, 
+                            &retval, 
+                            3, 
+                            params
+                        );
                         zval_ptr_dtor(&function_name);
                         zval_ptr_dtor(&url_pattern);
                         zval_ptr_dtor(&url_subject);
                         /* Start redirecting */
                         sapi_header_line ctr = {0};
-                        ctr.line_len    = spprintf(&(ctr.line), 0, "%s %s", "Location:", Z_STRVAL(retval));
+                        ctr.line_len    = spprintf(
+                            &(ctr.line), 
+                            0, 
+                            "%s %s", 
+                            "Location:", 
+                            Z_STRVAL(retval)
+                        );
                         ctr.response_code   = 0;
                         if (sapi_header_op(SAPI_HEADER_REPLACE, &ctr) == SUCCESS) {
                             zval_ptr_dtor(&retval);
@@ -311,7 +479,11 @@ void dispather_url()    /* {{{ Dispatcher the URL */
                         } else {
                             zval_ptr_dtor(&retval);
                             efree(ctr.line);
-                            php_error_docref(NULL, E_ERROR, "Please install SAPI extension.");
+                            php_error_docref(
+                                NULL, 
+                                E_ERROR, 
+                                "Please install SAPI extension."
+                            );
                         }
                     }
                 }

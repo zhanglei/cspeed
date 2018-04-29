@@ -61,12 +61,28 @@ CSPEED_METHOD(Config, loadConfig)/*{{{ proto Config::loadConfig()*/
         return ;
     }
     char path[MAXPATHLEN];
-    zend_string *real_inifile_path = strpprintf(0, "%s/%s", cspeed_get_cwd(path), ZSTR_VAL(file));
+    zend_string *real_inifile_path = strpprintf(
+      0, 
+      "%s/%s", 
+      cspeed_get_cwd(path), 
+      ZSTR_VAL(file)
+    );
     if (access(ZSTR_VAL(real_inifile_path), F_OK) != -1) {
         zval ini_values;
-        cspeed_parse_ini_file(ZSTR_VAL(real_inifile_path), NULL, NULL, 1, &ini_values);
+        cspeed_parse_ini_file(
+          ZSTR_VAL(real_inifile_path), 
+          NULL, 
+          NULL, 
+          1, 
+          &ini_values
+        );
         /* update the value to the property */
-        zend_update_property(cspeed_config_ce, getThis(), CSPEED_STRL(CSPEED_CONFIG_VARIABLES), &ini_values);
+        zend_update_property(
+          cspeed_config_ce, 
+          getThis(), 
+          CSPEED_STRL(CSPEED_CONFIG_VARIABLES), 
+          &ini_values
+        );
         zval_ptr_dtor(&ini_values);
     }
     zend_string_release(real_inifile_path);
@@ -74,7 +90,13 @@ CSPEED_METHOD(Config, loadConfig)/*{{{ proto Config::loadConfig()*/
 
 CSPEED_METHOD(Config, getConfigs) /*{{{ proto Config::getConfigs() */
 {
-    zval *configs = zend_read_property(cspeed_config_ce, getThis(), CSPEED_STRL(CSPEED_CONFIG_VARIABLES), 1, NULL);
+    zval *configs = zend_read_property(
+      cspeed_config_ce, 
+      getThis(), 
+      CSPEED_STRL(CSPEED_CONFIG_VARIABLES), 
+      1, 
+      NULL
+    );
     RETURN_ZVAL(configs, 1, NULL);
 } /*}}}*/
 
@@ -85,7 +107,13 @@ CSPEED_METHOD(Config, getConfig) /*{{{ proto Config::getConfig($configKey)*/
         return ;
     }
     if (CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(config_key))) {
-        zval *configs = zend_read_property(cspeed_config_ce, getThis(), CSPEED_STRL(CSPEED_CONFIG_VARIABLES), 1, NULL);
+        zval *configs = zend_read_property(
+          cspeed_config_ce, 
+          getThis(), 
+          CSPEED_STRL(CSPEED_CONFIG_VARIABLES), 
+          1, 
+          NULL
+        );
         zval *key_value = zend_hash_find(Z_ARRVAL_P(configs), config_key);
         RETURN_ZVAL(key_value, 1, NULL);
     }
@@ -106,7 +134,11 @@ CSPEED_INIT(config)/*{{{ Loading the Config */
     INIT_NS_CLASS_ENTRY(ce, "Cs\\tool", "Config", cspeed_config_functions);
     cspeed_config_ce = zend_register_internal_class(&ce);
 
-    zend_declare_property_null(cspeed_config_ce, CSPEED_STRL(CSPEED_CONFIG_VARIABLES), ZEND_ACC_PRIVATE);
+    zend_declare_property_null(
+      cspeed_config_ce, 
+      CSPEED_STRL(CSPEED_CONFIG_VARIABLES), 
+      ZEND_ACC_PRIVATE
+    );
 }/*}}}*/
 
 

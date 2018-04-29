@@ -283,7 +283,16 @@ cspeed_build_equal_string(zval *array, char *begin_str, zval *result)/*{{{ Build
                         smart_str_appendc(&where_str, '`');
                         // Join the relation-character
                         smart_str_appends(&where_str, ZSTR_VAL(relation_str));
-                        smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, " '%s", Z_STRVAL_P(relation_value))));
+                        smart_str_appends(
+                            &where_str, 
+                            ZSTR_VAL(
+                                strpprintf(
+                                    0, 
+                                    " '%s",
+                                    Z_STRVAL_P(relation_value)
+                                )
+                            )
+                        );
                         smart_str_appends(&where_str, "' AND ");
                     }
                 } ZEND_HASH_FOREACH_END();
@@ -294,11 +303,32 @@ cspeed_build_equal_string(zval *array, char *begin_str, zval *result)/*{{{ Build
                 smart_str_appends(&where_str, "`='");
                 if ( Z_TYPE_P(var_value) == IS_OBJECT ) convert_to_string(var_value);
                 if (Z_TYPE_P(var_value) == IS_LONG){
-                    smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, "%d", Z_LVAL_P(var_value))));
+                    smart_str_appends(
+                        &where_str, 
+                        ZSTR_VAL(
+                            strpprintf(
+                                0, 
+                                "%d", 
+                                Z_LVAL_P(var_value)
+                            )
+                        )
+                    );
                 } else if ( Z_TYPE_P(var_value) == IS_DOUBLE ) {
-                    smart_str_appends(&where_str, ZSTR_VAL(strpprintf(0, "%f", Z_DVAL_P(var_value))));
+                    smart_str_appends(
+                        &where_str, 
+                        ZSTR_VAL(
+                            strpprintf(
+                                0, 
+                                "%f", 
+                                Z_DVAL_P(var_value)
+                            )
+                        )
+                    );
                 } else if ( Z_TYPE_P(var_value) == IS_STRING ){
-                    smart_str_appends(&where_str, Z_STRVAL_P(var_value));
+                    smart_str_appends(
+                        &where_str, 
+                        Z_STRVAL_P(var_value)
+                    );
                 }
                 smart_str_appends(&where_str, "' AND ");
             }
@@ -339,7 +369,12 @@ int
 check_file_exists(char *file_path) /* Checking wheather the given file is exists or not. */
 {
     if (access(file_path, F_OK) == -1) {
-        php_error_docref(NULL, E_ERROR, "File: %s not exists.", file_path);
+        php_error_docref(
+            NULL, 
+            E_ERROR, 
+            "File: %s not exists.", 
+            file_path
+        );
     }
     return TRUE;
 }
@@ -354,7 +389,14 @@ recursive_call_parent_method(zend_class_entry *ce, char *method_name)/*{{{  Pare
         if (CSPEED_METHOD_IN_OBJECT(&parent_obj, method_name)){
             zval function_name, retval;
             ZVAL_STRING(&function_name, method_name);
-            call_user_function(NULL, &parent_obj, &function_name, &retval, 0, NULL);
+            call_user_function(
+                NULL, 
+                &parent_obj, 
+                &function_name, 
+                &retval, 
+                0, 
+                NULL
+            );
             zval_ptr_dtor(&function_name);
             zval_ptr_dtor(&retval);
         }
@@ -376,7 +418,14 @@ recursive_call_parent_method_two(zval *obj, char *method_name)/*{{{  Parent clas
             zval function_name, retval;
             ZVAL_STRING(&function_name, method_name);
             zval params[] = { *obj };
-            call_user_function(NULL, obj, &function_name, &retval, 1, params);
+            call_user_function(
+                NULL, 
+                obj, 
+                &function_name, 
+                &retval, 
+                1, 
+                params
+            );
             zval_ptr_dtor(&function_name);
             zval_ptr_dtor(&retval);
         }
@@ -389,13 +438,25 @@ call_method_with_object(zval *object, char *method_name, uint32_t param_counts, 
     if (CSPEED_METHOD_IN_OBJECT(object, method_name)){
         zval function_name;
         ZVAL_STRING(&function_name, method_name);
-        call_user_function(EG(function_table), object, &function_name, ret_val, param_counts, params);
+        call_user_function(
+            EG(function_table), 
+            object, 
+            &function_name, 
+            ret_val, 
+            param_counts, 
+            params
+        );
         zval_ptr_dtor(&function_name);
     }
 }
 
 void
-call_method_with_object_params(zval *object, char *method_name, zval *parameters, zval *ret_val)
+call_method_with_object_params(
+    zval *object, 
+    char *method_name, 
+    zval *parameters, 
+    zval *ret_val
+)
 {
     if ( Z_TYPE_P(parameters) != IS_ARRAY ) {
         return ;
@@ -409,52 +470,97 @@ call_method_with_object_params(zval *object, char *method_name, zval *parameters
         ZVAL_COPY(&params[n], val_para);
         n++;
     } ZEND_HASH_FOREACH_END();
-    call_method_with_object(object, method_name, params_count, params, ret_val);
+    call_method_with_object(
+        object, 
+        method_name, 
+        params_count, 
+        params, 
+        ret_val
+    );
     free(params);
 }
 
 int 
-cspeed_autoload_file(zend_string *class_name_with_namespace, zval *obj, char *alias) /*{{{ Load file */
+cspeed_autoload_file(
+    zend_string *class_name_with_namespace, 
+    zval *obj, 
+    char *alias
+) /*{{{ Load file */
 {    
     if ( *(ZSTR_VAL(class_name_with_namespace)) == '\\' ) {
-        class_name_with_namespace = strpprintf(0, "%s", ZSTR_VAL(class_name_with_namespace) + 1);
+
+        class_name_with_namespace = strpprintf(
+            0, 
+            "%s", 
+            ZSTR_VAL(class_name_with_namespace) + 1
+        );
     }
 
-    if (zend_hash_find_ptr(EG(class_table), zend_string_tolower(class_name_with_namespace)) != NULL) {
+    if (zend_hash_find_ptr(
+        EG(class_table), 
+        zend_string_tolower(class_name_with_namespace)
+    ) != NULL) {
         return TRUE;
     }
 
     char *slash_pos = strchr(ZSTR_VAL(class_name_with_namespace), '\\');
 
     if (slash_pos == NULL) { /* No slash find */
-        zend_string *real_file_path = strpprintf(0, "./%s.php", ZSTR_VAL(class_name_with_namespace));
+
+        zend_string *real_file_path = strpprintf(
+            0, 
+            "./%s.php", 
+            ZSTR_VAL(class_name_with_namespace)
+        );
+
         check_file_exists(ZSTR_VAL(real_file_path));
+
         if (cspeed_require_file(ZSTR_VAL(real_file_path), NULL, NULL, NULL) == FALSE){
             return FALSE;
         }
+
         zend_string_release(real_file_path);
     } else {                 
         /* find the slash */
         char *current_alias = (char *)malloc(sizeof(char) * (slash_pos - ZSTR_VAL(class_name_with_namespace) + 1));
         
-        memset(current_alias, 0, (slash_pos - ZSTR_VAL(class_name_with_namespace) + 1));
+        memset(
+            current_alias, 
+            0, 
+            (slash_pos - ZSTR_VAL(class_name_with_namespace) + 1)
+        );
         
-        memcpy(current_alias, 
+        memcpy(
+            current_alias, 
             ZSTR_VAL(class_name_with_namespace), 
-            (slash_pos - ZSTR_VAL(class_name_with_namespace)));
+            (slash_pos - ZSTR_VAL(class_name_with_namespace))
+        );
 
         /** 
          * Kernel contains the `app` namespace alias to do the default kernel loading
          * Developers can define other alias to do the freestyle autoloading job.
          */
-        zval *all_app_aliases = zend_read_property(Z_OBJCE_P(obj), obj, CSPEED_STRL(alias), 1, NULL);
+        zval *all_app_aliases = zend_read_property(
+            Z_OBJCE_P(obj), 
+            obj, 
+            CSPEED_STRL(alias), 
+            1, 
+            NULL
+        );
 
-        zval *has_exists = zend_hash_find(Z_ARRVAL_P(all_app_aliases), 
-                                        zend_string_init(CSPEED_STRL(current_alias), 0));
+        zval *has_exists = zend_hash_find(
+            Z_ARRVAL_P(all_app_aliases), 
+            zend_string_init(
+                CSPEED_STRL(current_alias),
+                0
+            )
+        );
 
         if ( strncmp(current_alias, ("Cs"), strlen("Cs")) == 0 ) {
             free(current_alias);
-            php_error_docref(NULL, E_ERROR, 
+            php_error_docref(
+                NULL, 
+                E_ERROR, 
                 "CSpeed framework not contain the class: `%s`.", 
                 ZSTR_VAL(class_name_with_namespace)
             );
@@ -466,20 +572,30 @@ cspeed_autoload_file(zend_string *class_name_with_namespace, zval *obj, char *al
                                     - (slash_pos - ZSTR_VAL(class_name_with_namespace))
                                     + 5;
 
+            /* Assign the memory and set it to zero. */
             char *real_file_path = (char *)malloc(sizeof(char) * real_file_path_size); 
-            
             memset(real_file_path, 0, real_file_path_size);
 
-            strncat(real_file_path, Z_STRVAL_P(has_exists), Z_STRLEN_P(has_exists));
-            strncat(real_file_path, 
+            strncat(
+                real_file_path, 
+                Z_STRVAL_P(has_exists), 
+                Z_STRLEN_P(has_exists)
+            );
+            strncat(
+                real_file_path, 
                 ZSTR_VAL(class_name_with_namespace) + (slash_pos - ZSTR_VAL(class_name_with_namespace)),
-                ZSTR_LEN(class_name_with_namespace) - (slash_pos - ZSTR_VAL(class_name_with_namespace)));
+                ZSTR_LEN(class_name_with_namespace) - (slash_pos - ZSTR_VAL(class_name_with_namespace))
+            );
+            
             /* Append the .php suffix */
             strncat(real_file_path, ".php", strlen(".php"));
+            
             /* Reslash all slash to reslash */
             cspeed_reverse_slash_char(real_file_path);
+            
             /* check whether the file is exists or not */
             check_file_exists(real_file_path);
+            
             /* After checking, require the file */
             if (cspeed_require_file(real_file_path, NULL, NULL, NULL) == FALSE){
                 free(current_alias);
@@ -490,7 +606,9 @@ cspeed_autoload_file(zend_string *class_name_with_namespace, zval *obj, char *al
             free(real_file_path);
         } else {            /* Not found the needing alias */
             free(current_alias);
-            php_error_docref(NULL, E_ERROR, 
+            php_error_docref(
+                NULL, 
+                E_ERROR, 
                 "Namespace alias: %s not found. please set it first before use.", 
                 current_alias
             );
@@ -512,7 +630,12 @@ load_kernel_setting(zend_string *ini_config_file, zend_string *ini_config_node_n
         if ( *(ZSTR_VAL(ini_config_file)) == '/' ) {
             ini_real_file = ini_config_file;
         } else {
-            ini_real_file = strpprintf(0, "%s/%s", path, ZSTR_VAL(ini_config_file));
+            ini_real_file = strpprintf(
+                0, 
+                "%s/%s", 
+                path, 
+                ZSTR_VAL(ini_config_file)
+            );
         }
         check_file_exists(ZSTR_VAL(ini_real_file));
         
@@ -529,15 +652,27 @@ load_kernel_setting(zend_string *ini_config_file, zend_string *ini_config_node_n
             "db"
         );
         /* Parsing the INI file, and put the config value into the configs */
-        cspeed_parse_ini_file(ZSTR_VAL(ini_real_file), NULL , NULL, 1, &configs);
+        cspeed_parse_ini_file(
+            ZSTR_VAL(ini_real_file), 
+            NULL, 
+            NULL, 
+            1, 
+            &configs
+        );
 
         if (ZVAL_IS_NULL(&configs)  && !zend_hash_num_elements(Z_ARRVAL(configs)) ) {
-            php_error_docref(NULL, E_ERROR, "Configs empty.");
+            php_error_docref(
+                NULL, 
+                E_ERROR, 
+                "Configs empty."
+            );
         }
         if ( ( Z_TYPE(configs) == IS_ARRAY ) ) {
             zval *config_value, *core_configs;
             if ( EXPECTED( (core_configs = zend_hash_find(Z_ARRVAL(configs), node_core_name)) == NULL )){
-                php_error_docref(NULL, E_ERROR, 
+                php_error_docref(
+                    NULL, 
+                    E_ERROR, 
                     "`%s` configs not found in config file.", 
                     ZSTR_VAL(node_core_name)
                 );
@@ -547,7 +682,9 @@ load_kernel_setting(zend_string *ini_config_file, zend_string *ini_config_node_n
                 CSPEED_STRL(CORE_CONFIG_APPLICATION_NAME))) != NULL ) ) {
                 CSPEED_G(core_application) = zend_string_copy(Z_STR_P(config_value));
             } else {
-                php_error_docref(NULL, E_ERROR, 
+                php_error_docref(
+                    NULL, 
+                    E_ERROR, 
                     "Config :`%s` not set.", 
                     CORE_CONFIG_APPLICATION_NAME
                 );
@@ -557,7 +694,9 @@ load_kernel_setting(zend_string *ini_config_file, zend_string *ini_config_node_n
                 CSPEED_STRL(CORE_CONFIG_BOOTSTRAP_NAME))) != NULL ) ) {
                 CSPEED_G(core_bootstrap) = zend_string_copy(Z_STR_P(config_value));
             } else {
-                php_error_docref(NULL, E_ERROR, 
+                php_error_docref(
+                    NULL, 
+                    E_ERROR, 
                     "Config :`%s` not set.", 
                     CORE_CONFIG_BOOTSTRAP_NAME
                 );
@@ -567,7 +706,9 @@ load_kernel_setting(zend_string *ini_config_file, zend_string *ini_config_node_n
                 CSPEED_STRL(CORE_CONFIG_BOOTSTRAP_METHOD_NAME))) != NULL ) ) {
                 CSPEED_G(core_bootstrap_method_string) = zend_string_copy(Z_STR_P(config_value));
             } else {
-                php_error_docref(NULL, E_ERROR, 
+                php_error_docref(
+                    NULL, 
+                    E_ERROR, 
                     "Config :`%s` not set.", 
                     CORE_CONFIG_BOOTSTRAP_METHOD_NAME
                 );
@@ -577,7 +718,12 @@ load_kernel_setting(zend_string *ini_config_file, zend_string *ini_config_node_n
                 CSPEED_STRL(CORE_CONFIG_MODULES_NAME) )) != NULL )) {
                 zval modules;
                 array_init(&modules);
-                php_explode(zend_string_init(CSPEED_STRL(","), 0), Z_STR_P(config_value), &modules, ZEND_LONG_MAX);
+                php_explode(
+                    zend_string_init(CSPEED_STRL(","), 0), 
+                    Z_STR_P(config_value), 
+                    &modules, 
+                    ZEND_LONG_MAX
+                );
                 zval_add_ref(&modules);
                 CSPEED_G(core_router_modules) = Z_ARRVAL(modules);
             } else {
@@ -671,7 +817,11 @@ load_kernel_setting(zend_string *ini_config_file, zend_string *ini_config_node_n
         } else {
             zend_string_release(node_core_name);
             zend_string_release(node_db_name);
-            php_error_docref(NULL, E_ERROR, "Configs data type wrong.");
+            php_error_docref(
+                NULL, 
+                E_ERROR, 
+                "Configs data type wrong."
+            );
         }
     }
 }
@@ -691,7 +841,9 @@ parameter_filter(zval *filter, zval *parameter)
                 Z_TRY_ADDREF_P(&ret_val);
                 ZVAL_COPY_VALUE(parameter, &ret_val);
             } else {
-                php_error_docref(NULL, E_ERROR, 
+                php_error_docref(
+                    NULL, 
+                    E_ERROR, 
                     "function: `%s` not exists.", 
                     Z_STRVAL_P(filter)
                 );
@@ -700,15 +852,30 @@ parameter_filter(zval *filter, zval *parameter)
             /* Check the object is callable or not. */
             zend_string *error_handler_name = NULL;
             if ( !zend_is_callable(filter, 0, &error_handler_name) ) {
-                php_error_docref(NULL, E_ERROR, "The argument must to be a valid callback.");
+                php_error_docref(
+                    NULL, 
+                    E_ERROR, 
+                    "The argument must to be a valid callback."
+                );
             }
             zval ret_val;
             zval params[] = { *parameter };
-            call_user_function(EG(function_table), NULL, filter, &ret_val, 1, params);
+            call_user_function(
+                EG(function_table), 
+                NULL, 
+                filter, 
+                &ret_val, 
+                1, 
+                params
+            );
             Z_TRY_ADDREF_P(&ret_val);
             ZVAL_COPY_VALUE(parameter, &ret_val);
         } else {
-            php_error_docref(NULL, E_ERROR, "The argument must be valid function name or callable.");
+            php_error_docref(
+                NULL, 
+                E_ERROR, 
+                "The argument must be valid function name or callable."
+                );
         }
     }
 }
@@ -723,20 +890,32 @@ add_object_property(zval *object, zval *properties) /*{{{ Add the properties to 
         zend_string *val_key; zval *val_value;
 
         ZEND_HASH_FOREACH_STR_KEY_VAL( Z_ARRVAL_P(properties), val_key, val_value ) {
-            zend_property_info *property_info = zend_hash_find_ptr(&(Z_OBJCE_P(object))->properties_info, val_key);
+            zend_property_info *property_info = zend_hash_find_ptr(
+                &(Z_OBJCE_P(object))->properties_info, 
+                val_key
+            );
             if ( property_info != NULL ) {
                 if ( (property_info->flags & ZEND_ACC_SHADOW) 
                     || (property_info->flags & ZEND_ACC_PUBLIC)
                     || (property_info->flags & ZEND_ACC_PROTECTED)
                     || (property_info->flags & ZEND_ACC_PRIVATE)
                 ) {
-                    zend_update_property(Z_OBJCE_P(object), object, CSPEED_STRL(ZSTR_VAL(val_key)), val_value);
+                    zend_update_property(
+                        Z_OBJCE_P(object), 
+                        object, 
+                        CSPEED_STRL(ZSTR_VAL(val_key)), 
+                        val_value
+                    );
                 } 
             } else {
                 if ( !Z_OBJ_P(object)->properties ) {
                     rebuild_object_properties( Z_OBJ_P(object) );
                 }
-                zend_hash_add_new(Z_OBJ_P(object)->properties, (val_key), val_value);
+                zend_hash_add_new(
+                    Z_OBJ_P(object)->properties, 
+                    (val_key), 
+                    val_value
+                );
             }
 
         } ZEND_HASH_FOREACH_END();
@@ -754,9 +933,20 @@ copy_object_properties(zval *dest_object, zval *src_object)
         if ( Z_OBJCE_P(dest_object) != Z_OBJCE_P(src_object) ) {
             return ;
         }
-        zval *value = zend_read_property(cspeed_model_ce, src_object, CSPEED_STRL(ZSTR_VAL(key)), 1, NULL);
+        zval *value = zend_read_property(
+            cspeed_model_ce, 
+            src_object, 
+            CSPEED_STRL(ZSTR_VAL(key)), 
+            1, 
+            NULL
+        );
         if ( !ZVAL_IS_NULL(value) ) {
-            zend_update_property(cspeed_model_ce, dest_object, CSPEED_STRL(ZSTR_VAL(key)), value);
+            zend_update_property(
+                cspeed_model_ce, 
+                dest_object, 
+                CSPEED_STRL(ZSTR_VAL(key)), 
+                value
+            );
         }
     } ZEND_HASH_FOREACH_END();
 }
@@ -775,11 +965,20 @@ add_multi_object_property(zval *object, zval *multi_properties, zval *ret_val) /
         ZEND_HASH_FOREACH_VAL( Z_ARRVAL_P(multi_properties), val_value ) {
             if ( (Z_TYPE_P(val_value) == IS_ARRAY) && zend_hash_num_elements(Z_ARRVAL_P(val_value)) ) {
                 zval t_object;
-                object_and_properties_init(&t_object, Z_OBJCE_P(object), Z_OBJ_P(object)->properties);
+                object_and_properties_init(
+                    &t_object, 
+                    Z_OBJCE_P(object), 
+                    Z_OBJ_P(object)->properties
+                );
                 copy_object_properties(&t_object, object);
                 zval_add_ref(val_value);
                 SEPARATE_ZVAL(val_value);
-                zend_update_property(cspeed_model_ce, &t_object, CSPEED_STRL(CSPEED_MODEL_ARRAY_DATA), val_value);
+                zend_update_property(
+                    cspeed_model_ce, 
+                    &t_object, 
+                    CSPEED_STRL(CSPEED_MODEL_ARRAY_DATA), 
+                    val_value
+                );
                 add_object_property(&t_object, val_value);
                 Z_TRY_ADDREF_P(&t_object);
                 add_next_index_zval(ret_val, &t_object);

@@ -32,7 +32,13 @@
 int trigger_events(zval *object_ptr, zend_string *event_name)/*{{{ To raise the event from the event list*/
 {
     /* Call all the functions in the array_queue_lists */
-    zval *events = zend_read_property(Z_OBJCE_P(object_ptr), object_ptr, CSPEED_STRL(CSPEED_COMPONENT_EVENTS), 1, NULL);
+    zval *events = zend_read_property(
+        Z_OBJCE_P(object_ptr), 
+        object_ptr, 
+        CSPEED_STRL(CSPEED_COMPONENT_EVENTS), 
+        1, 
+        NULL
+    );
     if (ZVAL_IS_NULL(events)) {
         return FALSE;
     }
@@ -42,7 +48,14 @@ int trigger_events(zval *object_ptr, zend_string *event_name)/*{{{ To raise the 
         ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(event_lists), index, var_value) {
             zval retval;
             zval params[] = { *object_ptr };
-            call_user_function(EG(function_table), NULL, var_value, &retval, 1, params);
+            call_user_function(
+                EG(function_table), 
+                NULL, 
+                var_value, 
+                &retval, 
+                1, 
+                params
+            );
             zval_ptr_dtor(&retval);
             zval_ptr_dtor(params);
         } ZEND_HASH_FOREACH_END();
@@ -74,16 +87,32 @@ CSPEED_METHOD(Component, __construct)/*{{{ proto Component::__construct()*/
 CSPEED_METHOD(Component, on)/*{{{ proto Component::on(EVENT_LOGIN, function(){})*/
 {
     zend_string *event_name; zval *func_name_or_obj;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz", &event_name, &func_name_or_obj) == FAILURE) {
+    if (zend_parse_parameters(
+        ZEND_NUM_ARGS() TSRMLS_CC,
+        "Sz", 
+        &event_name, 
+        &func_name_or_obj
+    ) == FAILURE) {
         return ;
     }
     if (CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(event_name))) {
         /* Check the property is null or not, if null initialise it before using */
-        zval *events = zend_read_property(cspeed_component_ce, getThis(), CSPEED_STRL(CSPEED_COMPONENT_EVENTS), 1, NULL);
+        zval *events = zend_read_property(
+            cspeed_component_ce, 
+            getThis(), 
+            CSPEED_STRL(CSPEED_COMPONENT_EVENTS), 
+            1, 
+            NULL
+        );
         if (ZVAL_IS_NULL(events)) {
             zval temp_events;
             array_init(&temp_events);
-            zend_update_property(cspeed_component_ce, getThis(), CSPEED_STRL(CSPEED_COMPONENT_EVENTS), &temp_events);
+            zend_update_property(
+                cspeed_component_ce, 
+                getThis(), 
+                CSPEED_STRL(CSPEED_COMPONENT_EVENTS), 
+                &temp_events
+            );
         }
         /* Find if there exist the given event_name */
         zend_bool is_exist = zend_hash_exists(Z_ARRVAL_P(events), event_name);
@@ -91,15 +120,25 @@ CSPEED_METHOD(Component, on)/*{{{ proto Component::on(EVENT_LOGIN, function(){})
             /* if exists, to add the given callback to the current exist array_list */
             zval *event_lists = zend_hash_find(Z_ARRVAL_P(events), event_name);
             zval_add_ref(func_name_or_obj);
-            add_next_index_zval(event_lists, func_name_or_obj);
+            add_next_index_zval(
+                event_lists, 
+                func_name_or_obj
+            );
         } else {
             /* Not exist, to initialise it and then append the callback */
             zval event_array;
             array_init(&event_array);
             zval_add_ref(func_name_or_obj);
-            add_next_index_zval(&event_array, func_name_or_obj);
+            add_next_index_zval(
+                &event_array, 
+                func_name_or_obj
+            );
             zval_add_ref(&event_array);
-            add_assoc_zval(events, ZSTR_VAL(event_name), &event_array);
+            add_assoc_zval(
+                events, 
+                ZSTR_VAL(event_name), 
+                &event_array
+            );
         }
         RETURN_TRUE
     }
@@ -115,7 +154,13 @@ CSPEED_METHOD(Component, off)/*{{{ proto Component::off(EVENT_LOGIN, $handler)*/
 
     if(CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(event_name))) {
         /* if handler null, unset all event_name handler, otherwise remove the given handler */
-        zval *events = zend_read_property(cspeed_component_ce, getThis(), CSPEED_STRL(CSPEED_COMPONENT_EVENTS), 1, NULL);
+        zval *events = zend_read_property(
+            cspeed_component_ce, 
+            getThis(), 
+            CSPEED_STRL(CSPEED_COMPONENT_EVENTS), 
+            1, 
+            NULL
+        );
         if (ZVAL_IS_NULL(events)) {
             RETURN_FALSE
         }
@@ -155,7 +200,11 @@ CSPEED_METHOD(Component, off)/*{{{ proto Component::off(EVENT_LOGIN, $handler)*/
             RETURN_TRUE
         }
     } else {
-        php_error_docref(NULL, E_ERROR, "Parameter one must be an valid string index.");
+        php_error_docref(
+            NULL, 
+            E_ERROR, 
+            "Parameter one must be an valid string index."
+        );
         return ;
     }
 
@@ -193,6 +242,10 @@ CSPEED_INIT(component)/* void component_init() */
     cspeed_component_ce = zend_register_internal_class(&ce);
 
     /* To store all events */
-    zend_declare_property_null(cspeed_component_ce, CSPEED_STRL(CSPEED_COMPONENT_EVENTS), ZEND_ACC_PROTECTED);
+    zend_declare_property_null(
+        cspeed_component_ce, 
+        CSPEED_STRL(CSPEED_COMPONENT_EVENTS), 
+        ZEND_ACC_PROTECTED
+    );
 }/*}}}*/
 

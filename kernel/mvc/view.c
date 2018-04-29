@@ -37,40 +37,79 @@ void render_view_file(zval *view_obj, zend_string *temp_file, zval *array_variab
     char path[MAXPATHLEN];
     cspeed_get_cwd(path);
 
-    zval *view_dir  = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_DIRS), 1, NULL);
-    zval *suffix    = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_SUFFIX), 1, NULL);
+    zval *view_dir  = zend_read_property(
+        cspeed_view_ce, 
+        view_obj, 
+        CSPEED_STRL(CSPEED_VIEW_DIRS), 
+        1, 
+        NULL
+    );
+    zval *suffix    = zend_read_property(
+        cspeed_view_ce, 
+        view_obj, 
+        CSPEED_STRL(CSPEED_VIEW_SUFFIX), 
+        1, 
+        NULL
+    );
     
-    zend_string *real_path_file = strpprintf(0, 
+    zend_string *real_path_file = strpprintf(
+        0, 
         "%s/%s/modules/%s/%s/%s/%s.%s", 
         path, 
         ZSTR_VAL(CSPEED_G(core_application)), 
         ZSTR_VAL(CSPEED_G(core_router_default_module)), 
         Z_STRVAL_P(view_dir), 
         ZSTR_VAL(CSPEED_G(core_router_default_controller)),
-        ZSTR_VAL(temp_file), ZSTR_VAL(CSPEED_G(core_view_ext))
+        ZSTR_VAL(temp_file), 
+        ZSTR_VAL(CSPEED_G(core_view_ext))
     );
     
-    zval *view_variables = zend_read_property(cspeed_view_ce, view_obj, CSPEED_STRL(CSPEED_VIEW_VARIABLES), 1, NULL);
+    zval *view_variables = zend_read_property(
+        cspeed_view_ce, 
+        view_obj, 
+        CSPEED_STRL(CSPEED_VIEW_VARIABLES), 
+        1, 
+        NULL
+    );
     if (array_variables && ( Z_TYPE_P(view_variables) == IS_ARRAY ) ) {
         zend_string *var_name;
         zval *var_value;
         ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(array_variables), var_name, var_value){
-            add_assoc_zval(view_variables, ZSTR_VAL(var_name), var_value);
+            add_assoc_zval(
+                view_variables, 
+                ZSTR_VAL(var_name), 
+                var_value
+            );
         } ZEND_HASH_FOREACH_END();
     }
     check_file_exists(ZSTR_VAL(real_path_file));
     
-    cspeed_require_file(ZSTR_VAL(real_path_file), view_variables, view_obj, ret_val);
+    cspeed_require_file(
+        ZSTR_VAL(real_path_file), 
+        view_variables, 
+        view_obj, 
+        ret_val
+    );
 }
 
 void render_file(INTERNAL_FUNCTION_PARAMETERS, zval *ret_val, zval *view_obj)/*{{{ View::render() & View::getRender() & View::partial() */
 {
     zend_string *temp_file;
     zval *array_variables = NULL;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|a", &temp_file, &array_variables) == FAILURE) {
+    if (zend_parse_parameters(
+        ZEND_NUM_ARGS() TSRMLS_CC, 
+        "S|a", 
+        &temp_file, 
+        &array_variables
+    ) == FAILURE) {
         return ;
     }
-    render_view_file(view_obj, temp_file, array_variables, ret_val);
+    render_view_file(
+        view_obj, 
+        temp_file, 
+        array_variables, 
+        ret_val
+    );
 }/*}}}*/
 
 /* {{{ ARG-INFO */
@@ -117,7 +156,12 @@ void initialise_view_object_properties(zval *view_object)
 {
     zval view_variables;
     array_init(&view_variables);
-    zend_update_property(cspeed_view_ce, view_object, CSPEED_STRL(CSPEED_VIEW_VARIABLES), &view_variables);
+    zend_update_property(
+        cspeed_view_ce, 
+        view_object, 
+        CSPEED_STRL(CSPEED_VIEW_VARIABLES), 
+        &view_variables
+    );
     zval_ptr_dtor(&view_variables);
 }
 
@@ -134,11 +178,23 @@ CSPEED_METHOD(View, __get)
     }
 
     if ( CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(property_name)) ) {
-        if ( (strncmp(ZSTR_VAL(property_name), ("module_id"), strlen("module_id")) == 0) ) {
+        if ( (strncmp(
+            ZSTR_VAL(property_name), 
+            ("module_id"), 
+            strlen("module_id")
+        ) == 0) ) {
             RETURN_STR(CSPEED_G(core_router_default_module));
-        } else if ( (strncmp(ZSTR_VAL(property_name), ("controller_id"), strlen("controller_id")) == 0) ) {
+        } else if ( (strncmp(
+            ZSTR_VAL(property_name), 
+            ("controller_id"), 
+            strlen("controller_id")
+        ) == 0) ) {
             RETURN_STR(CSPEED_G(core_router_default_controller));
-        } else if ( (strncmp(ZSTR_VAL(property_name), ("action_id"), strlen("action_id")) == 0) ) {
+        } else if ( (strncmp(
+            ZSTR_VAL(property_name), 
+            ("action_id"), 
+            strlen("action_id")
+        ) == 0) ) {
             RETURN_STR(CSPEED_G(core_router_default_action));
         } else {
             HashTable *properties = Z_OBJPROP_P(getThis());
@@ -171,9 +227,16 @@ CSPEED_METHOD(View, partial)         /*{{{ proto View::partial($file, $variables
     char path[MAXPATHLEN];
     cspeed_get_cwd(path);
 
-    zval *suffix    = zend_read_property(cspeed_view_ce, getThis(), CSPEED_STRL(CSPEED_VIEW_SUFFIX), 1, NULL);
+    zval *suffix    = zend_read_property(
+        cspeed_view_ce, 
+        getThis(), 
+        CSPEED_STRL(CSPEED_VIEW_SUFFIX), 
+        1, 
+        NULL
+    );
     
-    zend_string *real_path_file = strpprintf(0, 
+    zend_string *real_path_file = strpprintf(
+        0, 
         "%s/%s/views/%s.%s", 
         path, 
         ZSTR_VAL(CSPEED_G(core_application)), 
@@ -181,17 +244,32 @@ CSPEED_METHOD(View, partial)         /*{{{ proto View::partial($file, $variables
         ZSTR_VAL(CSPEED_G(core_view_ext))
     );
     
-    zval *view_variables = zend_read_property(cspeed_view_ce, getThis(), CSPEED_STRL(CSPEED_VIEW_VARIABLES), 1, NULL);
+    zval *view_variables = zend_read_property(
+        cspeed_view_ce, 
+        getThis(), 
+        CSPEED_STRL(CSPEED_VIEW_VARIABLES), 
+        1, 
+        NULL
+    );
     if (array_variables && ( Z_TYPE_P(view_variables) == IS_ARRAY ) ) {
         zend_string *var_name;
         zval *var_value;
         ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(array_variables), var_name, var_value){
-            add_assoc_zval(view_variables, ZSTR_VAL(var_name), var_value);
+            add_assoc_zval(
+                view_variables, 
+                ZSTR_VAL(var_name), 
+                var_value
+            );
         } ZEND_HASH_FOREACH_END();
     }
     check_file_exists(ZSTR_VAL(real_path_file));
     
-    cspeed_require_file(ZSTR_VAL(real_path_file), view_variables, getThis(), NULL);
+    cspeed_require_file(
+        ZSTR_VAL(real_path_file), 
+        view_variables, 
+        getThis(), 
+        NULL
+    );
 }/*}}}*/
 
 CSPEED_METHOD(View, getRender)      /*{{{ proto View::getRender($file, $variables)*/
@@ -207,7 +285,12 @@ CSPEED_METHOD(View, setSuffix)      /*{{{ proto View::setSuffix($suffix) */
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &suffix) == FAILURE) {
         return ;
     }
-    zend_update_property_str(cspeed_view_ce, getThis(), CSPEED_STRL(CSPEED_VIEW_SUFFIX), suffix);
+    zend_update_property_str(
+        cspeed_view_ce, 
+        getThis(), 
+        CSPEED_STRL(CSPEED_VIEW_SUFFIX), 
+        suffix
+    );
 }/*}}}*/
 
 CSPEED_METHOD(View, setVar)         /*{{{ proto View::setVar($var_name, $var_value) */
@@ -217,8 +300,18 @@ CSPEED_METHOD(View, setVar)         /*{{{ proto View::setVar($var_name, $var_val
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz", &var_name, &var_value) == FAILURE) {
         return ;
     }
-    zval *view_variables = zend_read_property(cspeed_view_ce, getThis(), CSPEED_STRL(CSPEED_VIEW_VARIABLES), 1, NULL);
-    add_assoc_zval(view_variables, ZSTR_VAL(var_name), var_value );
+    zval *view_variables = zend_read_property(
+        cspeed_view_ce, 
+        getThis(), 
+        CSPEED_STRL(CSPEED_VIEW_VARIABLES), 
+        1, 
+        NULL
+    );
+    add_assoc_zval(
+        view_variables, 
+        ZSTR_VAL(var_name), 
+        var_value 
+    );
 }/*}}}*/
 
 CSPEED_METHOD(View, setViewDir)         /*{{{ proto View::setViewDir($dirname) */
@@ -227,7 +320,12 @@ CSPEED_METHOD(View, setViewDir)         /*{{{ proto View::setViewDir($dirname) *
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &view_dir) == FAILURE) {
       return ;
     }
-    zend_update_property_str(cspeed_view_ce, getThis(), CSPEED_STRL(CSPEED_VIEW_DIRS), view_dir);
+    zend_update_property_str(
+        cspeed_view_ce, 
+        getThis(), 
+        CSPEED_STRL(CSPEED_VIEW_DIRS), 
+        view_dir
+    );
 }/*}}}*/
 
 static const zend_function_entry cspeed_view_functions[] = { /*{{{ All methods the View class had */
@@ -249,9 +347,23 @@ CSPEED_INIT(view) /*{{{ Initialise function to initialise the view components */
     INIT_NS_CLASS_ENTRY(ce, "Cs\\mvc", "View", cspeed_view_functions);
     cspeed_view_ce = zend_register_internal_class(&ce);
 
-    zend_declare_property_null(cspeed_view_ce,   CSPEED_STRL(CSPEED_VIEW_VARIABLES), ZEND_ACC_PROTECTED);
-    zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_SUFFIX), "", ZEND_ACC_PROTECTED);
-    zend_declare_property_string(cspeed_view_ce, CSPEED_STRL(CSPEED_VIEW_DIRS), CSPEED_VIEW_DIRS_V, ZEND_ACC_PROTECTED);
+    zend_declare_property_null(
+        cspeed_view_ce,   
+        CSPEED_STRL(CSPEED_VIEW_VARIABLES), 
+        ZEND_ACC_PROTECTED
+    );
+    zend_declare_property_string(
+        cspeed_view_ce, 
+        CSPEED_STRL(CSPEED_VIEW_SUFFIX), 
+        "", 
+        ZEND_ACC_PROTECTED
+    );
+    zend_declare_property_string(
+        cspeed_view_ce, 
+        CSPEED_STRL(CSPEED_VIEW_DIRS), 
+        CSPEED_VIEW_DIRS_V, 
+        ZEND_ACC_PROTECTED
+    );
 }/*}}}*/
 
 
