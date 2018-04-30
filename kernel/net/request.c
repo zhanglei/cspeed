@@ -394,7 +394,7 @@ CSPEED_METHOD(Request, getPost)
 {
     zend_string *post_key = NULL;
     zval *filter = NULL;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|Sz", &post_key) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|Sz", &post_key, &filter) == FAILURE) {
         return ;
     }
     zval *post_data = cspeed_request_post( ( (post_key == NULL) || (ZVAL_IS_NULL(post_key) == NULL)) ? NULL : ZSTR_VAL( post_key ) );
