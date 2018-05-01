@@ -78,7 +78,13 @@ CSPEED_METHOD(Client, __call)/*{{{ proto Client::call($name, $params)*/
 {
     zend_string *method_name;
     zval *method_params = NULL; /* It always to be an array, need json_encode */
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|z", &method_name, &method_params) == FAILURE) {
+    if (zend_parse_parameters(
+            ZEND_NUM_ARGS() TSRMLS_CC, 
+            "S|z", 
+            &method_name, 
+            &method_params
+        ) == FAILURE
+    ) {
         return ;
     }
     CURL *curl; CURLcode res;

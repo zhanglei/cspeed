@@ -49,7 +49,12 @@ initialise_di_object_properties(zval *di_object)/*{{{ Initialise the Di object's
 {
     zval objects;
     array_init(&objects);
-    zend_update_property(cspeed_di_ce, di_object, CSPEED_STRL(CSPEED_DI_OBJECT), &objects);
+    zend_update_property(
+      cspeed_di_ce, 
+      di_object, 
+      CSPEED_STRL(CSPEED_DI_OBJECT), 
+      &objects
+    );
     zval_ptr_dtor(&objects);
 }/*}}}*/
 
@@ -64,8 +69,16 @@ CSPEED_METHOD(Di, set) /*{{{ proto Di::set($key, function(){return new stdClass(
     zend_fcall_info zfi;
     zend_fcall_info_cache zfic;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sf", &key, &zfi, &zfic, 
-        &zfi.param_count, &zfi.params) == FAILURE) {
+    if (zend_parse_parameters(
+            ZEND_NUM_ARGS() TSRMLS_CC, 
+            "Sf", 
+            &key, 
+            &zfi, 
+            &zfic,
+            &zfi.param_count, 
+            &zfi.params
+        ) == FAILURE
+    ) {
         return ;
     }
 
@@ -109,7 +122,12 @@ CSPEED_METHOD(Di, set) /*{{{ proto Di::set($key, function(){return new stdClass(
 CSPEED_METHOD(Di, get) /*{{{ proto Di::get($key) */
 {
     zend_string *key;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &key) == FAILURE) {
+    if (zend_parse_parameters(
+            ZEND_NUM_ARGS() TSRMLS_CC, 
+            "S", 
+            &key
+        ) == FAILURE
+    ) {
         return ;
     }
 
@@ -156,10 +174,19 @@ static const zend_function_entry cspeed_di_functions[] = { /*{{{ All methods of 
 CSPEED_INIT(di) /*{{{ */
 {
     zend_class_entry ce;
-    INIT_NS_CLASS_ENTRY(ce, "Cs\\di", "Di", cspeed_di_functions);
+    INIT_NS_CLASS_ENTRY(
+        ce, 
+        "Cs\\di", 
+        "Di", 
+        cspeed_di_functions
+    );
     cspeed_di_ce = zend_register_internal_class(&ce);
 
-    zend_declare_property_null(cspeed_di_ce, CSPEED_STRL(CSPEED_DI_OBJECT), ZEND_ACC_PROTECTED);
+    zend_declare_property_null(
+        cspeed_di_ce, 
+        CSPEED_STRL(CSPEED_DI_OBJECT), 
+        ZEND_ACC_PROTECTED
+    );
 }/*}}}*/
 
 

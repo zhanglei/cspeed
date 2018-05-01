@@ -127,11 +127,20 @@ CSPEED_METHOD(Task, __construct)/*{{{ Task::construct()*/
 CSPEED_METHOD(Task, autoload)/*{{{ proto App::autoload The cspeed framework's autoload system */
 {
     zend_string *class_name_with_namespace;             /* The class name which you want to load with the namespace */
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &class_name_with_namespace) == FAILURE) {
+    if (zend_parse_parameters(
+            ZEND_NUM_ARGS() TSRMLS_CC, 
+            "S", 
+            &class_name_with_namespace
+        ) == FAILURE
+    ) {
         return;
     }
     /* To load the file */
-    cspeed_autoload_file(class_name_with_namespace, getThis(), CSPEED_TASK_AUTOLOAD_ALIASES);
+    cspeed_autoload_file(
+        class_name_with_namespace, 
+        getThis(), 
+        CSPEED_TASK_AUTOLOAD_ALIASES
+    );
 }/*}}}*/
 
 CSPEED_METHOD(Task, run)/*{{{ proto Task::run($module, $controller, $action)*/
@@ -154,10 +163,19 @@ static const zend_function_entry cspeed_task_functions[] = {/*{{{ proto Task's m
 CSPEED_INIT(task)/*{{{ proto void task_init() */
 {
     zend_class_entry ce;
-    INIT_NS_CLASS_ENTRY(ce, "Cs\\console", "Task", cspeed_task_functions);
+    INIT_NS_CLASS_ENTRY(
+        ce, 
+        "Cs\\console", 
+        "Task", 
+        cspeed_task_functions
+    );
     cspeed_task_ce = zend_register_internal_class(&ce);
 
-    zend_declare_property_null(cspeed_task_ce, CSPEED_STRL(CSPEED_TASK_AUTOLOAD_ALIASES), ZEND_ACC_PRIVATE);
+    zend_declare_property_null(
+        cspeed_task_ce, 
+        CSPEED_STRL(CSPEED_TASK_AUTOLOAD_ALIASES), 
+        ZEND_ACC_PRIVATE
+    );
 }/*}}}*/
 
 

@@ -42,25 +42,55 @@ CSPEED_METHOD(Controller, __construct)/*{{{ proto Controller::__construct() */
 }/*}}}*/
 
 static const zend_function_entry cspeed_controller_functions[] = { /*{{{*/
-    CSPEED_ME(Controller, __construct, arginfo_cspeed_controller_construct, ZEND_ACC_PUBLIC)
+    CSPEED_ME(
+      Controller, 
+      __construct, 
+      arginfo_cspeed_controller_construct, 
+      ZEND_ACC_PUBLIC
+    )
     PHP_FE_END
 };/*}}}*/
 
 CSPEED_INIT(controller) /*{{{*/
 {
     zend_class_entry ce;
-    INIT_NS_CLASS_ENTRY(ce, "Cs\\mvc", "Controller", cspeed_controller_functions);
+    INIT_NS_CLASS_ENTRY(
+      ce, 
+      "Cs\\mvc", 
+      "Controller", 
+      cspeed_controller_functions
+    );
     cspeed_controller_ce = zend_register_internal_class(&ce);
 
     /* Event feature */
     zend_do_inheritance(cspeed_controller_ce, cspeed_component_ce);
 
-    zend_declare_property_null(cspeed_controller_ce, CSPEED_STRL(CSPEED_DI_INSTANCE), ZEND_ACC_PUBLIC);
-    zend_declare_property_null(cspeed_controller_ce, CSPEED_STRL(CSPEED_VIEW_INSTANCE), ZEND_ACC_PUBLIC);
-    zend_declare_property_null(cspeed_controller_ce, CSPEED_STRL(CSPEED_ROUTER_INSTANCE), ZEND_ACC_PUBLIC);
+    zend_declare_property_null(
+      cspeed_controller_ce, 
+      CSPEED_STRL(CSPEED_DI_INSTANCE), 
+      ZEND_ACC_PUBLIC
+    );
+    zend_declare_property_null(
+      cspeed_controller_ce, 
+      CSPEED_STRL(CSPEED_VIEW_INSTANCE), 
+      ZEND_ACC_PUBLIC
+    );
+    zend_declare_property_null(
+      cspeed_controller_ce, 
+      CSPEED_STRL(CSPEED_ROUTER_INSTANCE), 
+      ZEND_ACC_PUBLIC
+    );
 
-    zend_declare_class_constant_string(cspeed_controller_ce, CSPEED_STRL(EVENT_BEFORE_ACTION), EVENT_BEFORE_ACTION);
-    zend_declare_class_constant_string(cspeed_controller_ce, CSPEED_STRL(EVENT_AFTER_ACTION),  EVENT_AFTER_ACTION);
+    zend_declare_class_constant_string(
+      cspeed_controller_ce, 
+      CSPEED_STRL(EVENT_BEFORE_ACTION), 
+      EVENT_BEFORE_ACTION
+    );
+    zend_declare_class_constant_string(
+      cspeed_controller_ce, 
+      CSPEED_STRL(EVENT_AFTER_ACTION), 
+       EVENT_AFTER_ACTION
+    );
 }/*}}}*/
 
 

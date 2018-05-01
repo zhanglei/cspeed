@@ -92,7 +92,7 @@ void parse_path_info(zval *path_info_array)
 
     /* To check wheather the module is exists */
     zval *temp_mca_value;
-    if (UNEXPECTED((temp_mca_value = zend_hash_index_find(Z_ARRVAL_P(path_info_array), 1)) != NULL)) {
+    if ( EXPECTED((temp_mca_value = zend_hash_index_find(Z_ARRVAL_P(path_info_array), 1)) != NULL) ) {
         CSPEED_G(core_router_default_module) = zend_string_dup(Z_STR_P(temp_mca_value), 0);
         default_module = zend_string_copy(Z_STR_P(temp_mca_value));
         zend_hash_index_del(Z_ARRVAL_P(path_info_array), 1);
@@ -133,7 +133,7 @@ void parse_path_info(zval *path_info_array)
     /* Exists or not. */
     check_file_exists(ZSTR_VAL(temp_module_path));
 
-    if (UNEXPECTED((temp_mca_value = zend_hash_index_find(Z_ARRVAL_P(path_info_array), 2)) != NULL)) {
+    if (EXPECTED((temp_mca_value = zend_hash_index_find(Z_ARRVAL_P(path_info_array), 2)) != NULL)) {
         default_controller = zend_string_copy(Z_STR_P(temp_mca_value));
         CSPEED_G(core_router_default_controller) = zend_string_dup(Z_STR_P(temp_mca_value), 0);
         zend_hash_index_del(Z_ARRVAL_P(path_info_array), 2);
@@ -190,7 +190,7 @@ void parse_path_info(zval *path_info_array)
     }
     CSPEED_G(core_router_default_controller) = zend_string_tolower(CSPEED_G(core_router_default_controller));
     /* Parsing the action in PATH_INFO */
-    if (UNEXPECTED( (temp_mca_value = zend_hash_index_find(Z_ARRVAL_P(path_info_array), 3)) != NULL )) {
+    if (EXPECTED( (temp_mca_value = zend_hash_index_find(Z_ARRVAL_P(path_info_array), 3)) != NULL )) {
         default_action = zend_string_copy(Z_STR_P(temp_mca_value));
         CSPEED_G(core_router_default_action) = zend_string_dup(Z_STR_P(temp_mca_value), 0);
         zend_hash_index_del(Z_ARRVAL_P(path_info_array), 3);

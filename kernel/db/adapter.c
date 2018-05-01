@@ -165,7 +165,14 @@ zend_bool output_sql_errors(zval *pdo_statement)  /*{{{ Return the SQL running e
         Z_ARRVAL_P(&retval),
         2
     );
-    if (!zend_string_equals( Z_STR_P(sql_state), strpprintf(0, "00000") )) {
+    if (!zend_string_equals(
+            Z_STR_P(sql_state), 
+            strpprintf(
+                0, 
+                "00000"
+            )
+        )
+    ) {
         php_error_docref(
             NULL, 
             E_ERROR, 
@@ -253,7 +260,12 @@ ZEND_END_ARG_INFO()
 CSPEED_METHOD(Adapter, __construct)/*{{{ proto Adapter::__construct(array $options = [])*/
 {    
     zval *pdo_options = NULL;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a", &pdo_options) == FAILURE){
+    if (zend_parse_parameters(
+            ZEND_NUM_ARGS() TSRMLS_CC, 
+            "|a", 
+            &pdo_options
+        ) == FAILURE
+    ){
         return ;
     }
     /* If setting the data from the given options */
@@ -364,7 +376,12 @@ CSPEED_METHOD(Adapter, __construct)/*{{{ proto Adapter::__construct(array $optio
 CSPEED_METHOD(Adapter, select)/*{{{ proto Adapter::select($fields)*/
 {
     zval *fields;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &fields) == FAILURE) {
+    if (zend_parse_parameters(
+            ZEND_NUM_ARGS() TSRMLS_CC, 
+            "z", 
+            &fields
+        ) == FAILURE
+    ) {
         return ;
     }
     if (fields && (Z_TYPE_P(fields) == IS_ARRAY) ) {
@@ -404,7 +421,12 @@ CSPEED_METHOD(Adapter, select)/*{{{ proto Adapter::select($fields)*/
 CSPEED_METHOD(Adapter, from)/*{{{ proto Adapter::from($table)*/
 {
     zend_string *table;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &table) == FAILURE) {
+    if (zend_parse_parameters(
+            ZEND_NUM_ARGS() TSRMLS_CC,
+            "S", 
+            &table
+        ) == FAILURE
+    ) {
         return ;
     }
     zend_update_property_string(
@@ -424,7 +446,12 @@ CSPEED_METHOD(Adapter, from)/*{{{ proto Adapter::from($table)*/
 CSPEED_METHOD(Adapter, where)/*{{{ proto Adapter::where($where_condition)*/
 {
     zval *where;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &where) == FAILURE) {
+    if (zend_parse_parameters(
+            ZEND_NUM_ARGS() TSRMLS_CC, 
+            "z", 
+            &where
+        ) == FAILURE
+    ) {
         return ;
     }
     if (where && (Z_TYPE_P(where) == IS_ARRAY)){
@@ -472,7 +499,12 @@ CSPEED_METHOD(Adapter, where)/*{{{ proto Adapter::where($where_condition)*/
 CSPEED_METHOD(Adapter, andWhere)/*{{{ proto Adapter::andWhere($where_condition)*/
 {
     zval *where;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &where) == FAILURE) {
+    if (zend_parse_parameters(
+            ZEND_NUM_ARGS() TSRMLS_CC, 
+            "z", 
+            &where
+        ) == FAILURE
+    ) {
         return ;
     }
     /* Get the where condition */
@@ -517,7 +549,9 @@ CSPEED_METHOD(Adapter, andWhere)/*{{{ proto Adapter::andWhere($where_condition)*
             )
         );
     } else {
-        php_error_docref(NULL, E_ERROR, 
+        php_error_docref(
+            NULL, 
+            E_ERROR, 
             "Parameter can only be array or string."
         );
         RETURN_FALSE
@@ -532,7 +566,12 @@ CSPEED_METHOD(Adapter, andWhere)/*{{{ proto Adapter::andWhere($where_condition)*
 CSPEED_METHOD(Adapter, groupBy)/*{{{ proto Adapter::groupBy($groupBy)*/
 {
     zval *group_by;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &group_by) == FAILURE) {
+    if (zend_parse_parameters(
+            ZEND_NUM_ARGS() TSRMLS_CC, 
+            "z", 
+            &group_by
+        ) == FAILURE
+    ) {
         return ;
     }
     if (group_by && (Z_TYPE_P(group_by) == IS_ARRAY)){
@@ -566,7 +605,9 @@ CSPEED_METHOD(Adapter, groupBy)/*{{{ proto Adapter::groupBy($groupBy)*/
             )
         );
     } else {
-        php_error_docref(NULL, E_ERROR, 
+        php_error_docref(
+            NULL, 
+            E_ERROR, 
             "Parameter can only be array or string."
         );
         RETURN_FALSE
@@ -581,7 +622,12 @@ CSPEED_METHOD(Adapter, groupBy)/*{{{ proto Adapter::groupBy($groupBy)*/
 CSPEED_METHOD(Adapter, having)/*{{{ proto Adapter::having($having)*/
 {
     zval *having;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &having) == FAILURE) {
+    if (zend_parse_parameters(
+            ZEND_NUM_ARGS() TSRMLS_CC, 
+            "z", 
+            &having
+        ) == FAILURE
+    ) {
         return ;
     }
     if (having && (Z_TYPE_P(having) == IS_ARRAY)){
@@ -611,7 +657,9 @@ CSPEED_METHOD(Adapter, having)/*{{{ proto Adapter::having($having)*/
             )
         );
     } else {
-        php_error_docref(NULL, E_ERROR, 
+        php_error_docref(
+            NULL, 
+            E_ERROR, 
             "Parameter can only be array or string."
         );
         RETURN_FALSE
@@ -626,7 +674,13 @@ CSPEED_METHOD(Adapter, having)/*{{{ proto Adapter::having($having)*/
 CSPEED_METHOD(Adapter, orderBy)/*{{{ proto Adapter::orderBy($orderBy)*/
 {
     zval *order_by;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &order_by) == FAILURE) {
+
+    if (zend_parse_parameters(
+            ZEND_NUM_ARGS() TSRMLS_CC, 
+            "z", 
+            &order_by
+        ) == FAILURE
+    ) {
         return ;
     }
     if (order_by && (Z_TYPE_P(order_by) == IS_ARRAY)){
@@ -692,7 +746,13 @@ CSPEED_METHOD(Adapter, orderBy)/*{{{ proto Adapter::orderBy($orderBy)*/
 CSPEED_METHOD(Adapter, limit)/*{{{ proto Adapter::limit($limit)*/
 {
     zend_long *num, *offset = NULL;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &num, &offset) == FAILURE) {
+    if (zend_parse_parameters(
+            ZEND_NUM_ARGS() TSRMLS_CC, 
+            "l|l", 
+            &num, 
+            &offset
+        ) == FAILURE
+    ) {
         return ;
     }
     zend_string *temp_limit_str;
@@ -1030,23 +1090,84 @@ static const zend_function_entry cspeed_adapter_functions[] = { /*{{{*/
 CSPEED_INIT(adapter)/*{{{*/
 {
     zend_class_entry ce;
-    INIT_NS_CLASS_ENTRY(ce, "Cs\\db\\pdo", "Adapter", cspeed_adapter_functions)
+    INIT_NS_CLASS_ENTRY(
+        ce, 
+        "Cs\\db\\pdo", 
+        "Adapter", 
+        cspeed_adapter_functions
+    )
     cspeed_adapter_ce = zend_register_internal_class(&ce);
     /* Implements from the ModelInterface */
     zend_class_implements(cspeed_adapter_ce, 1, cspeed_model_interface_ce);
     /* All propertyies */
-    zend_declare_property_string(cspeed_adapter_ce, CSPEED_STRL(CSPEED_ADAPTER_SELECT), "*", ZEND_ACC_PROTECTED);
-    zend_declare_property_string(cspeed_adapter_ce, CSPEED_STRL(CSPEED_ADAPTER_FROM), "", ZEND_ACC_PROTECTED);
-    zend_declare_property_string(cspeed_adapter_ce, CSPEED_STRL(CSPEED_ADAPTER_WHERE), "", ZEND_ACC_PROTECTED);
-    zend_declare_property_string(cspeed_adapter_ce, CSPEED_STRL(CSPEED_ADAPTER_GROUP_BY), "", ZEND_ACC_PROTECTED);
-    zend_declare_property_string(cspeed_adapter_ce, CSPEED_STRL(CSPEED_ADAPTER_HAVING), "", ZEND_ACC_PROTECTED);
-    zend_declare_property_string(cspeed_adapter_ce, CSPEED_STRL(CSPEED_ADAPTER_ORDER_BY), "", ZEND_ACC_PROTECTED);
-    zend_declare_property_string(cspeed_adapter_ce, CSPEED_STRL(CSPEED_ADAPTER_LIMIT), "", ZEND_ACC_PROTECTED);
-    zend_declare_property_string(cspeed_adapter_ce, CSPEED_STRL(CSPEED_ADAPTER_RAW_SQL), "", ZEND_ACC_PROTECTED);
-    zend_declare_property_null(cspeed_adapter_ce, CSPEED_STRL(CSPEED_ADAPTER_BIND_PARAMS), ZEND_ACC_PROTECTED);
-    zend_declare_property_null(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_PDO_OBJECT), ZEND_ACC_STATIC);
-    zend_declare_property_null(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_THIS_ADAPTER), ZEND_ACC_STATIC);
-    zend_declare_property_null(cspeed_adapter_ce, CSPEED_STRL(CSPEED_DB_THIS_PDO), ZEND_ACC_PUBLIC);
+    zend_declare_property_string(
+        cspeed_adapter_ce, 
+        CSPEED_STRL(CSPEED_ADAPTER_SELECT), 
+        "*", 
+        ZEND_ACC_PROTECTED
+    );
+    zend_declare_property_string(
+        cspeed_adapter_ce, 
+        CSPEED_STRL(CSPEED_ADAPTER_FROM), 
+        "", 
+        ZEND_ACC_PROTECTED
+    );
+    zend_declare_property_string(
+        cspeed_adapter_ce, 
+        CSPEED_STRL(CSPEED_ADAPTER_WHERE), 
+        "", 
+        ZEND_ACC_PROTECTED
+    );
+    zend_declare_property_string(
+        cspeed_adapter_ce, 
+        CSPEED_STRL(CSPEED_ADAPTER_GROUP_BY), 
+        "", 
+        ZEND_ACC_PROTECTED
+    );
+    zend_declare_property_string(
+        cspeed_adapter_ce, 
+        CSPEED_STRL(CSPEED_ADAPTER_HAVING), 
+        "", 
+        ZEND_ACC_PROTECTED
+    );
+    zend_declare_property_string(
+        cspeed_adapter_ce, 
+        CSPEED_STRL(CSPEED_ADAPTER_ORDER_BY), 
+        "", 
+        ZEND_ACC_PROTECTED
+    );
+    zend_declare_property_string(
+        cspeed_adapter_ce, 
+        CSPEED_STRL(CSPEED_ADAPTER_LIMIT), 
+        "", 
+        ZEND_ACC_PROTECTED
+    );
+    zend_declare_property_string(
+        cspeed_adapter_ce, 
+        CSPEED_STRL(CSPEED_ADAPTER_RAW_SQL), 
+        "", 
+        ZEND_ACC_PROTECTED
+    );
+    zend_declare_property_null(
+        cspeed_adapter_ce, 
+        CSPEED_STRL(CSPEED_ADAPTER_BIND_PARAMS), 
+        ZEND_ACC_PROTECTED
+    );
+    zend_declare_property_null(
+        cspeed_adapter_ce, 
+        CSPEED_STRL(CSPEED_DB_PDO_OBJECT), 
+        ZEND_ACC_STATIC
+    );
+    zend_declare_property_null(
+        cspeed_adapter_ce, 
+        CSPEED_STRL(CSPEED_DB_THIS_ADAPTER), 
+        ZEND_ACC_STATIC
+    );
+    zend_declare_property_null(
+        cspeed_adapter_ce, 
+        CSPEED_STRL(CSPEED_DB_THIS_PDO), 
+        ZEND_ACC_PUBLIC
+    );
 }/*}}}*/
 
 

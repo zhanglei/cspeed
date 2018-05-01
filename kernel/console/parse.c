@@ -101,7 +101,7 @@ parse_cli_path_info(zval *path_info_array)
     /* Exists or not. */
     check_file_exists(ZSTR_VAL(temp_module_path));
 
-    if (UNEXPECTED((temp_mca_value = zend_hash_index_find(Z_ARRVAL_P(path_info_array), 2)) != NULL)) {
+    if ( EXPECTED((temp_mca_value = zend_hash_index_find(Z_ARRVAL_P(path_info_array), 2)) != NULL) ) {
         default_controller = zend_string_copy(Z_STR_P(temp_mca_value));
         CSPEED_G(core_router_default_controller) = zend_string_dup(Z_STR_P(temp_mca_value), 0);
         zend_hash_index_del(Z_ARRVAL_P(path_info_array), 2);
@@ -120,7 +120,10 @@ parse_cli_path_info(zval *path_info_array)
 
     /* After require the class from the controller file. create the controller object and do the initialise process */
     zval controller_obj;
-    zend_class_entry *controller_ptr = zend_hash_find_ptr(EG(class_table), zend_string_tolower(default_controller));
+    zend_class_entry *controller_ptr = zend_hash_find_ptr(
+        EG(class_table), 
+        zend_string_tolower(default_controller)
+    );
     if (controller_ptr) {
         if (!instanceof_function(controller_ptr, cspeed_controller_ce)){
             php_error_docref(
@@ -229,7 +232,15 @@ parse_cli_path_info(zval *path_info_array)
     recursive_call_parent_method_two(&controller_obj, "initialise");
 
     /* After running the initialise method. running the __beforeAction method */
-    trigger_events(&controller_obj, strpprintf(0, "%s", EVENT_BEFORE_ACTION));
+    trigger_events(
+        &controller_obj, 
+        strpprintf(
+            0, 
+            "%s", 
+            EVENT_BEFORE_ACTION
+        )
+    );
+
     /* After adding the value into $_GET run the controller's action */
     zend_string *action_append_action = strpprintf(
         0, 
