@@ -160,7 +160,7 @@ CSPEED_METHOD(Response, setJsonContent)/*{{{ Set the response with the given for
         return ;
     }
     smart_str json_str = { 0 };
-    php_json_encode(&json_str, json_array, 0);
+    php_json_encode(&json_str, json_array, 256);
     smart_str_0(&json_str);
 #if 0
     zval function_name, retval_ptr;
