@@ -336,8 +336,16 @@ cspeed_build_equal_string(zval *array, char *begin_str, zval *result)/*{{{ Build
     } ZEND_HASH_FOREACH_END();
     smart_str_0(&where_str);
     char *temp_where_str = (char *)malloc(sizeof(char) * ZSTR_LEN(where_str.s) - 4);
-    memset(temp_where_str, 0, ZSTR_LEN(where_str.s) - 4);
-    memcpy(temp_where_str, ZSTR_VAL(where_str.s), ZSTR_LEN(where_str.s) - 5);
+    memset(
+        temp_where_str, 
+        0, 
+        ZSTR_LEN(where_str.s) - 4
+    );
+    memcpy(
+        temp_where_str, 
+        ZSTR_VAL(where_str.s), 
+        ZSTR_LEN(where_str.s) - 5
+    );
     smart_str_free(&where_str);
     ZVAL_STRING(result, temp_where_str);
     free(temp_where_str);
@@ -358,8 +366,16 @@ cspeed_build_quote_string(zval *array, zval *result)/*{{{ Building the Quote str
     } ZEND_HASH_FOREACH_END();
     smart_str_0(&field_str);
     char *temp_select_str = (char *)malloc(sizeof(char) * ZSTR_LEN(field_str.s));
-    memset(temp_select_str, 0, ZSTR_LEN(field_str.s));
-    memcpy(temp_select_str, ZSTR_VAL(field_str.s), ZSTR_LEN(field_str.s) - 1);
+    memset(
+        temp_select_str, 
+        0, 
+        ZSTR_LEN(field_str.s)
+    );
+    memcpy(
+        temp_select_str, 
+        ZSTR_VAL(field_str.s), 
+        ZSTR_LEN(field_str.s) - 1
+    );
     smart_str_free(&field_str);
     ZVAL_STRING(result, temp_select_str);
     free(temp_select_str);
