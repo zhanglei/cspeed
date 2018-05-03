@@ -92,7 +92,7 @@ CSPEED_METHOD(Controller, dispatch)
     );
 
     if ( EXPECTED( 
-            (module = zend_hash_index_find(Z_ARRVAL(url_data), 0))
+            (module = zend_hash_index_find(Z_ARRVAL(url_data), 1))
             == NULL
     ) ) {
         module_name = ZSTR_VAL(CSPEED_G(core_router_default_module));
@@ -102,7 +102,7 @@ CSPEED_METHOD(Controller, dispatch)
 
     if (
         EXPECTED(
-            ( controller = zend_hash_index_find(Z_ARRVAL(url_data), 1) )
+            ( controller = zend_hash_index_find(Z_ARRVAL(url_data), 2) )
             == NULL
         )
     ) {
@@ -113,7 +113,7 @@ CSPEED_METHOD(Controller, dispatch)
 
     if (
         EXPECTED(
-            ( action = zend_hash_index_find(Z_ARRVAL(url_data), 2) )
+            ( action = zend_hash_index_find(Z_ARRVAL(url_data), 3) )
             == NULL
         )
     ) {
@@ -123,12 +123,22 @@ CSPEED_METHOD(Controller, dispatch)
     }
 
     if ( 
-        (strncmp(ZSTR_VAL(CSPEED_G(core_router_default_module)), CSPEED_STRL(module_name)) == 0) &&
-        (strncmp(ZSTR_VAL(CSPEED_G(core_router_default_controller)), CSPEED_STRL(controller_name)) == 0) &&
-        (strncmp(ZSTR_VAL(CSPEED_G(core_router_default_action)), CSPEED_STRL(action_name)) == 0)
+        ( strncmp(
+            ZSTR_VAL(CSPEED_G(core_router_default_module)), 
+            CSPEED_STRL(module_name)
+        ) == 0) &&
+        ( strncmp(
+            ZSTR_VAL(CSPEED_G(core_router_default_controller)), 
+            CSPEED_STRL(controller_name)
+        ) == 0) &&
+        ( strncmp(
+            ZSTR_VAL(CSPEED_G(core_router_default_action)), 
+            CSPEED_STRL(action_name)
+        ) == 0)
     ) {
         php_error_docref(NULL, E_ERROR, "%s", "Can't dispatch the url to current pattern.");
     }
+
 
     parse_path_info(&url_data);
 
