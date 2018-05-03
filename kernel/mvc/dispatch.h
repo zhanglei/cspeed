@@ -21,7 +21,11 @@
 #ifndef CSPEED_DISPATCH_H
 #define CSPEED_DISPATCH_H
 
-void dispather_url();                 /* Dispatcher the URL from the PATH_INFO */
+/* Dispatcher the URL from the PATH_INFO */
+void dispather_url();                 
+
+/* Dispatcher the URL to the dest */
+void parse_path_info(zval *path_info_array);
 
 #endif
 

@@ -28,11 +28,16 @@
 #include "php_cspeed.h"
 
 #include "kernel/di/di.h"
+#include "kernel/mvc/dispatch.h"
 #include "kernel/mvc/controller.h"
 #include "kernel/tool/component.h"
 
 /*{{{*/
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_controller_construct, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_controller_dispatch, 0, 0, 1)
+  ZEND_ARG_INFO(0, arginfo_cspeed_dispatch)
 ZEND_END_ARG_INFO()
 /*}}}*/
 
@@ -41,13 +46,109 @@ CSPEED_METHOD(Controller, __construct)/*{{{ proto Controller::__construct() */
     
 }/*}}}*/
 
-static const zend_function_entry cspeed_controller_functions[] = { /*{{{*/
+/*{{{ proto Controller::dispatch($url)*/
+CSPEED_METHOD(Controller, dispatch)
+{
+    /** 
+     * Note that, the $url must contains within three parts: 
+     * module/controller/action, if not, use the default instead. 
+     */
+    zend_string *url;
+    zval *module;
+    zval *controller;
+    zval *action;
+
+    char *module_name, *controller_name, *action_name;
+
+    zval url_data;
+    array_init(&url_data);
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &url) == FAILURE) {
+        return ;
+    }
+
+    if ( !CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(url)) ) {
+        php_error_docref(
+            NULL,
+            E_ERROR,
+            "%s",
+            "The argument `url` must be a valid string."
+        );
+    }
+
+    if ( *(ZSTR_VAL(url)) != '/' ) {
+        url = strpprintf(
+            0,
+            "/%s",
+            ZSTR_VAL(url)
+        );
+    }
+
+    php_explode(
+        zend_string_init(CSPEED_STRL("/"), 0), 
+        url,
+        &url_data, 
+        ZEND_LONG_MAX
+    );
+
+    if ( EXPECTED( 
+            (module = zend_hash_index_find(Z_ARRVAL(url_data), 0))
+            == NULL
+    ) ) {
+        module_name = ZSTR_VAL(CSPEED_G(core_router_default_module));
+    } else {
+        module_name = Z_STRVAL_P(module);
+    }
+
+    if (
+        EXPECTED(
+            ( controller = zend_hash_index_find(Z_ARRVAL(url_data), 1) )
+            == NULL
+        )
+    ) {
+        controller_name = ZSTR_VAL(CSPEED_G(core_router_default_controller));
+    } else {
+        controller_name = Z_STRVAL_P(controller);
+    }
+
+    if (
+        EXPECTED(
+            ( action = zend_hash_index_find(Z_ARRVAL(url_data), 2) )
+            == NULL
+        )
+    ) {
+        action_name = ZSTR_VAL(CSPEED_G(core_router_default_action));
+    } else {
+        action_name = Z_STRVAL_P(action);
+    }
+
+    if ( 
+        (strncmp(ZSTR_VAL(CSPEED_G(core_router_default_module)), CSPEED_STRL(module_name)) == 0) &&
+        (strncmp(ZSTR_VAL(CSPEED_G(core_router_default_controller)), CSPEED_STRL(controller_name)) == 0) &&
+        (strncmp(ZSTR_VAL(CSPEED_G(core_router_default_action)), CSPEED_STRL(action_name)) == 0)
+    ) {
+        php_error_docref(NULL, E_ERROR, "%s", "Can't dispatch the url to current pattern.");
+    }
+
+    parse_path_info(&url_data);
+
+} /*}}}*/
+
+/*{{{*/
+static const zend_function_entry cspeed_controller_functions[] = {
     CSPEED_ME(
       Controller, 
       __construct, 
       arginfo_cspeed_controller_construct, 
       ZEND_ACC_PUBLIC
     )
+    CSPEED_ME(
+        Controller,
+        dispatch,
+        arginfo_cspeed_controller_dispatch,
+        ZEND_ACC_PUBLIC
+    )
+
     PHP_FE_END
 };/*}}}*/
 
