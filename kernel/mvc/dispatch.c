@@ -103,10 +103,15 @@ void parse_path_info(zval *path_info_array)
     if (zend_hash_num_elements(CSPEED_G(core_router_modules))) {
         zval *allowed_module;
         ZEND_HASH_FOREACH_VAL(CSPEED_G(core_router_modules), allowed_module){
-            if (memcmp(
+            if ( ( memcmp(
                     Z_STRVAL_P(allowed_module), 
                     CSPEED_STRL( ZSTR_VAL(default_module) )
-                ) == 0) {
+                ) == 0) || 
+                 ( memcmp(
+                    Z_STRVAL_P(allowed_module), 
+                    CSPEED_STRL("*")
+                ) == 0 )
+             ) {
                 is_allowed = TRUE;
                 break;
             }
