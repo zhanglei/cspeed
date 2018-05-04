@@ -142,6 +142,8 @@ CSPEED_METHOD(Controller, dispatch)
 
     parse_path_info(&url_data);
 
+    zval_ptr_dtor(&url_data);
+
 } /*}}}*/
 
 /*{{{*/
