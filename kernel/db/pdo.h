@@ -51,6 +51,8 @@ void cspeed_pdo_last_insert_id(zval *pdo_object, char *name, zval *retval);
 /* Get a prepared SQLSTATEMENT */
 void cspeed_pdo_prepare(zval *pdo_object, char *sql, zval *retval);
 
+/* Execute the PDO statements */
+void cspeed_pdo_statement_execute(zval *pdostatement_obj, zval *bind_parameters, zval *retval);
 
 /* The flowing is the PDOStatement functions */
 /* Binding the params */

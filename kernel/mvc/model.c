@@ -20,18 +20,20 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/info.h"
 #include "php_cspeed.h"
+#include "zend_smart_str.h"             /* Use the smart_str */
+#include "ext/standard/info.h"
 
-#include "kernel/tool/helper.h"
 #include "kernel/mvc/model.h"
+#include "kernel/tool/helper.h"
+#include "Zend/zend_inheritance.h"
 
 #include "kernel/CApp.h"
 #include "kernel/di/di.h"
+#include "kernel/db/pdo.h"
 #include "kernel/db/adapter.h"
 #include "kernel/tool/component.h"
 
-#include "zend_smart_str.h"             /* Use the smart_str */
 
 void 
 reset_model_sql(zval *this) /*{{{ To clear the current sql result for the next execute */

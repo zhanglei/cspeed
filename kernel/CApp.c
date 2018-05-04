@@ -24,24 +24,24 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/info.h"
+#include "php_main.h"
 #include "php_cspeed.h"
-
-#include "kernel/CApp.h"
-#include "kernel/bootinit.h"
-#include "kernel/net/request.h"
-
-#include "kernel/tool/helper.h"
-#include "kernel/tool/require.h"
-
-#include "kernel/di/di.h"
-#include "kernel/mvc/router.h"
-#include "kernel/mvc/dispatch.h"
-
+#include "ext/standard/info.h"
 #include "ext/pcre/php_pcre.h"
+#include "Zend/zend_inheritance.h"
 #include "ext/standard/php_string.h"
 
+#include "kernel/CApp.h"
+#include "kernel/di/di.h"
+#include "kernel/bootinit.h"
+#include "kernel/mvc/router.h"
+#include "kernel/net/request.h"
+#include "kernel/tool/helper.h"
+#include "kernel/tool/require.h"
+#include "kernel/mvc/dispatch.h"
 #include "kernel/tool/component.h"
+
+
 
 int
 cspeed_deal_reqeust(zend_string *url, zend_fcall_info *zfi, zend_fcall_info_cache *zfic, zval *ret_val) 

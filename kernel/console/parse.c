@@ -22,12 +22,14 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/info.h"
 #include "php_cspeed.h"
+#include "ext/standard/info.h"
+#include "ext/standard/php_string.h"
 
 #include "kernel/net/request.h"
 #include "kernel/tool/helper.h"
 #include "kernel/tool/require.h"
+#include "kernel/tool/component.h"
 #include "kernel/mvc/controller.h"
 
 void 
@@ -70,18 +72,22 @@ parse_cli_path_info(zval *path_info_array)
     if (zend_hash_num_elements(CSPEED_G(core_router_modules))) {
         zval *allowed_module;
         ZEND_HASH_FOREACH_VAL(CSPEED_G(core_router_modules), allowed_module){
-            if ( memcmp(
-                Z_STRVAL_P(allowed_module), 
-                CSPEED_STRL( ZSTR_VAL(default_module) ) 
-                ) == 0) {
+            if ( (memcmp(
+                    Z_STRVAL_P(allowed_module), 
+                    CSPEED_STRL( ZSTR_VAL(default_module) ) 
+                ) == 0) ||
+                 (memcmp(
+                    Z_STRVAL_P(allowed_module),
+                    CSPEED_STRL("*")
+                ) == 0)
+            ) {
                 is_allowed = TRUE;
                 break;
             }
         } ZEND_HASH_FOREACH_END();
     }
     if (is_allowed == FALSE){
-        php_error_docref(
-            NULL, 
+        zend_error(
             E_ERROR, 
             "Module: `%s` are not allowed to access.", 
             ZSTR_VAL(default_module)
@@ -126,16 +132,14 @@ parse_cli_path_info(zval *path_info_array)
     );
     if (controller_ptr) {
         if (!instanceof_function(controller_ptr, cspeed_controller_ce)){
-            php_error_docref(
-                NULL, 
+            zend_error(
                 E_ERROR, 
                 "Controller class must extends from \\Cs\\mvc\\Controller class."
             );
         }
         object_init_ex(&controller_obj, controller_ptr);
     } else {
-        php_error_docref(
-            NULL, 
+        zend_error(
             E_ERROR, 
             "Controller class :`%s` not found.", 
             ZSTR_VAL(default_controller)
@@ -255,8 +259,7 @@ parse_cli_path_info(zval *path_info_array)
         zval_ptr_dtor(&retval_ptr);
     } else {
         zend_string_release(action_append_action);
-        php_error_docref(
-            NULL, 
+        zend_error(
             E_ERROR, 
             "Controller class has not the :`%s` method.", 
             ZSTR_VAL(action_append_action)

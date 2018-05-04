@@ -192,6 +192,7 @@ class Request
      *
      * $idCard = $request->get('idcard', 'strtoupper');
      * </pre>
+     * @return mixed|string|array
      */
     function get($key, $filterClosure)
     {

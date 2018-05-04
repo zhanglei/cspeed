@@ -24,10 +24,13 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/info.h"
 #include "php_cspeed.h"
+#include "ext/standard/info.h"
+#include "Zend/zend_exceptions.h"
+
 
 #include "kernel/net/request.h"
+#include "kernel/tool/helper.h"
 
 zval *cspeed_request_get(const char *get_key)/*{{{ Get zval from $_GET */
 {
@@ -379,7 +382,9 @@ CSPEED_METHOD(Request, get)
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|Sz", &get_key, &filter) == FAILURE) {
         return ;
     }
-    zval *get_data = cspeed_request_get( ( (get_key == NULL) || (ZVAL_IS_NULL(get_key ) == NULL) ) ? NULL : ZSTR_VAL(get_key) );
+    zval *get_data = cspeed_request_get( 
+        ( ( get_key == NULL) || !CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(get_key)) ) ? NULL : ZSTR_VAL(get_key) 
+    );
     if (get_data) {
         parameter_filter(filter, get_data);
         RETURN_ZVAL(get_data, 1, 0);
@@ -397,7 +402,9 @@ CSPEED_METHOD(Request, getPost)
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|Sz", &post_key, &filter) == FAILURE) {
         return ;
     }
-    zval *post_data = cspeed_request_post( ( (post_key == NULL) || (ZVAL_IS_NULL(post_key) == NULL)) ? NULL : ZSTR_VAL( post_key ) );
+    zval *post_data = cspeed_request_post(
+        ( (post_key == NULL) || !CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(post_key)) ) ? NULL : ZSTR_VAL( post_key )
+    );
     if (post_data) {
         parameter_filter(filter, post_data);
         RETURN_ZVAL(post_data, 1, 0);

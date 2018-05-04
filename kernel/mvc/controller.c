@@ -24,8 +24,12 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/info.h"
+#include "php_main.h"
 #include "php_cspeed.h"
+#include "ext/standard/info.h"
+#include "kernel/tool/require.h"
+#include "Zend/zend_inheritance.h"
+#include "ext/standard/php_string.h"
 
 #include "kernel/di/di.h"
 #include "kernel/mvc/dispatch.h"
@@ -43,7 +47,6 @@ ZEND_END_ARG_INFO()
 
 CSPEED_METHOD(Controller, __construct)/*{{{ proto Controller::__construct() */
 {
-    
 }/*}}}*/
 
 /*{{{ proto Controller::dispatch($url)*/
@@ -68,8 +71,7 @@ CSPEED_METHOD(Controller, dispatch)
     }
 
     if ( !CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(url)) ) {
-        php_error_docref(
-            NULL,
+        zend_error(
             E_ERROR,
             "%s",
             "The argument `url` must be a valid string."
@@ -136,12 +138,14 @@ CSPEED_METHOD(Controller, dispatch)
             CSPEED_STRL(action_name)
         ) == 0)
     ) {
-        php_error_docref(NULL, E_ERROR, "%s", "Can't dispatch the url to current pattern.");
+        zend_error(E_ERROR, "%s", "Loop dispatch mode forbid.");
     }
 
-
     parse_path_info(&url_data);
+    zval_ptr_dtor(&url_data);
 
+    /* For that this is the re-dispatch, after the dispatch you must shutdown the request. */
+    php_request_shutdown(NULL);
 } /*}}}*/
 
 /*{{{*/

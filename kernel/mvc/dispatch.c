@@ -103,18 +103,22 @@ void parse_path_info(zval *path_info_array)
     if (zend_hash_num_elements(CSPEED_G(core_router_modules))) {
         zval *allowed_module;
         ZEND_HASH_FOREACH_VAL(CSPEED_G(core_router_modules), allowed_module){
-            if (memcmp(
+            if ( (memcmp(
                     Z_STRVAL_P(allowed_module), 
                     CSPEED_STRL( ZSTR_VAL(default_module) )
-                ) == 0) {
+                  ) == 0) ||
+                 (memcmp(
+                    Z_STRVAL_P(allowed_module),
+                    CSPEED_STRL("*")
+                 ) == 0 )
+            ) {
                 is_allowed = TRUE;
                 break;
             }
         } ZEND_HASH_FOREACH_END();
     }
     if (is_allowed == FALSE){
-        php_error_docref(
-            NULL, 
+        zend_error(
             E_ERROR, 
             "Module: `%s` are not allowed to access.", 
             ZSTR_VAL(default_module)
@@ -152,8 +156,7 @@ void parse_path_info(zval *path_info_array)
         1
     );
     if (ZVAL_IS_NULL(app_object)){
-        php_error_docref(
-            NULL, 
+        zend_error(
             E_ERROR, 
             "You must create a Cs\\App object first."
         );
@@ -173,16 +176,14 @@ void parse_path_info(zval *path_info_array)
     );
     if (controller_ptr) {
         if (!instanceof_function(controller_ptr, cspeed_controller_ce)){
-            php_error_docref(
-                NULL, 
+            zend_error(
                 E_ERROR, 
                 "Controller class must extends from \\Cs\\mvc\\Controller class."
             );
         }
         object_init_ex(&controller_obj, controller_ptr);
     } else {
-        php_error_docref(
-            NULL, 
+        zend_error(
             E_ERROR, 
             "Controller class :`%s` not found.", 
             ZSTR_VAL(default_controller)
@@ -313,8 +314,7 @@ void parse_path_info(zval *path_info_array)
             zval_ptr_dtor(&retval_ptr);
         } else {
             zend_string_release(action_append_action);
-            php_error_docref(
-                NULL, 
+            zend_error(
                 E_ERROR, 
                 "Controller class has not the :`%s` method.", 
                 ZSTR_VAL(action_append_action)
@@ -479,8 +479,7 @@ void dispather_url()    /* {{{ Dispatcher the URL */
                         } else {
                             zval_ptr_dtor(&retval);
                             efree(ctr.line);
-                            php_error_docref(
-                                NULL, 
+                            zend_error(
                                 E_ERROR, 
                                 "Please install SAPI extension."
                             );

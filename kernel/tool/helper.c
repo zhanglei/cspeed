@@ -24,22 +24,26 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/info.h"
 #include "php_cspeed.h"
-#include "kernel/tool/helper.h"
+#include "ext/standard/info.h"
 #include "ext/standard/php_dir.h"
-#include "kernel/mvc/model.h"
+#include "ext/standard/php_string.h"
 #include "ext/standard/basic_functions.h"
 
+#include <unistd.h>
+#include <fcntl.h>
+
 #include "zend.h"
+#include "zend_smart_str.h"             /* Use the smart_str */
 #include "zend_ini_scanner.h"
 #include "zend_language_scanner.h"
 #include <zend_language_parser.h>
 
-#include "zend_smart_str.h"             /* Use the smart_str */
 
-#include <unistd.h>
-#include <fcntl.h>
+#include "kernel/mvc/model.h"
+#include "kernel/tool/helper.h"
+#include "kernel/tool/require.h"
+
 
 char *cspeed_get_cwd(char *path)                    /*{{{ Return the current directory */
 {
@@ -385,10 +389,9 @@ int
 check_file_exists(char *file_path) /* Checking wheather the given file is exists or not. */
 {
     if (access(file_path, F_OK) == -1) {
-        php_error_docref(
-            NULL, 
+        zend_error(
             E_ERROR, 
-            "File: %s not exists.", 
+            "File: `%s` not exists.", 
             file_path
         );
     }
@@ -574,8 +577,7 @@ cspeed_autoload_file(
 
         if ( strncmp(current_alias, ("Cs"), strlen("Cs")) == 0 ) {
             free(current_alias);
-            php_error_docref(
-                NULL, 
+            zend_error(
                 E_ERROR, 
                 "CSpeed framework not contain the class: `%s`.", 
                 ZSTR_VAL(class_name_with_namespace)
@@ -622,8 +624,7 @@ cspeed_autoload_file(
             free(real_file_path);
         } else {            /* Not found the needing alias */
             free(current_alias);
-            php_error_docref(
-                NULL, 
+            zend_error(
                 E_ERROR, 
                 "Namespace alias: %s not found. please set it first before use.", 
                 current_alias

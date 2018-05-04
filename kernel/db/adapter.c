@@ -29,6 +29,7 @@
 
 #include "kernel/db/pdo.h"              /* Use the PDO wrapper functions */
 #include "kernel/db/adapter.h"
+#include "kernel/tool/helper.h"
 #include "kernel/db/model_interface.h"
 
 #include "zend_smart_str.h"             /* Use the smart_str */

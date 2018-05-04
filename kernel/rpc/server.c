@@ -27,15 +27,16 @@
 #include "ext/standard/info.h"
 #include "php_cspeed.h"
 
-#include "Zend/zend_smart_str.h"
 #include "main/SAPI.h"
 #include "ext/json/php_json.h"
 #include "ext/standard/head.h"
+#include "Zend/zend_smart_str.h"
+#include "Zend/zend_inheritance.h"
 
-#include "kernel/tool/component.h"
-#include "kernel/mvc/controller.h"
 #include "kernel/rpc/server.h"
 #include "kernel/net/request.h"
+#include "kernel/tool/component.h"
+#include "kernel/mvc/controller.h"
 
 #include "main/SAPI.h"  /* for sapi */
 

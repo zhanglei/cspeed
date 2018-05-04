@@ -31,4 +31,16 @@ class Controller extends \Cs\tool\Component
      * @var $router \Cs\mvc\Router
      */
     public $router;
+
+    /**
+     * Dispatch the URL without redirect.
+     * May used in the APIs.
+     * [NOTE]: when in dispatching, current request code behind the dispatch operation will be discarded.
+     * @param $url string To dispatch the url without redirection.
+     *                    $url contains with 3 parts at least and parameters may be add to the URL too.
+     *                    such as ``` dispatch('/stores/index/do');``` or ```dispatch(/stores/index/do/id/1')```
+     */
+    public function dispatch($url)
+    {
+    }
 }

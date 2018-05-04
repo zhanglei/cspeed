@@ -288,7 +288,7 @@ nest_again:
                                                              && (property_info->flags & ZEND_ACC_PRIVATE ) )
                                                           )
                                                         ) {
-                                                            if ( (Z_TYPE_INFO_P(attr_value) == IS_FALSE) ) {
+                                                            if ( (Z_TYPE_P(attr_value) == IS_FALSE) ) {
                                                                 set_attr_or_not = 0;
                                                                 break;
                                                             } else {
