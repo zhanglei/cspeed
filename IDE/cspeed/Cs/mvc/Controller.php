@@ -31,4 +31,12 @@ class Controller extends \Cs\tool\Component
      * @var $router \Cs\mvc\Router
      */
     public $router;
+
+    /**
+     * @var $url string The router url to dispatch, contains with 3 parts: 
+     * module/controller/action,  Get parameters in url path-infoss
+     */
+    function dispatch($url)
+    {
+    }
 }
