@@ -186,7 +186,9 @@ void handle_method_request(zval *object_ptr, char *method_name, INTERNAL_FUNCTIO
     );
     if ( continue_or_false >= 0 ) {
         /* Fix: if meet the suited regular url, the next will abandoned */
-        php_request_shutdown(NULL);
+        zval ret_val;
+        zend_eval_string("exit();", &ret_val, "exit();");
+        zval_ptr_dtor(&ret_val);
     }
 } /*}}}*/
 
