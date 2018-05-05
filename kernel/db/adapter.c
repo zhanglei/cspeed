@@ -24,8 +24,9 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/info.h"
+#include "php_main.h"
 #include "php_cspeed.h"
+#include "ext/standard/info.h"
 
 #include "kernel/db/pdo.h"              /* Use the PDO wrapper functions */
 #include "kernel/db/adapter.h"
@@ -199,6 +200,11 @@ zend_bool output_sql_errors(zval *pdo_statement, zval *model_object)  /*{{{ Retu
                     2, 
                     params
                 );
+                if ( Z_TYPE(ret_val) == IS_FALSE ) {
+                    zval_ptr_dtor(&ret_val);
+                    php_request_shutdown(NULL);
+                    return TRUE;
+                }
                 zval_ptr_dtor(&ret_val);
             } else {
                 /* 2. when onErrorCallback method exists in object, call it */
@@ -214,6 +220,11 @@ zend_bool output_sql_errors(zval *pdo_statement, zval *model_object)  /*{{{ Retu
                     params, 
                     &ret_val
                 );
+                if ( Z_TYPE(ret_val) == IS_FALSE ) {
+                    zval_ptr_dtor(&ret_val);
+                    php_request_shutdown(NULL);
+                    return TRUE;
+                }
                 zval_ptr_dtor(&ret_val);
             }
         }
