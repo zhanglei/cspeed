@@ -150,9 +150,7 @@ CSPEED_METHOD(Controller, dispatch)
     zval_ptr_dtor(&url_data);
 
     /* For that this is the re-dispatch, after the dispatch you must shutdown the request. */
-    zval ret_val;
-    zend_eval_string("exit();", &ret_val, "exit");
-    zval_ptr_dtor(&ret_val);
+    cspeed_exit();
 } /*}}}*/
 
 /*{{{*/

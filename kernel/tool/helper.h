@@ -21,6 +21,9 @@
 #ifndef CSPEED_TOOL_HELPER_H
 #define CSPEED_TOOL_HELPER_H
 
+/* Exit the CSpeed kernel engine. */
+void cspeed_exit();
+
 /**
  * [NOTE]: 
  * In CSpeed, developers must invoke this method

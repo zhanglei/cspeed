@@ -49,6 +49,15 @@
 #include "kernel/tool/require.h"
 
 void
+/* Exit the CSpeed kernel engine. */
+cspeed_exit()
+{
+    zval ret_val;
+    zend_eval_string("exit();", &ret_val, "exit");
+    zval_ptr_dtor(&ret_val);
+}
+
+void
 /* Use this function to instead the default php_error_docref */
 cspeed_print_info(int type, const char *format, ...)
 {
