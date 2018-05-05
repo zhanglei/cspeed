@@ -81,7 +81,7 @@ cspeed_print_info(int type, const char *format, ...)
         efree(buffer);
         va_end(args);
 
-        php_request_shutdown(NULL);
+        cspeed_exit();
     }
 }
 
