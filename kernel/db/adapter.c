@@ -150,7 +150,7 @@ void reset_adapter_sql(zval *this)/*{{{ Rest the SQL for the next running */
     );
 }/*}}}*/
 
-zend_bool output_sql_errors(zval *pdo_statement)  /*{{{ Return the SQL running errors*/
+zend_bool output_sql_errors(zval *pdo_statement, zval *model_object)  /*{{{ Return the SQL running errors*/
 {
     zval retval;
     cspeed_pdo_error_info(pdo_statement, &retval);
@@ -174,8 +174,50 @@ zend_bool output_sql_errors(zval *pdo_statement)  /*{{{ Return the SQL running e
             )
         )
     ) {
-        php_error_docref(
-            NULL, 
+        if ( model_object) {
+            /* Invokeing object was from Adapter or Cs\mvc\Model */
+            /* 1. When setErrorCallback exists call it */
+            zval *error_callback = zend_read_property(
+                Z_OBJCE_P(model_object), 
+                model_object,
+                CSPEED_STRL(CSPEED_DB_ERROR_CALLBACK),
+                1,
+                NULL
+            );
+
+            if ( error_callback && !ZVAL_IS_NULL(error_callback) ) {
+                zval ret_val;
+                zval params[] = {
+                    *sql_code,
+                    *sql_info
+                };
+                call_user_function(
+                    EG(function_table), 
+                    NULL, 
+                    error_callback, 
+                    &ret_val, 
+                    2, 
+                    params
+                );
+                zval_ptr_dtor(&ret_val);
+            } else {
+                /* 2. when onErrorCallback method exists in object, call it */
+                zval ret_val;
+                zval params[] = {
+                    *sql_code,
+                    *sql_info
+                };
+                call_method_with_object(
+                    model_object, 
+                    "onErrorCallback", 
+                    2, 
+                    params, 
+                    &ret_val
+                );
+                zval_ptr_dtor(&ret_val);
+            }
+        }
+        cspeed_print_info(
             E_ERROR, 
             "SQL: %d %s", 
             Z_LVAL_P(sql_code), 
@@ -227,6 +269,15 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_adapter_create_command, 0, 0, 1)
     ZEND_ARG_INFO(0, raw_sql)
     ZEND_ARG_INFO(0, bind_params)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_adapter_set_error_callback, 0, 0, 1)
+    ZEND_ARG_INFO(0, error_callback)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_adapter_on_error_callback, 0, 0, 2)
+    ZEND_ARG_INFO(0, error_code)
+    ZEND_ARG_INFO(0, error_message)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_adapter_execute, 0, 0, 0)
@@ -299,24 +350,21 @@ CSPEED_METHOD(Adapter, __construct)/*{{{ proto Adapter::__construct(array $optio
     }
 
     if (CSPEED_G(db_master_dsn) == NULL) {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "PDO need a valid dsn."
         );
         RETURN_FALSE
     }
     if (CSPEED_G(db_master_username) == NULL) {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "PDO need a valid username."
         );
         RETURN_FALSE
     }
     if (CSPEED_G(db_master_password) == NULL) {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "PDO need a valid password."
         );
@@ -406,8 +454,7 @@ CSPEED_METHOD(Adapter, select)/*{{{ proto Adapter::select($fields)*/
             Z_STRVAL_P(fields)
         );
     } else {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Parameter can only be array or string."
         );
@@ -483,8 +530,7 @@ CSPEED_METHOD(Adapter, where)/*{{{ proto Adapter::where($where_condition)*/
             )
         );
     } else {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Parameter can only be array or string."
         );
@@ -550,8 +596,7 @@ CSPEED_METHOD(Adapter, andWhere)/*{{{ proto Adapter::andWhere($where_condition)*
             )
         );
     } else {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Parameter can only be array or string."
         );
@@ -606,8 +651,7 @@ CSPEED_METHOD(Adapter, groupBy)/*{{{ proto Adapter::groupBy($groupBy)*/
             )
         );
     } else {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Parameter can only be array or string."
         );
@@ -658,8 +702,7 @@ CSPEED_METHOD(Adapter, having)/*{{{ proto Adapter::having($having)*/
             )
         );
     } else {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Parameter can only be array or string."
         );
@@ -736,7 +779,8 @@ CSPEED_METHOD(Adapter, orderBy)/*{{{ proto Adapter::orderBy($orderBy)*/
             )
         );
     } else {
-        php_error_docref(NULL, E_ERROR, 
+        cspeed_print_info(
+            E_ERROR, 
             "Parameter can only be array or string."
         );
         RETURN_FALSE
@@ -813,7 +857,11 @@ CSPEED_METHOD(Adapter, createCommand)/*{{{ proto Adapter::createCommand($rawsql)
             bind_params
         );
     }
-    RETURN_TRUE
+    RETURN_ZVAL(
+        getThis(),
+        1,
+        NULL
+    );
 }/*}}}*/
 
 CSPEED_METHOD(Adapter, execute)/*{{{ proto Adapter::execute($rawsql)*/
@@ -860,7 +908,7 @@ CSPEED_METHOD(Adapter, execute)/*{{{ proto Adapter::execute($rawsql)*/
         &retval
     );
 
-    if (!output_sql_errors(&pdo_statement)){
+    if (!output_sql_errors(&pdo_statement, getThis())){
         zval result;
         cspeed_pdo_statement_fetch_all(
             &pdo_statement, 
@@ -994,7 +1042,7 @@ CSPEED_METHOD(Adapter, find)/*{{{ proto Adapter::find()*/
         &retval
     );
 
-    if ( !output_sql_errors(&pdo_statement) ){
+    if ( !output_sql_errors(&pdo_statement, getThis()) ){
         zval result;
         cspeed_pdo_statement_fetch(
             &pdo_statement, 
@@ -1035,7 +1083,7 @@ CSPEED_METHOD(Adapter, findAll)/*{{{ proto Adapter::findAll()*/
         &retval
     );
 
-    if ( !output_sql_errors(&pdo_statement) ){
+    if ( !output_sql_errors(&pdo_statement, getThis()) ){
         zval result;
         cspeed_pdo_statement_fetch_all(
             &pdo_statement, 
@@ -1065,6 +1113,44 @@ CSPEED_METHOD(Adapter, isInTransaction) /*{{{ proto Adapter::isInTransaction*/
     RETURN_ZVAL(&retval, 1, NULL);
 }/*}}}*/
 
+/*{{{ proto Adapter::setErrorCallback($closure)*/
+CSPEED_METHOD(Adapter, setErrorCallback)
+{
+    zval *error_callback;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &error_callback) == FAILURE) {
+        return ;
+    }
+
+    if ( Z_TYPE_P(error_callback) != IS_OBJECT ){
+        cspeed_print_info(
+            E_ERROR,
+            "%s",
+            "Parameter must be a valid callback object."
+        );
+    }
+    zend_string *error_handler_name = NULL;
+    if ( !zend_is_callable(error_callback, 0, &error_handler_name) ) {
+        cspeed_print_info(
+            E_ERROR, 
+            "Parameter must be callable."
+        );
+    }
+
+    /* Store the data into property */
+    zend_update_property(
+        cspeed_adapter_ce, 
+        getThis(),
+        CSPEED_STRL(CSPEED_DB_ERROR_CALLBACK), 
+        error_callback
+    );
+}/*}}}*/
+
+/*{{{ proto Adapter::onErrorCallback($errorCode, $errorMessage)*/
+CSPEED_METHOD(Adapter, onErrorCallback)
+{
+
+}/*}}}*/
+
 static const zend_function_entry cspeed_adapter_functions[] = { /*{{{*/
     CSPEED_ME(Adapter, __construct, arginfo_cspeed_adapter_construct, ZEND_ACC_PUBLIC)
     CSPEED_ME(Adapter, select, arginfo_cspeed_adapter_select, ZEND_ACC_PUBLIC)
@@ -1076,6 +1162,8 @@ static const zend_function_entry cspeed_adapter_functions[] = { /*{{{*/
     CSPEED_ME(Adapter, orderBy, arginfo_cspeed_adapter_order_by, ZEND_ACC_PUBLIC)
     CSPEED_ME(Adapter, limit, arginfo_cspeed_adapter_limit, ZEND_ACC_PUBLIC)
     CSPEED_ME(Adapter, createCommand, arginfo_cspeed_adapter_create_command, ZEND_ACC_PUBLIC)
+    CSPEED_ME(Adapter, setErrorCallback, arginfo_cspeed_adapter_set_error_callback, ZEND_ACC_PUBLIC)
+    CSPEED_ME(Adapter, onErrorCallback, arginfo_cspeed_adapter_on_error_callback, ZEND_ACC_PUBLIC)
     CSPEED_ME(Adapter, execute, arginfo_cspeed_adapter_execute, ZEND_ACC_PUBLIC)
     CSPEED_ME(Adapter, begin, arginfo_cspeed_adapter_begin, ZEND_ACC_PUBLIC)
     CSPEED_ME(Adapter, rollback, arginfo_cspeed_adapter_rollback, ZEND_ACC_PUBLIC)
@@ -1168,6 +1256,11 @@ CSPEED_INIT(adapter)/*{{{*/
         cspeed_adapter_ce, 
         CSPEED_STRL(CSPEED_DB_THIS_PDO), 
         ZEND_ACC_PUBLIC
+    );
+    zend_declare_property_null(
+        cspeed_adapter_ce, 
+        CSPEED_STRL(CSPEED_DB_ERROR_CALLBACK), 
+        ZEND_ACC_PRIVATE
     );
 }/*}}}*/
 

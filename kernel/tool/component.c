@@ -27,6 +27,7 @@
 #include "ext/standard/info.h"
 #include "php_cspeed.h"
 
+#include "kernel/tool/helper.h"
 #include "kernel/tool/component.h"
 
 int trigger_events(zval *object_ptr, zend_string *event_name)/*{{{ To raise the event from the event list*/
@@ -200,8 +201,7 @@ CSPEED_METHOD(Component, off)/*{{{ proto Component::off(EVENT_LOGIN, $handler)*/
             RETURN_TRUE
         }
     } else {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Parameter one must be an valid string index."
         );

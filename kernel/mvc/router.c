@@ -196,8 +196,7 @@ CSPEED_METHOD(Router, addFromIni)   /*{{{ proto Router::addFromIni($ini_file)*/
         );
         /* *** */
         if ( ZVAL_IS_NULL(&routers_from_ini) && (Z_TYPE(routers_from_ini) != IS_ARRAY ) ){
-            php_error_docref(
-                NULL, 
+            cspeed_print_info(
                 E_ERROR, 
                 "File : `%s` not valid.",  
                 ZSTR_VAL(real_ini_file_path)
@@ -230,8 +229,7 @@ CSPEED_METHOD(Router, addFromIni)   /*{{{ proto Router::addFromIni($ini_file)*/
             }
         } ZEND_HASH_FOREACH_END();
     } else {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Parameter must be a valid file string path."
         );

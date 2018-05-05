@@ -162,13 +162,6 @@ CSPEED_METHOD(Response, setJsonContent)/*{{{ Set the response with the given for
     smart_str json_str = { 0 };
     php_json_encode(&json_str, json_array, 256);
     smart_str_0(&json_str);
-#if 0
-    zval function_name, retval_ptr;
-    ZVAL_STRING(&function_name, "json_encode");
-    uint32_t param_count = 1;
-    zval params[] = { *json_array };
-    call_user_function(EG(function_table), NULL, &function_name, &retval_ptr, param_count, params);
-#endif
     zend_update_property_string(
         cspeed_response_ce, 
         getThis(), 

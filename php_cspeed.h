@@ -43,6 +43,7 @@ extern zend_module_entry cspeed_module_entry;
 	and END macros here:
 */
 ZEND_BEGIN_MODULE_GLOBALS(cspeed)
+
     /* Below are the core configs */
     zend_string   *core_application;
     zend_string   *core_bootstrap;
@@ -52,7 +53,7 @@ ZEND_BEGIN_MODULE_GLOBALS(cspeed)
     zend_string   *core_router_default_controller;
     zend_string   *core_router_default_action;
     zend_string   *core_view_ext;
-    zend_string   *core_view_auto_render;
+    zend_bool     core_view_auto_render;
     zend_string   *core_url_pattern;
 
     /* Below are the DB configs */
@@ -66,7 +67,18 @@ ZEND_BEGIN_MODULE_GLOBALS(cspeed)
 
     /* Below are the extension configs */
     HashTable     *db_connections;
-    zval          *new_db_pdo_object;   /* The newest db connection. */
+    zval          *new_db_pdo_object;
+
+    /* Debug mode or not, value can be false or true */
+    zend_bool     core_debug_mode;
+
+    /* The running_time logs path, must be readable and writable */
+    zend_string   *core_runtime_logs_path;
+
+    /* The log pattern */
+    zend_string   *core_runtime_logs_pattern;
+
+    /* Global values end */
 ZEND_END_MODULE_GLOBALS(cspeed)
 
 /* Always refer to the globals in your function as CSPEED_G(variable).
@@ -102,6 +114,9 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define CORE_CONFIG_DB_USERNAME                 "db.master.username"
 #define CORE_CONFIG_DB_PASSWORD                 "db.master.password"
 
+/* Debug mode */
+#define CORE_DEBUG_MODE                         "core.debug.mode"
+
 /* Below are some default setting of the CSpeed engine */
 #define CORE_APPLICATION                        "../app"
 #define CORE_BOOTSTRAP                          "../app/bootinit.php"
@@ -114,8 +129,10 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define CORE_VIEW_AUTO_RENDER                   "0"
 #define CORE_BOOSTRAP_METHOD_STRING             "__init"
 #define CORE_BOOTSTRAP_CLASS_NAME               "BootInit"
+#define CORE_VIEW_NEED_RENDER                   0
 
-#define CORE_VIEW_NEED_RENDER                   "1"
+/* Default setting */
+#define DEFAULT_CORE_DEBUG_MODE                 0
 
 /* Some macros for the CSpeed engine */
 #define CSPEED_FN(function_name)        function_name##Action

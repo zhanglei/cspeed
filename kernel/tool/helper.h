@@ -21,6 +21,13 @@
 #ifndef CSPEED_TOOL_HELPER_H
 #define CSPEED_TOOL_HELPER_H
 
+/**
+ * [NOTE]: 
+ * In CSpeed, developers must invoke this method
+ * to print the info instead of the php_error_decref. 
+ */
+void cspeed_print_info(int type, const char *format, ...);
+
 /* Reverse all slashes to reslash */
 char *cspeed_reverse_slash_char(char *src);                                      
 

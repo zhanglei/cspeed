@@ -42,9 +42,7 @@ class BootInit implements \Cs\BootInit
     function __initFactory($di, $router)
     {
         $di->set('factory', function (){
-            $factory = new ObjectFactory();
-            $factory->init('factory.php');
-            return $factory;
+            return new ObjectFactory('factory.php');
         });
     }
 }

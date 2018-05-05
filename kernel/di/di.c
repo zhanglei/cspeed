@@ -24,10 +24,11 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/info.h"
 #include "php_cspeed.h"
+#include "ext/standard/info.h"
 
 #include "kernel/di/di.h"
+#include "kernel/tool/helper.h"
 
 /*{{{*/
 ZEND_BEGIN_ARG_INFO_EX(argin_info_cspeed_di_construct, 0, 0, 0)
@@ -83,8 +84,7 @@ CSPEED_METHOD(Di, set) /*{{{ proto Di::set($key, function(){return new stdClass(
     }
 
     if (!CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(key))) {
-        php_error_docref(
-          NULL, 
+        cspeed_print_info(
           E_ERROR, 
           "Parameter one must be a valid string index key."
         );
@@ -109,8 +109,7 @@ CSPEED_METHOD(Di, set) /*{{{ proto Di::set($key, function(){return new stdClass(
         );
         RETURN_TRUE
     } else {
-        php_error_docref(
-          NULL, 
+        cspeed_print_info(
           E_ERROR, 
           "Parameter must return a class object."
         );
@@ -132,8 +131,7 @@ CSPEED_METHOD(Di, get) /*{{{ proto Di::get($key) */
     }
 
     if (!CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(key))) {
-        php_error_docref(
-          NULL, 
+        cspeed_print_info(
           E_ERROR, 
           "Parameter must be a valid string key."
         );
@@ -153,13 +151,12 @@ CSPEED_METHOD(Di, get) /*{{{ proto Di::get($key) */
     if (object) {
         RETURN_ZVAL(object, 1, NULL);
     } else {
-        php_error_docref(
-          NULL, 
+        cspeed_print_info(
           E_WARNING, 
-          "Class didn't has the value associated with '%s' index key.", 
+          "Value not found in Di object named '%s'.", 
           ZSTR_VAL(key)
         );
-        RETURN_FALSE
+        RETURN_NULL()
     }
 }/*}}}*/
 

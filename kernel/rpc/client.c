@@ -24,14 +24,15 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/info.h"
 #include "php_cspeed.h"
+#include "ext/standard/info.h"
+#include "ext/json/php_json.h"
 
-#include "kernel/rpc/client.h"
 #include <curl/curl.h>
 #include <curl/easy.h>
+#include "kernel/rpc/client.h"
+#include "kernel/tool/helper.h"
 #include "Zend/zend_smart_str.h"
-#include "ext/json/php_json.h"
 
 /*{{{ All ARGINFO for Client class*/
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_rpc_client_construct, 0, 0, 1)
@@ -44,7 +45,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_rpc_client_call, 0, 0, 2)
 ZEND_END_ARG_INFO()
 /*}}}*/
 
-size_t cspeed_client_write_data(char* buffer, size_t size, size_t nmemb, void *stream)/*{{{ Receive the data from the cURL */
+/*{{{ Receive the data from the cURL */
+size_t cspeed_client_write_data(char* buffer, size_t size, size_t nmemb, void *stream)
 {  
     smart_str *data = (smart_str *)stream;  
     size_t len = size * nmemb;
@@ -66,8 +68,7 @@ CSPEED_METHOD(Client, __construct)/*{{{ proto Client::__construct($url)*/
             ZSTR_VAL(url)
         );
     } else {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Parameter must be a valid URL."
         );
@@ -147,8 +148,7 @@ CSPEED_METHOD(Client, __call)/*{{{ proto Client::call($name, $params)*/
         /* Check for errors */ 
         if(res != CURLE_OK) {
             curl_easy_cleanup(curl);
-            php_error_docref(
-                NULL, 
+            cspeed_print_info(
                 E_ERROR, 
                 "Calling the curl_easy_perform() failed: %s.", 
                 curl_easy_strerror(res)

@@ -32,7 +32,7 @@
 #include "kernel/db/pdo.h"
 
 /**
- * This is the tool helpers to help the develop to develop the PDO databaesed Extension
+ * This is the tool helpers to help the developer to develop the PDO databaesed Extension
  * www.supjos.cn      Josin 2017年10月08日20:41:39
  */
 

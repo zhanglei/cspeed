@@ -87,7 +87,7 @@ parse_cli_path_info(zval *path_info_array)
         } ZEND_HASH_FOREACH_END();
     }
     if (is_allowed == FALSE){
-        zend_error(
+        cspeed_print_info(
             E_ERROR, 
             "Module: `%s` are not allowed to access.", 
             ZSTR_VAL(default_module)
@@ -132,14 +132,14 @@ parse_cli_path_info(zval *path_info_array)
     );
     if (controller_ptr) {
         if (!instanceof_function(controller_ptr, cspeed_controller_ce)){
-            zend_error(
+            cspeed_print_info(
                 E_ERROR, 
                 "Controller class must extends from \\Cs\\mvc\\Controller class."
             );
         }
         object_init_ex(&controller_obj, controller_ptr);
     } else {
-        zend_error(
+        cspeed_print_info(
             E_ERROR, 
             "Controller class :`%s` not found.", 
             ZSTR_VAL(default_controller)
@@ -259,7 +259,7 @@ parse_cli_path_info(zval *path_info_array)
         zval_ptr_dtor(&retval_ptr);
     } else {
         zend_string_release(action_append_action);
-        zend_error(
+        cspeed_print_info(
             E_ERROR, 
             "Controller class has not the :`%s` method.", 
             ZSTR_VAL(action_append_action)

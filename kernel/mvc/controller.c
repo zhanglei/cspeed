@@ -32,6 +32,7 @@
 #include "ext/standard/php_string.h"
 
 #include "kernel/di/di.h"
+#include "kernel/tool/helper.h"
 #include "kernel/mvc/dispatch.h"
 #include "kernel/mvc/controller.h"
 #include "kernel/tool/component.h"
@@ -71,7 +72,7 @@ CSPEED_METHOD(Controller, dispatch)
     }
 
     if ( !CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(url)) ) {
-        zend_error(
+        cspeed_print_info(
             E_ERROR,
             "%s",
             "The argument `url` must be a valid string."
@@ -138,7 +139,11 @@ CSPEED_METHOD(Controller, dispatch)
             CSPEED_STRL(action_name)
         ) == 0)
     ) {
-        zend_error(E_ERROR, "%s", "Loop dispatch mode forbid.");
+        cspeed_print_info(
+          E_ERROR, 
+          "%s", 
+          "Loop dispatch mode forbid."
+        );
     }
 
     parse_path_info(&url_data);

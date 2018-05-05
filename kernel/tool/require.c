@@ -28,6 +28,8 @@
 #include "ext/standard/info.h"
 #include "Zend/zend_exceptions.h"
 
+#include "kernel/tool/helper.h"
+
 
 /*{{{ To require the file as the function in PHP: require
     for the variables which were come from user-input
@@ -81,8 +83,7 @@ int cspeed_require_file(const char * file_name, zval *variables, zval *called_ob
         0, 
         PHP_OUTPUT_HANDLER_STDFLAGS
       ) == FAILURE) {
-        php_error_docref(
-          NULL, 
+        cspeed_print_info(
           E_WARNING, 
           "Failed to call ob_start()."
         );
@@ -107,8 +108,7 @@ int cspeed_require_file(const char * file_name, zval *variables, zval *called_ob
     if (return_view) { /* Store the data into the return_view zval struct and discard the data in the output */
         if (php_output_get_contents(return_view) == FAILURE) {
             php_output_end();
-            php_error_docref(
-              NULL, 
+            cspeed_print_info(
               E_WARNING, 
               "Can't fetch the ob_data."
             );

@@ -309,8 +309,7 @@ CSPEED_METHOD(App, __construct) /*{{{ proto App::__construct() */
         1
     );
     if (!ZVAL_IS_NULL(is_new_app)) {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "An application is running."
         );
@@ -408,8 +407,7 @@ CSPEED_METHOD(App, setAlias)/*{{{ proto App::setAlias() */
         return ;
     }
     if ( ( *ZSTR_VAL(alias_name) ) != '@') {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Namespace alias must be start with @."
         );
@@ -490,8 +488,7 @@ CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
     );
 
     if (!instanceof_function(bootstrap_class_ptr, cspeed_bootinit_ce)){
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "BootInit class must implements interface \\Cs\\BootInit."
         );
@@ -534,8 +531,7 @@ CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
         /* Return the App class object to user, to do the next job. such as the router parsing and so on. */
         RETURN_ZVAL(getThis(), 1, NULL);
     } else {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "class BoosInit not exists."
         );

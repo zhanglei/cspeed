@@ -31,11 +31,18 @@ class BootInit implements \Cs\BootInit
                 'password' => '3333'
             ]);
         });
+    }
 
+    function __initIOC($di, $router)
+    {
         $di->set('factory', function(){
-            $objectFactory  = new \Cs\ObjectFactory();
-            $objectFactory->init("config.php");
-            return $objectFactory;
+            return new \Cs\ObjectFactory("config.php");
         });
     }
 }
+
+
+
+
+
+

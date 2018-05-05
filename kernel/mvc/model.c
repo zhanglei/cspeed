@@ -226,7 +226,7 @@ set_columns_to_model(zval *model_object)
         &retval_data
     );
     
-    if ( !output_sql_errors(&pdo_statement) ){
+    if ( !output_sql_errors(&pdo_statement, model_object) ){
         zval result;
         cspeed_pdo_statement_fetch_all(&pdo_statement, &result);
 
@@ -295,8 +295,7 @@ initialise_the_model_object(zval *model_object, zend_long new_record, INTERNAL_F
     );
 
     if (pdo_object == NULL || ZVAL_IS_NULL(pdo_object) ) {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Please set the Adapter class to \\Cs\\di\\Di container."
         );
@@ -638,6 +637,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_group_by, 0, 0, 1)
     ZEND_ARG_INFO(0, group_by_conditions)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_set_error_callback, 0, 0, 1)
+    ZEND_ARG_INFO(0, error_callback)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_on_error_callback, 0, 0, 2)
+    ZEND_ARG_INFO(0, error_code)
+    ZEND_ARG_INFO(0, error_message)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_one, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
@@ -730,8 +738,7 @@ CSPEED_METHOD(Model, where)/*{{{ proto Model::where()*/
             )
         );
     } else {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Parameter can only be array or string."
         );
@@ -790,8 +797,7 @@ CSPEED_METHOD(Model, andWhere)/*{{{ proto Model::andWhere()*/
             )
         );
     } else {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Parameter can only be array or string."
         );
@@ -859,8 +865,7 @@ CSPEED_METHOD(Model, orderBy)/*{{{ proto Model::orderBy()*/
             )
         );
     } else {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Parameter can only be array or string."
         );
@@ -907,8 +912,7 @@ CSPEED_METHOD(Model, groupBy)/*{{{ proto Model::groupBy()*/
             )
         );
     } else {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Parameter can only be array or string."
         );
@@ -1012,7 +1016,7 @@ CSPEED_METHOD(Model, one)/*{{{ proto Model::one()*/
     /* Set the SQL to model for analysing */
     set_executed_sql(getThis(), raw_sql);
 
-    if ( !output_sql_errors(&pdo_statement) ){
+    if ( !output_sql_errors(&pdo_statement, getThis()) ){
         zval result;
         cspeed_pdo_statement_fetch(&pdo_statement, &result);
         if ( Z_LVAL_P(as_array) == IS_TRUE ) {
@@ -1061,8 +1065,7 @@ CSPEED_METHOD(Model, select)    /*{{{ proto Model::select($fields)*/
             Z_STRVAL_P(fields)
         );
     } else {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Parameter can only be array or string."
         );
@@ -1164,7 +1167,7 @@ CSPEED_METHOD(Model, all)/*{{{ proto Model::all()*/
     /* Set the SQL to model for analysing */
     set_executed_sql(getThis(), raw_sql);
 
-    if (!output_sql_errors(&pdo_statement)){
+    if (!output_sql_errors(&pdo_statement, getThis())){
         zval result, ultimate_result;
         cspeed_pdo_statement_fetch_all(
             &pdo_statement, 
@@ -1272,7 +1275,7 @@ CSPEED_METHOD(Model, save)/*{{{ proto Model::save()*/
         )
     );
     reset_model_sql(getThis());
-    if (!output_sql_errors(&pdo_statement)){
+    if (!output_sql_errors(&pdo_statement, getThis())){
         zval row_count;
         cspeed_pdo_statement_row_count(
             &pdo_statement, 
@@ -1318,8 +1321,7 @@ CSPEED_METHOD(Model, delete)/*{{{ proto Model::delete()*/
         NULL
     );
     if (ZVAL_IS_NULL(pdo_object)) {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Invalid PDO instance."
         );
@@ -1357,7 +1359,7 @@ CSPEED_METHOD(Model, delete)/*{{{ proto Model::delete()*/
         )
     );
     reset_model_sql(getThis());
-    if (!output_sql_errors(&pdo_statement)){
+    if (!output_sql_errors(&pdo_statement, getThis())){
         zval row_count;
         cspeed_pdo_statement_row_count(
             &pdo_statement, 
@@ -1415,8 +1417,7 @@ CSPEED_METHOD(Model, setDb)/*{{{ proto Model::setDb('db')*/
         }
         RETURN_FALSE
     } else {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Please set the Adapter object into the Di container first."
         );
@@ -1445,8 +1446,7 @@ CSPEED_METHOD(Model, getDb)/*{{{ Get the PDO object*/
         NULL
     );
     if ( ZVAL_IS_NULL(is_set_ultimate_pdo) ) {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Sorry, you must set Adapter to the \\Cs\\di\\Di object"
         );
@@ -1472,8 +1472,7 @@ CSPEED_METHOD(Model, getAdapter)/*{{{ Get the Adapter object*/
         1
     );
     if ( ZVAL_IS_NULL(adapter_object) ) {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Sorry, you must set Adapter to the \\Cs\\di\\Di object."
         );
@@ -1504,6 +1503,44 @@ CSPEED_METHOD(Model, asArray)/*Set the ResultSet are Array*/
     RETURN_ZVAL(getThis(), 1, NULL);
 }/*}}}*/
 
+/*{{{ proto Model::setErrorCallback($closure)*/
+CSPEED_METHOD(Model, setErrorCallback)
+{
+    zval *error_callback;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &error_callback) == FAILURE) {
+        return ;
+    }
+
+    if ( Z_TYPE_P(error_callback) != IS_OBJECT ){
+        cspeed_print_info(
+            E_ERROR,
+            "%s",
+            "Parameter must be a valid callback object."
+        );
+    }
+    zend_string *error_handler_name = NULL;
+    if ( !zend_is_callable(error_callback, 0, &error_handler_name) ) {
+        cspeed_print_info(
+            E_ERROR, 
+            "Parameter must be callable."
+        );
+    }
+
+    /* Store the data into property */
+    zend_update_property(
+        cspeed_model_ce, 
+        getThis(),
+        CSPEED_STRL(CSPEED_DB_ERROR_CALLBACK), 
+        error_callback
+    );
+}
+
+/*{{{ proto Model::onErrorCallback*/
+CSPEED_METHOD(Model, onErrorCallback)
+{
+
+}/*}}}*/
+
 /*{{{ All functions definitions */
 static const zend_function_entry cspeed_model_functions[] = {
     CSPEED_ME(Model, __construct, arginfo_cspeed_model_construct, ZEND_ACC_PUBLIC)
@@ -1523,6 +1560,8 @@ static const zend_function_entry cspeed_model_functions[] = {
     CSPEED_ME(Model, getAdapter, arginfo_cspeed_model_get_adapter, ZEND_ACC_PUBLIC)
     CSPEED_ME(Model, getExecutedSql, arginfo_cspeed_model_get_executed_sql, ZEND_ACC_PUBLIC)
     CSPEED_ME(Model, asArray, arginfo_cspeed_model_as_array, ZEND_ACC_PUBLIC)
+    CSPEED_ME(Model, setErrorCallback, arginfo_cspeed_model_set_error_callback, ZEND_ACC_PUBLIC)
+    CSPEED_ME(Model, onErrorCallback, arginfo_cspeed_model_on_error_callback, ZEND_ACC_PUBLIC)
 
     PHP_FE_END
 };/*}}}*/
@@ -1576,6 +1615,11 @@ CSPEED_INIT(model)  /*{{{ Load the module function*/
     zend_declare_property_null(
         cspeed_model_ce, 
         CSPEED_STRL(CSPEED_MODEL_ARRAY_DATA), 
+        ZEND_ACC_PRIVATE
+    );
+    zend_declare_property_null(
+        cspeed_model_ce, 
+        CSPEED_STRL(CSPEED_DB_ERROR_CALLBACK), 
         ZEND_ACC_PRIVATE
     );
     zend_declare_property_bool(

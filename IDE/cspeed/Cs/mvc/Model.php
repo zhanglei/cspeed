@@ -171,6 +171,36 @@ class Model extends \Cs\tool\Component
      */
     function getExecutedSql()
     {
-
     }
+
+    /**
+     * @param $errorCallBack \Closure Note that, the $errorCallBack
+     *                       contains two parameters, $errorCode plus $errorMessage
+     *                       such as :
+     *                            setErrorCallback(function($errorCode, $errorMessage){
+     *                                // TODO...
+     *                            }
+     */
+    function setErrorCallback($errorCallBack)
+    {
+    }
+
+    /**
+     * @param $errorCode int
+     * @param $errorMessage string
+     * @override You must override this method, if you want to get the SQL error logs.
+     *           After you collect the log use the callback and not to show the system log, you may to exit()
+     *           such as:
+     *
+     *           function onErrorCallback($errorCode, $errorMessage){
+     *              // TODO...
+     *
+     *              // exit to prohibit the system SQL error log show.
+     *              exit();
+     *           }
+     */
+    function onErrorCallback($errorCode, $errorMessage)
+    {
+    }
+
 }

@@ -26,6 +26,7 @@ extern zend_class_entry *cspeed_adapter_ce;
 #define CSPEED_DB_PDO_OBJECT            "__db_pdo"               /* The Db's pdo object */
 #define CSPEED_DB_THIS_PDO              "__adapter_this_pdo"     /* The Db's pdo object attach to the Adapter */
 #define CSPEED_DB_THIS_ADAPTER          "__adapter"              /* The current Adapter object */
+#define CSPEED_DB_ERROR_CALLBACK        "__error_callback"       /* The ErrorCallback closure */
 
 #define CSPEED_ADAPTER_SELECT           "__select"               /* The select fields */
 #define CSPEED_ADAPTER_FROM             "__from"                 /* The from fields */
@@ -37,7 +38,8 @@ extern zend_class_entry *cspeed_adapter_ce;
 #define CSPEED_ADAPTER_RAW_SQL          "__raw_sql"              /* Raw Sql */
 #define CSPEED_ADAPTER_BIND_PARAMS      "__bind_params"          /* Raw Sql */
 
-zend_bool output_sql_errors(zval *pdo_statement);               /* Output the SQL error */
+/* Output the SQL error */
+zend_bool output_sql_errors(zval *pdo_statement, zval *model_object);
 
 CSPEED_INIT(adapter);
 

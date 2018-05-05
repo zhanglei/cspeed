@@ -54,7 +54,8 @@ char *cspeed_request_get_str_key_val(const char *get_key) /*{{{ GET $_GET value*
 {
     zval *get_value = cspeed_request_get(get_key);
     if (get_value == NULL) {
-        php_error_docref(NULL, E_NOTICE, 
+        cspeed_print_info(
+            E_NOTICE, 
             "Unknow index %s", 
             get_key
         );
@@ -88,8 +89,7 @@ char *cspeed_request_server_str_key_val(const char *server_key) /*{{{ GET $_SERV
 {
     zval *server_value = cspeed_reqeust_server(server_key);
     if (server_value == NULL) {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_NOTICE, 
             "Unknow index %s", 
             server_key
@@ -119,8 +119,7 @@ char *cspeed_request_post_str_key_val(const char *post_key) /*{{{ GET $_POST val
 {
     zval *post_value = cspeed_request_post(post_key);
     if (post_value == NULL) {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_NOTICE, 
             "Unknow index %s", 
             post_key

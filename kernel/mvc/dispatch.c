@@ -50,10 +50,7 @@
 /*{{{ Renderin the file automatically */
 void auto_render_view_file(zend_class_entry *controller_ptr, zval *controller_obj, zval *view_object)
 {
-    if ( strncasecmp(
-            CORE_VIEW_NEED_RENDER, 
-            CSPEED_STRL( ZSTR_VAL( CSPEED_G(core_view_auto_render) ) )
-        ) == 0 ) {
+    if ( CSPEED_G(core_view_auto_render) == 1 ) {
         /* First, create the view object */
         object_init_ex(view_object, cspeed_view_ce);
         /* Initialise the view properties */
@@ -118,7 +115,7 @@ void parse_path_info(zval *path_info_array)
         } ZEND_HASH_FOREACH_END();
     }
     if (is_allowed == FALSE){
-        zend_error(
+        cspeed_print_info(
             E_ERROR, 
             "Module: `%s` are not allowed to access.", 
             ZSTR_VAL(default_module)
@@ -156,7 +153,7 @@ void parse_path_info(zval *path_info_array)
         1
     );
     if (ZVAL_IS_NULL(app_object)){
-        zend_error(
+        cspeed_print_info(
             E_ERROR, 
             "You must create a Cs\\App object first."
         );
@@ -176,14 +173,14 @@ void parse_path_info(zval *path_info_array)
     );
     if (controller_ptr) {
         if (!instanceof_function(controller_ptr, cspeed_controller_ce)){
-            zend_error(
+            cspeed_print_info(
                 E_ERROR, 
                 "Controller class must extends from \\Cs\\mvc\\Controller class."
             );
         }
         object_init_ex(&controller_obj, controller_ptr);
     } else {
-        zend_error(
+        cspeed_print_info(
             E_ERROR, 
             "Controller class :`%s` not found.", 
             ZSTR_VAL(default_controller)
@@ -314,7 +311,7 @@ void parse_path_info(zval *path_info_array)
             zval_ptr_dtor(&retval_ptr);
         } else {
             zend_string_release(action_append_action);
-            zend_error(
+            cspeed_print_info(
                 E_ERROR, 
                 "Controller class has not the :`%s` method.", 
                 ZSTR_VAL(action_append_action)
@@ -479,7 +476,7 @@ void dispather_url()    /* {{{ Dispatcher the URL */
                         } else {
                             zval_ptr_dtor(&retval);
                             efree(ctr.line);
-                            zend_error(
+                            cspeed_print_info(
                                 E_ERROR, 
                                 "Please install SAPI extension."
                             );

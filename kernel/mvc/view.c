@@ -207,7 +207,10 @@ CSPEED_METHOD(View, __get)
             }
         }
     }
-    php_error_docref(NULL, E_ERROR, "__get need a valid string index.");
+    cspeed_print_info(
+        E_ERROR, 
+        "__get need a valid string index."
+    );
 }
 
 CSPEED_METHOD(View, render)         /*{{{ proto View::render($file, $variables) */

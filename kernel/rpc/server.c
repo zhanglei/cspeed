@@ -24,8 +24,8 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/info.h"
 #include "php_cspeed.h"
+#include "ext/standard/info.h"
 
 #include "main/SAPI.h"
 #include "ext/json/php_json.h"
@@ -35,10 +35,10 @@
 
 #include "kernel/rpc/server.h"
 #include "kernel/net/request.h"
+#include "kernel/tool/helper.h"
 #include "kernel/tool/component.h"
 #include "kernel/mvc/controller.h"
 
-#include "main/SAPI.h"  /* for sapi */
 
 /*{{{ All ARGINFO For class Server */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_server_contruct, 0, 0, 0)
@@ -62,8 +62,7 @@ CSPEED_METHOD(Server, handle)   /*{{{ proto Server::handle */
     }
     /* Only accept the POST method */
     if (!cspeed_request_is_method("POST")) {
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "RPC Server only accept POST request."
         );
@@ -100,8 +99,7 @@ CSPEED_METHOD(Server, handle)   /*{{{ proto Server::handle */
         efree(ctr.line);
     } else {
         efree(ctr.line);
-        php_error_docref(
-            NULL, 
+        cspeed_print_info(
             E_ERROR, 
             "Please install SAPI extension."
         );

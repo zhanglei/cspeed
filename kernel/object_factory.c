@@ -84,8 +84,7 @@ CSPEED_METHOD(ObjectFactory, __construct)
             1
         );
         if ( !app_object || ZVAL_IS_NULL(app_object) || (Z_TYPE_P(app_object) != IS_OBJECT) ) {
-            php_error_docref(
-                NULL, 
+            cspeed_print_info(
                 E_ERROR, 
                 "Please do the IOC job in the \\Cs\\App inside."
             );
@@ -339,8 +338,7 @@ nest_again:
                             &class_object
                         );
                     } else {
-                        php_error_docref(
-                            NULL, 
+                        cspeed_print_info(
                             E_ERROR, 
                             "Class `%s` not found.", 
                             Z_STRVAL_P(class_name)
