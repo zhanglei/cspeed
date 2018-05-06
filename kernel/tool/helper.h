@@ -22,7 +22,7 @@
 #define CSPEED_TOOL_HELPER_H
 
 /* Exit the CSpeed kernel engine. */
-void cspeed_exit();
+void cspeed_exit(char *exit_info);
 
 /**
  * [NOTE]: 

@@ -50,10 +50,16 @@
 
 void
 /* Exit the CSpeed kernel engine. */
-cspeed_exit()
+cspeed_exit(char *exit_info)
 {
     zval ret_val;
-    zend_eval_string("exit();", &ret_val, "exit");
+    char *exit_string = ZSTR_VAL(strpprintf(
+        0,
+        "%s('%s');",
+        "exit",
+        (!exit_info || CSPEED_STRING_NOT_EMPTY(exit_info)) ? exit_info : ""
+    ));
+    zend_eval_string(exit_string, &ret_val, "exit");
     zval_ptr_dtor(&ret_val);
 }
 
@@ -81,7 +87,7 @@ cspeed_print_info(int type, const char *format, ...)
         efree(buffer);
         va_end(args);
 
-        cspeed_exit();
+        cspeed_exit("");
     }
 }
 
@@ -752,12 +758,48 @@ load_kernel_setting(zend_string *ini_config_file, zend_string *ini_config_node_n
                 } else {
                     cspeed_print_info(
                         E_ERROR,
-                        "Config %s must be %s. ", 
+                        "Config `%s` must be %s. ", 
                         CORE_DEBUG_MODE, 
                         "`true` or `false` or `on` or `off`"
                     );
                 }
-            }            
+            }
+            /*core.path.info.mode*/
+            if ( EXPECTED((config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs),
+                CSPEED_STRL(CORE_PATH_INFO_MODE) ) ) != NULL) 
+            ) {
+                if ( (strncmp(
+                        "AUTO",
+                        CSPEED_STRL(ZSTR_VAL(php_string_toupper(Z_STR_P(config_value))))
+                     ) == 0) || 
+                     (strncmp(
+                        "PATH",
+                        CSPEED_STRL(ZSTR_VAL(php_string_toupper(Z_STR_P(config_value))))
+                     ) == 0) || 
+                     (strncmp(
+                        "GET",
+                        CSPEED_STRL(ZSTR_VAL(php_string_toupper(Z_STR_P(config_value))))
+                    ) == 0)
+                ) {
+                    CSPEED_G(core_path_info_mode) = php_string_toupper(Z_STR_P(config_value));
+                } else {
+                    cspeed_print_info(
+                        E_ERROR,
+                        "Config `%s` must be %s.",
+                        CORE_PATH_INFO_MODE,
+                        "`PATH` or `AUTO` or `GET`"
+                    );
+                }
+            }
+            /*get_router_pattern*/
+            if ( EXPECTED((config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
+                CSPEED_STRL(CORE_PATH_INFO_SYMBOL) ) ) != NULL )
+            ) {
+                if (CSPEED_STRING_NOT_EMPTY(Z_STRVAL_P(config_value))) {
+                    CSPEED_G(get_router_pattern) = Z_STR_P(config_value);
+                }
+            }
+
             /*core.application*/
             if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_APPLICATION_NAME))) != NULL ) ) {

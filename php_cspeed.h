@@ -78,6 +78,10 @@ ZEND_BEGIN_MODULE_GLOBALS(cspeed)
     /* The log pattern */
     zend_string   *core_runtime_logs_pattern;
 
+    /* CSpeed's PATH-INFO parameters pattern */
+    zend_string   *get_router_pattern;
+    zend_string   *core_path_info_mode;
+
     /* Global values end */
 ZEND_END_MODULE_GLOBALS(cspeed)
 
@@ -116,6 +120,8 @@ ZEND_TSRMLS_CACHE_EXTERN()
 
 /* Debug mode */
 #define CORE_DEBUG_MODE                         "core.debug.mode"
+#define CORE_PATH_INFO_MODE                     "core.path.info.mode"
+#define CORE_PATH_INFO_SYMBOL                   "core.path.info.symbol"
 
 /* Below are some default setting of the CSpeed engine */
 #define CORE_APPLICATION                        "../app"
@@ -133,6 +139,10 @@ ZEND_TSRMLS_CACHE_EXTERN()
 
 /* Default setting */
 #define DEFAULT_CORE_DEBUG_MODE                 0
+
+/* Default GET router name for CSpeed to parse the ROUTER */
+#define DEFAULT_GET_ROUTER_PATTERN              "_csurl"
+#define DEFAULT_CORE_PATH_INFO_MODE             "PATH"
 
 /* Some macros for the CSpeed engine */
 #define CSPEED_FN(function_name)        function_name##Action

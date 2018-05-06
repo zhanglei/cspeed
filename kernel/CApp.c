@@ -186,7 +186,7 @@ void handle_method_request(zval *object_ptr, char *method_name, INTERNAL_FUNCTIO
     );
     if ( continue_or_false >= 0 ) {
         /* Fix: if meet the suited regular url, the next will abandoned */
-        cspeed_exit();
+        cspeed_exit("");
     }
 } /*}}}*/
 

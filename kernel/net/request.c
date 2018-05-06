@@ -56,7 +56,7 @@ char *cspeed_request_get_str_key_val(const char *get_key) /*{{{ GET $_GET value*
     if (get_value == NULL) {
         cspeed_print_info(
             E_NOTICE, 
-            "Unknow index %s", 
+            "$_GET['%s'] empty.", 
             get_key
         );
         return "";
@@ -91,7 +91,7 @@ char *cspeed_request_server_str_key_val(const char *server_key) /*{{{ GET $_SERV
     if (server_value == NULL) {
         cspeed_print_info(
             E_NOTICE, 
-            "Unknow index %s", 
+            "$_SERVER['%s'] empty.", 
             server_key
         );
         return "";
@@ -121,7 +121,7 @@ char *cspeed_request_post_str_key_val(const char *post_key) /*{{{ GET $_POST val
     if (post_value == NULL) {
         cspeed_print_info(
             E_NOTICE, 
-            "Unknow index %s", 
+            "$_POST['%s'] empty.", 
             post_key
         );
         return "";

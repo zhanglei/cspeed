@@ -45,6 +45,51 @@ extension=cspeed.so
 4、systemctl restart php-fpm 或者 systemctl restart httpd
 ```
 
+## 环境配置  ##
+
+默认情况下 **CSpeed** 会从服务器的请求参数 **PATH-INFO** 获取路由信息并进行解析，用户也可以配置成从 **URL** 获取 **GET参数**  来进行路由解析，开发者仅需要从ini配置文件设置即可，如下：
+
+```ini
+core.path.info.symbol           = __url              ; 使用GET形式获取路由URL的GET参数名
+core.path.info.mode             = get                ; PATH(PATH-INFO)、GET、AUTO
+```
+
+```core.path.info.symbol``` 配置 GET 参数的解析参数值，如果配置**CSpeed** 从 **URL** 解析参数，用户可以自定义URL中的路由段以完成路由解析，默认值：**__csurl**，用户可以自定义此字段灵活进行框架的配置解析
+
+```core.path.info.mode``` 定义 **CSpeed**的路由解析模式，默认情况为 PATH-INFO 模式，用户可以在此处定义 **GET、AUTO、PATH** 模式，**GET** 模式的灵活设置需要用户配置 ```core.path.info.symbol```选项，如果配置成 **AUTO**模式，CSpeed会自动从两种模式中获取有路由字段的进行解析，如果**PATH-INFO** 模式与 **URL** 模式具有路由字段信息，则以 **PATH-INFO** 为准.
+
+下方分别列出两种模式的 **nginx** 配置：
+
+**PATH-INFO**
+
+```ini
+location / {
+	if (!-e $request_filename) {
+		rewrite ^/(.*)$ /index.php/$1 last;
+		break;
+	}
+}
+
+location ~ \.php {
+    fastcgi_pass   127.0.0.1:9000;
+    fastcgi_index  index.php;  
+    fastcgi_split_path_info ^(.+\.php)(/.+)$;
+    fastcgi_param  PATH_INFO $fastcgi_path_info;
+    fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+    include        fastcgi_params;
+}
+```
+
+**URL(CSpeed系统默认的__csurl模式)**
+
+```ini
+location / {
+    rewrite ^/(.*)$ /index.php?__csurl=/$1 last;
+}
+```
+
+对比于 **PATH-INFO** 模式， **URL** 模式情况下 nginx 的配置文件的所需配置选项也相应的变得简单，用户可以在此种模式下通过设置 ```core.path.info.symbol``` 为 ```_url```( **CSpeed** 系统默认值：```__csurl```)来兼容 **Phalcon** 框架的路由
+
 ## 框架特性 ##
 
 ### 1、JSON-RPC 分布式支持 ###
