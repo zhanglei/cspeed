@@ -555,6 +555,7 @@ void dispather_url()    /* {{{ Dispatcher the URL */
                         if (sapi_header_op(SAPI_HEADER_REPLACE, &ctr) == SUCCESS) {
                             zval_ptr_dtor(&retval);
                             efree(ctr.line);
+                            if ( can_free ) free(path_info);
                             return ;
                         } else {
                             zval_ptr_dtor(&retval);
