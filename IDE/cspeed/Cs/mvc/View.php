@@ -63,14 +63,6 @@ class View
     }
 
     /**
-     * Set the Module Dir
-     * @param $moduleDir string
-     */
-    function setModuleDir($moduleDir)
-    {
-    }
-
-    /**
      * As same as the render function, and will changed in the kernel C code, but the PHP level work usually as before
      * @param $templateFileName string
      * @param $variables        string|array|mixed
