@@ -46,6 +46,7 @@
 
 #include "kernel/mvc/model.h"
 #include "kernel/tool/helper.h"
+#include "kernel/net/request.h"
 #include "kernel/tool/require.h"
 
 void
@@ -92,6 +93,7 @@ cspeed_print_info(int type, const char *format, ...)
 }
 
 void
+/* Get the CSpeed engine's ROUTER_INFO based on PATH-INFO or $GET['xxx'] first char is '/' */
 cspeed_get_path_info(zval *ret_path_info)
 {
     char *path_info = NULL;
@@ -115,23 +117,6 @@ cspeed_get_path_info(zval *ret_path_info)
     ) {
         /* AUTO mode will get router info from PATH-INFO */
         path_info = cspeed_request_server_str_key_val("PATH_INFO");
-        /* PATH_INFO */
-        if ( zend_string_equals(
-             CSPEED_G(core_path_info_mode), 
-             strpprintf(
-                0, 
-                "%s", 
-                "PATH"
-            )
-         ) ) {
-            if ( !CSPEED_STRING_NOT_EMPTY(path_info) ) {
-                cspeed_print_info(
-                    E_ERROR,
-                    "%s",
-                    "Cant' get router data from PATH_INFO."
-                );
-            }
-        }
     }
 
     if ( zend_string_equals(
@@ -151,37 +136,31 @@ cspeed_get_path_info(zval *ret_path_info)
             )
          ) 
     ) {
-        if ( !path_info || !CSPEED_STRING_NOT_EMPTY(path_info) ) {
-
+        if ( !path_info || 
+            !CSPEED_STRING_NOT_EMPTY(path_info) 
+        ) {
             path_info = cspeed_request_get_str_key_val(ZSTR_VAL(CSPEED_G(get_router_pattern)));
-            
-            if ( zend_string_equals(
-                 CSPEED_G(core_path_info_mode), 
-                 strpprintf(
-                    0, 
-                    "%s", 
-                    "GET"
-                )
-             ) ) {
-                if ( !CSPEED_STRING_NOT_EMPTY(path_info) ) {
-                    cspeed_print_info(
-                        E_ERROR,
-                        "%s",
-                        "Cant' get router data from GET parameters."
-                    );
-                }
-            }
         }
     }
 
-    if (*path_info != '/') {
-        path_info = ZSTR_VAL(strpprintf(
+    /**
+     * In the PATH info, you must remember that the end of the string may be slash
+     * if slashes exists at the end, trim it.
+     */
+    if ( CSPEED_STRING_NOT_EMPTY(path_info) &&
+        (
+            (*(path_info + strlen(path_info) - 1) == '/') ||
+            (*path_info == '/')
+        )
+    ) {
+        path_info = ZSTR_VAL(php_trim(strpprintf(
             0,
-            "/%s",
+            "%s",
             path_info
-        ));
+        ), CSPEED_STRL("/"), 3));
     }
 
+    /* Return the value to the parent-calling function. */
     ZVAL_STRING(ret_path_info, path_info);
 }
 

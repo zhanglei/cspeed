@@ -41,15 +41,23 @@
 #include "kernel/mvc/dispatch.h"
 #include "kernel/tool/component.h"
 
-
-
 int
 cspeed_deal_reqeust(zend_string *url, zend_fcall_info *zfi, zend_fcall_info_cache *zfic, zval *ret_val) 
 /*{{{ Deal the REQUEST */
 {
-    char *path_info = cspeed_request_server_str_key_val("PATH_INFO");
+    zval zval_path_info;
+    cspeed_get_path_info(&zval_path_info);
+    char *path_info = ZSTR_VAL(
+        strpprintf(
+            0,
+            "/%s",
+            Z_STRVAL(zval_path_info)
+        )
+    );
+
     if (CSPEED_STRING_NOT_EMPTY(path_info) 
         || ( ( *(ZSTR_VAL(url)) == '/' ) && (ZSTR_LEN(url) == 1) ) ) {
+        
         zend_string *pattern = strpprintf(0, "#%s#", ZSTR_VAL(url));
 
         /* The nested thing to get the preg mathces */

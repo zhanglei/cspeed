@@ -54,11 +54,7 @@ char *cspeed_request_get_str_key_val(const char *get_key) /*{{{ GET $_GET value*
 {
     zval *get_value = cspeed_request_get(get_key);
     if (get_value == NULL) {
-        cspeed_print_info(
-            E_NOTICE, 
-            "$_GET['%s'] empty.", 
-            get_key
-        );
+
         return "";
     } else {
         return Z_STRVAL_P(get_value);
@@ -89,11 +85,7 @@ char *cspeed_request_server_str_key_val(const char *server_key) /*{{{ GET $_SERV
 {
     zval *server_value = cspeed_reqeust_server(server_key);
     if (server_value == NULL) {
-        cspeed_print_info(
-            E_NOTICE, 
-            "$_SERVER['%s'] empty.", 
-            server_key
-        );
+
         return "";
     } else {
         return Z_STRVAL_P(server_value);
