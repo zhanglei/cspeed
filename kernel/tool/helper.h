@@ -31,6 +31,9 @@ void cspeed_exit(char *exit_info);
  */
 void cspeed_print_info(int type, const char *format, ...);
 
+/* Get the PATH_INFO data */
+void cspeed_get_path_info(zval *ret_path_info);
+
 /* Reverse all slashes to reslash */
 char *cspeed_reverse_slash_char(char *src);                                      
 

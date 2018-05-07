@@ -91,6 +91,100 @@ cspeed_print_info(int type, const char *format, ...)
     }
 }
 
+void
+cspeed_get_path_info(zval *ret_path_info)
+{
+    char *path_info = NULL;
+
+    if ( zend_string_equals(
+             CSPEED_G(core_path_info_mode), 
+             strpprintf(
+                0, 
+                "%s", 
+                "AUTO"
+            )
+         )  ||
+         zend_string_equals(
+             CSPEED_G(core_path_info_mode), 
+             strpprintf(
+                0, 
+                "%s", 
+                "PATH"
+            )
+         )    
+    ) {
+        /* AUTO mode will get router info from PATH-INFO */
+        path_info = cspeed_request_server_str_key_val("PATH_INFO");
+        /* PATH_INFO */
+        if ( zend_string_equals(
+             CSPEED_G(core_path_info_mode), 
+             strpprintf(
+                0, 
+                "%s", 
+                "PATH"
+            )
+         ) ) {
+            if ( !CSPEED_STRING_NOT_EMPTY(path_info) ) {
+                cspeed_print_info(
+                    E_ERROR,
+                    "%s",
+                    "Cant' get router data from PATH_INFO."
+                );
+            }
+        }
+    }
+
+    if ( zend_string_equals(
+             CSPEED_G(core_path_info_mode), 
+             strpprintf(
+                0, 
+                "%s", 
+                "GET"
+            )
+         ) ||
+         zend_string_equals(
+             CSPEED_G(core_path_info_mode), 
+             strpprintf(
+                0, 
+                "%s", 
+                "AUTO"
+            )
+         ) 
+    ) {
+        if ( !path_info || !CSPEED_STRING_NOT_EMPTY(path_info) ) {
+
+            path_info = cspeed_request_get_str_key_val(ZSTR_VAL(CSPEED_G(get_router_pattern)));
+            
+            if ( zend_string_equals(
+                 CSPEED_G(core_path_info_mode), 
+                 strpprintf(
+                    0, 
+                    "%s", 
+                    "GET"
+                )
+             ) ) {
+                if ( !CSPEED_STRING_NOT_EMPTY(path_info) ) {
+                    cspeed_print_info(
+                        E_ERROR,
+                        "%s",
+                        "Cant' get router data from GET parameters."
+                    );
+                }
+            }
+        }
+    }
+
+    if (*path_info != '/') {
+        path_info = ZSTR_VAL(strpprintf(
+            0,
+            "/%s",
+            path_info
+        ));
+    }
+
+    ZVAL_STRING(ret_path_info, path_info);
+}
+
 char *cspeed_get_cwd(char *path)                    /*{{{ Return the current directory */
 {
 #if 0
