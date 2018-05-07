@@ -1,7 +1,20 @@
 <?php
 
+/**
+ * Class BootInit
+ *
+ * The CSpeed's bootstrap file, Each bootstrap class must implements the interface Cs\BootInit
+ * as a reservable interface to the engine job.
+ *
+ * The class name BootInit can be set in the INI config file.
+ */
+
 class BootInit implements \Cs\BootInit
 {
+    /**
+     * @param $di \Cs\di\Di
+     * @param $router \Cs\mvc\Router
+     */
     function __initRouter($di, $router)
     {
         $di->set('view', function(){
@@ -18,6 +31,10 @@ class BootInit implements \Cs\BootInit
         $router->addFromIni('../app/router.ini');
     }
 
+    /**
+     * @param $di \Cs\di\Di
+     * @param $router \Cs\mvc\Router
+     */
     function __InitDb($di, $router)
     {
         $di->set('db', function(){
@@ -33,6 +50,10 @@ class BootInit implements \Cs\BootInit
         });
     }
 
+    /**
+     * @param $di \Cs\di\Di
+     * @param $router \Cs\mvc\Router
+     */
     function __initIOC($di, $router)
     {
         $di->set('factory', function(){

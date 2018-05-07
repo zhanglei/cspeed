@@ -1,28 +1,44 @@
 <?php
 
+/**
+ * This is the Index controller
+ */
+
 namespace app\modules\index\controllers;
+
+use Cs\mvc\View;
 
 class Index extends \Cs\mvc\Controller
 {
+    /**
+     * To view the affect, enter the url in web browser:
+     *
+     * http://xxx.com/index/index/index
+     *
+     * or
+     *
+     * http://xxx.com
+     */
 	function indexAction()
 	{
-	    $user = new \app\models\User();
+        /**
+         * @var $view View
+         */
+        $view = $this->di->get('view');
 
-	    echo '<pre>';
-	    print_r($user);
-	    $data = $user->one();
-//
-//	    echo '<pre>';
-//	    print_r($data);
+        $view->setVar('name', "您好 CSpeed 用户 ");
 
-//        $client = new \Cs\rpc\Client("http://www.supjos.com/index/c");
-//
-//        $result = $client->list("aa", "bb");
-//
-//        $two = $client->two("hello");
-//        echo '<pre>';
-//        print_r($result);
-//        print_r($two);
-//        echo '</pre>';
+        $view->render('view');
 	}
+
+    /**
+     * To run the method in web browser, enter:
+     *
+     * http://xxx.com/index/index/view.html
+     *
+     */
+	function viewAction()
+    {
+        echo '<h1>Hello World</h1>';
+    }
 }

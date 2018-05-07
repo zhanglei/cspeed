@@ -46,9 +46,11 @@ class Model extends \Cs\tool\Component
      * Setting the table which you want to operate
      * NOTE TAHT:
      *  You must return the database table name, if you want to operate the other table not the model name table
+     * @return string
      */
     function tableName()
     {
+        return '';
     }
 
     /**

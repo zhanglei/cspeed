@@ -429,22 +429,15 @@ void dispather_url()    /* {{{ Dispatcher the URL */
         }
     }
 
-    if ( !path_info || !CSPEED_STRING_NOT_EMPTY(path_info) ) {
-
-        cspeed_exit("CSpeed need valid URL info to parse the Router.");
-    } else {
-        if (*path_info != '/') {
-            path_info = ZSTR_VAL(strpprintf(
-                0,
-                "/%s",
-                path_info
-            ));
-        }
+    if (*path_info != '/') {
+        path_info = ZSTR_VAL(strpprintf(
+            0,
+            "/%s",
+            path_info
+        ));
     }
 
-    int can_free = FALSE;
-
-    int pattern_pos;
+    int can_free = FALSE, pattern_pos;
 
     /* To remove the url_pattern string */
     if ( EXPECTED( 
