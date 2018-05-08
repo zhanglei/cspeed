@@ -819,7 +819,8 @@ load_kernel_setting(zend_string *ini_config_file, zend_string *ini_config_node_n
             ) {/* Value must be false or true, otherwise print error info */
                 if ( (strncmp(
                         Z_STRVAL_P(config_value),
-                        CSPEED_STRL("1")
+                        ("1"),
+                        strlen("1")
                       ) == 0
                     ) || (
                         !CSPEED_STRING_NOT_EMPTY(Z_STRVAL_P(config_value)) && (atoi(Z_STRVAL_P(config_value)) == 0)
@@ -843,15 +844,18 @@ load_kernel_setting(zend_string *ini_config_file, zend_string *ini_config_node_n
             ) {
                 if ( (strncmp(
                         "AUTO",
-                        CSPEED_STRL(ZSTR_VAL(php_string_toupper(Z_STR_P(config_value))))
+                        (ZSTR_VAL(php_string_toupper(Z_STR_P(config_value)))),
+                        strlen(ZSTR_VAL(php_string_toupper(Z_STR_P(config_value))))
                      ) == 0) || 
                      (strncmp(
                         "PATH",
-                        CSPEED_STRL(ZSTR_VAL(php_string_toupper(Z_STR_P(config_value))))
+                        (ZSTR_VAL(php_string_toupper(Z_STR_P(config_value)))),
+                        strlen(ZSTR_VAL(php_string_toupper(Z_STR_P(config_value))))
                      ) == 0) || 
                      (strncmp(
                         "GET",
-                        CSPEED_STRL(ZSTR_VAL(php_string_toupper(Z_STR_P(config_value))))
+                        (ZSTR_VAL(php_string_toupper(Z_STR_P(config_value)))),
+                        strlen(ZSTR_VAL(php_string_toupper(Z_STR_P(config_value))))
                     ) == 0)
                 ) {
                     CSPEED_G(core_path_info_mode) = php_string_toupper(Z_STR_P(config_value));
@@ -976,7 +980,8 @@ load_kernel_setting(zend_string *ini_config_file, zend_string *ini_config_node_n
 
                 if ( (strncmp(
                         Z_STRVAL_P(config_value),
-                        CSPEED_STRL("1")
+                        ("1"),
+                        strlen("1")
                       ) == 0
                     ) || (
                         !CSPEED_STRING_NOT_EMPTY(Z_STRVAL_P(config_value)) && (atoi(Z_STRVAL_P(config_value)) == 0)

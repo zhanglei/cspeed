@@ -128,15 +128,18 @@ CSPEED_METHOD(Controller, dispatch)
     if ( 
         ( strncmp(
             ZSTR_VAL(CSPEED_G(core_router_default_module)), 
-            CSPEED_STRL(module_name)
+            (module_name),
+            strlen(module_name)
         ) == 0) &&
         ( strncmp(
             ZSTR_VAL(CSPEED_G(core_router_default_controller)), 
-            CSPEED_STRL(controller_name)
+            (controller_name),
+            strlen(controller_name)
         ) == 0) &&
         ( strncmp(
             ZSTR_VAL(CSPEED_G(core_router_default_action)), 
-            CSPEED_STRL(action_name)
+            (action_name),
+            strlen(action_name)
         ) == 0)
     ) {
         cspeed_print_info(
