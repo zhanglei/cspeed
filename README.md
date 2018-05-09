@@ -18,10 +18,10 @@ CSpeed作为一个开源C语言PHP扩展，为了更加方便开发者进行项�
 
 Github:
 
-	https://github.com/liqiongfan/cspeed
+    https://github.com/liqiongfan/cspeed
 码云：
 
-	https://gitee.com/josinli/cspeed
+    https://gitee.com/josinli/cspeed
 安装步骤：
 
 ```php
@@ -64,10 +64,10 @@ core.path.info.mode             = get                ; PATH(PATH-INFO)、GET、A
 
 ```ini
 location / {
-	if (!-e $request_filename) {
-		rewrite ^/(.*)$ /index.php/$1 last;
-		break;
-	}
+    if (!-e $request_filename) {
+        rewrite ^/(.*)$ /index.php/$1 last;
+        break;
+    }
 }
 
 location ~ \.php {
@@ -108,42 +108,42 @@ namespace app\modules\rpc\controllers;
 
 class Goods extends \Cs\rpc\Server
 {
-	
-	function initialise()
-	{
-		// handle函数绑定 RPC 服务端处理类
-		$this->handle($this);
-	}
-	
-	// ----- 所有的对外的 RPC 方法
-	
-	/**
-	 * 每一个 RPC 方法都包含一个 参数（本方法使用：$params）用来接收客户端的发送的请求信息
-	 * $params是一个数组，数组的每一项对应于请求参数的每一项
-	 * 如果需要将数据返回给客户端，只需要将所需数据 return 即可.
-	 */
-	function listsRpc($params)
-	{
-		return [ 'version' => '2.1.11', 'kernel' => 'CSpeed' ];
-	}
-	
-	/**
-	 * 添加商品服务
-	 */
-	function addRpc($params)
-	{
-		// TODO ..
-	}
-	
-	/**
-	 * 删除商品服务
-	 */
-	function deleteRpc($params)
-	{
-		// TODO...
-	}
-	
-	// 等等服务代码
+    
+    function initialise()
+    {
+        // handle函数绑定 RPC 服务端处理类
+        $this->handle($this);
+    }
+    
+    // ----- 所有的对外的 RPC 方法
+    
+    /**
+     * 每一个 RPC 方法都包含一个 参数（本方法使用：$params）用来接收客户端的发送的请求信息
+     * $params是一个数组，数组的每一项对应于请求参数的每一项
+     * 如果需要将数据返回给客户端，只需要将所需数据 return 即可.
+     */
+    function listsRpc($params)
+    {
+        return [ 'version' => '2.1.11', 'kernel' => 'CSpeed' ];
+    }
+    
+    /**
+     * 添加商品服务
+     */
+    function addRpc($params)
+    {
+        // TODO ..
+    }
+    
+    /**
+     * 删除商品服务
+     */
+    function deleteRpc($params)
+    {
+        // TODO...
+    }
+    
+    // 等等服务代码
 }
 
 ```
@@ -176,27 +176,27 @@ namespace app\modules\rpc\controllers;
 
 class Goods extends \Cs\rpc\Server
 {
-	
-	function initialise()
-	{
-		// handle函数绑定 RPC 服务端处理类
-		$this->handle($this);
-	}
-	
-	/**
-	 * 参数 $params 就是一个数组，数组的内容如下：
-	 * $params = [
-	 *     [
-	 *         'id'       => 11,
-	 *         'category' => 'fruit
-	 *     ]
-	 * ]
-	 */
-	function listsRpc($params)
-	{
-	
-	}
-	
+    
+    function initialise()
+    {
+        // handle函数绑定 RPC 服务端处理类
+        $this->handle($this);
+    }
+    
+    /**
+     * 参数 $params 就是一个数组，数组的内容如下：
+     * $params = [
+     *     [
+     *         'id'       => 11,
+     *         'category' => 'fruit
+     *     ]
+     * ]
+     */
+    function listsRpc($params)
+    {
+    
+    }
+    
 }
 ```
 
@@ -218,25 +218,25 @@ namespace app\modules\rpc\controllers;
 
 class Goods extends \Cs\rpc\Server
 {
-	
-	function initialise()
-	{
-		// handle函数绑定 RPC 服务端处理类
-		$this->handle($this);
-	}
-	
-	/**
-	 * 参数 $params 就是一个数组，数组的内容如下：
-	 * $params = [
-	 *     11,
-	 *     'cspeed'
-	 * ]
-	 */
-	function listsRpc($params)
-	{
-	
-	}
-	
+    
+    function initialise()
+    {
+        // handle函数绑定 RPC 服务端处理类
+        $this->handle($this);
+    }
+    
+    /**
+     * 参数 $params 就是一个数组，数组的内容如下：
+     * $params = [
+     *     11,
+     *     'cspeed'
+     * ]
+     */
+    function listsRpc($params)
+    {
+    
+    }
+    
 }
 ```
 
@@ -265,7 +265,7 @@ return [
     'rsa' => [
         'class'      => '\app\models\User',
         'params'     => [
-        	"hello", "CSpeed", "v2.1.11'
+            "hello", "CSpeed", "v2.1.11'
         ],
         'properties' => [
             'name' => '\app\models\Tools',
@@ -307,7 +307,7 @@ attrs 表示：哪种属性的类对象可以初始化，可选值：private、p
 
 ```php
 'params'     => [
-	"hello", "CSpeed", "v2.1.11'
+    "hello", "CSpeed", "v2.1.11'
 ]
 ```
 **数组的每一项表示对应于类的构造函数的实际参数**
@@ -353,26 +353,26 @@ function setTwo(new \app\models\Tools());
 
 class Commmon
 {
-	function __construct()
-	{
-		// TODO...
-	}
+    function __construct()
+    {
+        // TODO...
+    }
 }
 
 class User extends Common
 {
-	function __construct()
-	{
-		parent::__construct();
-	}
+    function __construct()
+    {
+        parent::__construct();
+    }
 }
 
 class Manager extnds Common
 {
-	function __construct()
-	{
-		parent::__construct();
-	}
+    function __construct()
+    {
+        parent::__construct();
+    }
 }
 ```
 
@@ -382,12 +382,12 @@ class Manager extnds Common
 
 class Test
 {
-	function __construct()
-	{
-		$this->on('before', funtion($obj){
-			// TODO...
-		});
-	}
+    function __construct()
+    {
+        $this->on('before', funtion($obj){
+            // TODO...
+        });
+    }
 }
 ```
 
@@ -406,9 +406,9 @@ function trigger($eventName);
 CSpeed框架继承 **Cs\tool\Component** 的类如下三个：
 
 ```php
-Cs\mvc\Controller	
-Cs\mvc\Model				
-Cs\rpc\Server			
+Cs\mvc\Controller   
+Cs\mvc\Model                
+Cs\rpc\Server           
 ```
 
 开发者只需要在如上三个类中的 **initialise** 方法内绑定事件即可, **注意：initialise方法在 CSpeed框架中，当存在此方法时，框架会从顶级父类开始执行到本类的initialise方法来完成初始化,也就是会先执行父类的initialise，然后执行子类initialise，直到本类的initialise方法**，如：
@@ -418,12 +418,12 @@ namesapce app\modules\admin\controllers;
 
 class User extends \Cs\mvc\Controller
 {
-	function initialise()
-	{
-		$this->on(self::EVENT_BEFORE_ACTION, function($object){
-			// TODO...
-		});
-	}
+    function initialise()
+    {
+        $this->on(self::EVENT_BEFORE_ACTION, function($object){
+            // TODO...
+        });
+    }
 }
 ```
 
@@ -434,23 +434,23 @@ class User extends \Cs\mvc\Controller
 ```php
 class BootInit implements Cs\BootInit
 {
-	// TODO...
-	// 在此类中的以指定的前缀开头的方法都会被依次执行，如在配置文件指定方法前缀为：__init
-	// 那么本类中所有的以 __init 开头的方法都会被执行
-	function __initDi($di, $router)
-	{
-		// TODO... 
-	}
-	
-	function __initRouter($di, $router)
-	{
-		// TODO...
-	}
-	
-	function __initIOC($di, $router)
-	{
-		// TODO...
-	}
+    // TODO...
+    // 在此类中的以指定的前缀开头的方法都会被依次执行，如在配置文件指定方法前缀为：__init
+    // 那么本类中所有的以 __init 开头的方法都会被执行
+    function __initDi($di, $router)
+    {
+        // TODO... 
+    }
+    
+    function __initRouter($di, $router)
+    {
+        // TODO...
+    }
+    
+    function __initIOC($di, $router)
+    {
+        // TODO...
+    }
 }
 ```
 
@@ -479,14 +479,14 @@ namesapce app\models\read;
 
 class User extends \Cs\mvc\Model
 {
-	function __construct()
-	{
-		// 构造函数内，必须显式执行父类的构造函数来完成初始化
-		parent::__construct();
-		
-		// 设置当前模型使用 read 数据库连接
-		$this->setDb('read');
-	}
+    function __construct()
+    {
+        // 构造函数内，必须显式执行父类的构造函数来完成初始化
+        parent::__construct();
+        
+        // 设置当前模型使用 read 数据库连接
+        $this->setDb('read');
+    }
 }
 ```
 
@@ -495,15 +495,15 @@ class User extends \Cs\mvc\Model
 ```php
 
 $di->set('read', function(){
-	return new \Cs\db\pdo\Adapter([
-		'dsn' => 'mysql:host=localhost;port=3306;dbname=supjos',
-		'username' => 'root',
-		'password' => 'root',
-		'options'  => [                   // options参数非必填
+    return new \Cs\db\pdo\Adapter([
+        'dsn' => 'mysql:host=localhost;port=3306;dbname=supjos',
+        'username' => 'root',
+        'password' => 'root',
+        'options'  => [                   // options参数非必填
            \PDO::ATTR_PERSISTENT => true, // 持久连接
            \PDO::ATTR_AUTOCOMMIT => 0     // 默认不自动提交
        ]
-	]);
+    ]);
 });
 ```
 
@@ -533,9 +533,9 @@ CSpeed 框架支持 **配置文件加载路由** 与直接 **添加路由** 来�
 **CSpeed** 预定义的正则如下所示：
 
 ```php
-:action:、:controller:、:module: 			表示 ([^0-9-][a-zA-Z0-9-]*)
-:any:									      表示 ([^/]+)
-:id:									      表示 ([0-9]+)
+:action:、:controller:、:module:          表示 ([^0-9-][a-zA-Z0-9-]*)
+:any:                                         表示 ([^/]+)
+:id:                                          表示 ([0-9]+)
 ```
 
 ### 7、命令行模式支持 ###
@@ -576,26 +576,26 @@ namespace app\models;
 
 class Good extends \Cs\mvc\Model
 {
-	// 不建议用户使用构造函数，务必记住，如果定义构造函数，一定需要调用父类的
-	// 构造函数
-	function __construct()
-	{
-		parent::__construct();
-	}
-	
-	// 使用本方法完成一些初始化工作
-	function initialise($object)
-	{
-	    // TODO...
-	    // 此方法只要存在就一定执行，不管是new模型还是find获取模型
-	    // [注意]：构造函数只有在new模型的时候执行。
-	    // 方法传入了本类的对象(此处是$object代表Good对象)作为参数
-	}
-	
-	function tableName()
-	{
-		return 'www_product';
-	}
+    // 不建议用户使用构造函数，务必记住，如果定义构造函数，一定需要调用父类的
+    // 构造函数
+    function __construct()
+    {
+        parent::__construct();
+    }
+    
+    // 使用本方法完成一些初始化工作
+    function initialise($object)
+    {
+        // TODO...
+        // 此方法只要存在就一定执行，不管是new模型还是find获取模型
+        // [注意]：构造函数只有在new模型的时候执行。
+        // 方法传入了本类的对象(此处是$object代表Good对象)作为参数
+    }
+    
+    function tableName()
+    {
+        return 'www_product';
+    }
 }
 ```
 
@@ -615,8 +615,8 @@ $good->id = 1;
 $good->has = 1;
 
 if ($good->save()){
-	// TODO...
-	// 成功添加记录
+    // TODO...
+    // 成功添加记录
 } else {
    // TODO...
    // 添加记录失败
@@ -629,12 +629,12 @@ if ($good->save()){
 $good = \app\models\Good::find();
 
 if ($good->where([ 'id' => 1 ])->save([
-	'name'   => 'CSpeed-V2.1.11',
-	'version => 'v2.1.11' 
+    'name'   => 'CSpeed-V2.1.11',
+    'version => 'v2.1.11' 
 ])){
-	// TODO...
+    // TODO...
 } else {
-	// TODO...
+    // TODO...
 }
 
 ```
@@ -663,9 +663,9 @@ $lists = $good->orderBy(['id DESC', 'age ASC'])->asArray()->one();
 $good = \app\models\Good::find();
 
 if ($good->where([ 'id' => 1 ])->delete()){
-	// TODO...
+    // TODO...
 } else {
-	// TODO...
+    // TODO...
 }
 
 ```
@@ -696,13 +696,13 @@ Time per request:       0.098 [ms] (mean, across all concurrent requests)
 Transfer rate:          1847.10 [Kbytes/sec] received
 
 Connection Times (ms)
-	      min  mean[+/-sd] median   max
+          min  mean[+/-sd] median   max
 Connect:        0    1   0.9      0       9
 Processing:     1    9   1.8      9      25
 Waiting:        1    9   1.8      9      24
 Total:          4   10   1.3     10      28
 WARNING: The median and mean for the initial connection time are not within a normal deviation
-	These results are probably not that reliable.
+    These results are probably not that reliable.
 
 Percentage of the requests served within a certain time (ms)
   50%     10
@@ -724,7 +724,7 @@ Percentage of the requests served within a certain time (ms)
 [core]
 core.application                = ../app                 ; WEB目录
 core.bootstrap                  = ../app/bootstrap.php   ; 指定bootstrap 类目录
-core.bootstrap.class.name 		= BootInit				 ; 引导类名称
+core.bootstrap.class.name       = BootInit               ; 引导类名称
 core.bootstrap.method.string    = __init                 ; 指定Bootstrap类的初始化方法的前缀 
 core.router.modules             = index,home,back        ; 注册多模块
 core.router.default.module      = index                  ; 默认模块
@@ -745,7 +745,7 @@ db.master.password              =  3333                                         
 [dev:core]
 core.application                = ../app                 ; WEB目录
 core.bootstrap                  = ../app/bootstrap.php   ; 指定bootstrap 类目录
-core.bootstrap.class.name 		= BootInit				 ; 引导类名称
+core.bootstrap.class.name       = BootInit               ; 引导类名称
 core.bootstrap.method.string    = __init                 ; 指定Bootstrap类的初始化方法的前缀 
 core.router.modules             = index,home,back        ; 注册多模块
 core.router.default.module      = index                  ; 默认模块
