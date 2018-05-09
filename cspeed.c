@@ -124,6 +124,7 @@ PHP_RINIT_FUNCTION(cspeed)
     CSPEED_G(core_debug_mode) = DEFAULT_CORE_DEBUG_MODE;
     CSPEED_G(core_path_info_mode) = zend_string_init(CSPEED_STRL(DEFAULT_CORE_PATH_INFO_MODE), 0);
     CSPEED_G(get_router_pattern) = zend_string_init(CSPEED_STRL(DEFAULT_GET_ROUTER_PATTERN), 0);
+    CSPEED_G(boot_class_name) = zend_string_init(CSPEED_STRL(CORE_BOOTSTRAP_CLASS_NAME), 0);
 
     /* Initialise the Router object & Di object */
     zval di_object, router_object;
@@ -153,6 +154,7 @@ PHP_RSHUTDOWN_FUNCTION(cspeed)
     zend_string_release(CSPEED_G(core_url_pattern));
     zend_string_release(CSPEED_G(get_router_pattern));
     zend_string_release(CSPEED_G(core_path_info_mode));
+    zend_string_release(CSPEED_G(boot_class_name));
 
     /* free the memory */
     pefree(CSPEED_G(di_object), GC_FLAGS(CSPEED_G(di_object)) & IS_STR_PERSISTENT);

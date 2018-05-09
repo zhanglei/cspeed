@@ -876,7 +876,18 @@ load_kernel_setting(zend_string *ini_config_file, zend_string *ini_config_node_n
                     CSPEED_G(get_router_pattern) = Z_STR_P(config_value);
                 }
             }
-
+            /*boot_class_name*/
+            if ( EXPECTED((
+                    config_value = zend_hash_str_find(
+                        Z_ARRVAL_P(core_configs),
+                        CSPEED_STRL(CORE_CONFIG_BOOTSTRAP_CLASS_NAME)
+                    )
+                ) != NULL)
+            ){
+                if ( CSPEED_STRING_NOT_EMPTY(Z_STRVAL_P(config_value)) ) {
+                    CSPEED_G(boot_class_name) = Z_STR_P(config_value);
+                }
+            }
             /*core.application*/
             if ( EXPECTED( (config_value = zend_hash_str_find(Z_ARRVAL_P(core_configs), 
                 CSPEED_STRL(CORE_CONFIG_APPLICATION_NAME))) != NULL ) ) {

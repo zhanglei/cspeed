@@ -24,7 +24,7 @@
 extern zend_module_entry cspeed_module_entry;
 #define phpext_cspeed_ptr &cspeed_module_entry
 
-#define PHP_CSPEED_VERSION "2.1.11"
+#define PHP_CSPEED_VERSION "2.1.12"
 
 #ifdef PHP_WIN32
 #	define PHP_CSPEED_API __declspec(dllexport)
@@ -82,6 +82,9 @@ ZEND_BEGIN_MODULE_GLOBALS(cspeed)
     zend_string   *get_router_pattern;
     zend_string   *core_path_info_mode;
 
+    /* CSpeed's BootInit class name. */
+    zend_string   *boot_class_name;
+
     /* Global values end */
 ZEND_END_MODULE_GLOBALS(cspeed)
 
@@ -104,6 +107,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 /* Define the CSpeed system config */
 #define CORE_CONFIG_APPLICATION_NAME            "core.application"
 #define CORE_CONFIG_BOOTSTRAP_NAME              "core.bootstrap"
+#define CORE_CONFIG_BOOTSTRAP_CLASS_NAME        "core.bootstrap.class.name"
 #define CORE_CONFIG_BOOTSTRAP_METHOD_NAME       "core.bootstrap.method.string"
 #define CORE_CONFIG_MODULES_NAME                "core.router.modules"
 #define CORE_CONFIG_DEFAULT_MODULE_NAME         "core.router.default.module"

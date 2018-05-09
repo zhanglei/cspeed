@@ -488,10 +488,7 @@ CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
     zend_class_entry *bootstrap_class_ptr = zend_hash_find_ptr(
         EG(class_table), 
         zend_string_tolower(
-            zend_string_init(
-                CSPEED_STRL(CORE_BOOTSTRAP_CLASS_NAME),
-                0
-            )
+            CSPEED_G(boot_class_name)
         )
     );
 
