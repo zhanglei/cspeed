@@ -145,7 +145,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define DEFAULT_CORE_DEBUG_MODE                 0
 
 /* Default GET router name for CSpeed to parse the ROUTER */
-#define DEFAULT_GET_ROUTER_PATTERN              "_csurl"
+#define DEFAULT_GET_ROUTER_PATTERN              "__csurl"
 #define DEFAULT_CORE_PATH_INFO_MODE             "PATH"
 
 /* Some macros for the CSpeed engine */
