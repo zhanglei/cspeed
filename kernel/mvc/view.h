@@ -32,7 +32,6 @@ void render_view_file(zval *, zend_string *, zval *, zval *);             /* Ren
 #define CSPEED_VIEW_CONTROLLER_CONTROLLER_ID  "controller_id"             /* The current Controller name */
 #define CSPEED_VIEW_CONTROLLER_ACTION_ID      "action_id"                 /* The current Action Id */
 #define CSPEED_VIEW_DIRS                      "__dir"         /* The view directory to find the view file */
-#define CSPEED_VIEW_SUFFIX                    "__suffix"      /* The view template file's suffix */
 #define CSPEED_VIEW_VARIABLES                 "__variables"   /* The variables the view has */
 #define CSPEED_VIEW_ROOT_DIR                  "__root_dir"    /* The parent root dir of the view file location */
 CSPEED_INIT(view);                                                        /* Init function declare */

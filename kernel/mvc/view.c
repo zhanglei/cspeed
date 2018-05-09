@@ -44,13 +44,6 @@ void render_view_file(zval *view_obj, zend_string *temp_file, zval *array_variab
         1, 
         NULL
     );
-    zval *suffix    = zend_read_property(
-        cspeed_view_ce, 
-        view_obj, 
-        CSPEED_STRL(CSPEED_VIEW_SUFFIX), 
-        1, 
-        NULL
-    );
     
     zend_string *real_path_file = strpprintf(
         0, 
@@ -229,14 +222,6 @@ CSPEED_METHOD(View, partial)         /*{{{ proto View::partial($file, $variables
     /* Fix the ZTS path problem */
     char path[MAXPATHLEN];
     cspeed_get_cwd(path);
-
-    zval *suffix    = zend_read_property(
-        cspeed_view_ce, 
-        getThis(), 
-        CSPEED_STRL(CSPEED_VIEW_SUFFIX), 
-        1, 
-        NULL
-    );
     
     zend_string *real_path_file = strpprintf(
         0, 
@@ -288,12 +273,7 @@ CSPEED_METHOD(View, setSuffix)      /*{{{ proto View::setSuffix($suffix) */
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &suffix) == FAILURE) {
         return ;
     }
-    zend_update_property_str(
-        cspeed_view_ce, 
-        getThis(), 
-        CSPEED_STRL(CSPEED_VIEW_SUFFIX), 
-        suffix
-    );
+    CSPEED_G(core_view_ext) = suffix;
 }/*}}}*/
 
 CSPEED_METHOD(View, setVar)         /*{{{ proto View::setVar($var_name, $var_value) */
@@ -353,12 +333,6 @@ CSPEED_INIT(view) /*{{{ Initialise function to initialise the view components */
     zend_declare_property_null(
         cspeed_view_ce,   
         CSPEED_STRL(CSPEED_VIEW_VARIABLES), 
-        ZEND_ACC_PROTECTED
-    );
-    zend_declare_property_string(
-        cspeed_view_ce, 
-        CSPEED_STRL(CSPEED_VIEW_SUFFIX), 
-        "", 
         ZEND_ACC_PROTECTED
     );
     zend_declare_property_string(
