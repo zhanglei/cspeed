@@ -28,7 +28,7 @@ class Index extends \Cs\mvc\Controller
 
         $view->setVar('name', "您好 CSpeed 用户 ");
 
-        $view->render('view');
+        $view->render('index');
 	}
 
     /**
