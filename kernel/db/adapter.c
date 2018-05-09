@@ -274,7 +274,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_adapter_limit, 0, 0, 1)
     ZEND_ARG_INFO(0, limit_condition)
-    ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_adapter_create_command, 0, 0, 1)
@@ -801,31 +800,20 @@ CSPEED_METHOD(Adapter, orderBy)/*{{{ proto Adapter::orderBy($orderBy)*/
 
 CSPEED_METHOD(Adapter, limit)/*{{{ proto Adapter::limit($limit)*/
 {
-    zend_long *num, *offset = NULL;
+    zend_string *limit;
     if (zend_parse_parameters(
             ZEND_NUM_ARGS() TSRMLS_CC, 
-            "l|l", 
-            &num, 
-            &offset
+            "S", 
+            &limit
         ) == FAILURE
     ) {
         return ;
     }
-    zend_string *temp_limit_str;
-    if (offset) {
-        temp_limit_str = strpprintf(
+    zend_string *temp_limit_str = strpprintf(
             0, 
-            " LIMIT %d,%d", 
-            num, 
-            offset
+            " LIMIT %s", 
+            ZSTR_VAL(limit)
         );
-    } else {
-        temp_limit_str = strpprintf(
-            0, 
-            " LIMIT %d", 
-            num
-        );
-    }
     zend_update_property_string(
         cspeed_adapter_ce, 
         getThis(), 

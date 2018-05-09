@@ -75,11 +75,10 @@ class Adapter implements ModelInterface
     }
 
     /**
-     * @param int $count
-     * @param int $offset
-     * @return $this|Adapter
+     * @param string $limit The limit condition
+     * @return $this|ModelInterface
      */
-    function limit($count, $offset)
+    function limit($limit)
     {
         return $this;
     }

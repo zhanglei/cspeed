@@ -982,7 +982,7 @@ CSPEED_METHOD(Model, one)/*{{{ proto Model::one()*/
 
     zend_string *raw_sql = strpprintf(
         0, 
-        "SELECT %s FROM %s%s%s%s LIMIT 1", 
+        "SELECT %s FROM %s%s%s%s", 
         Z_STRVAL_P(select), 
         Z_STRVAL_P(table_name), 
         Z_STRVAL_P(where),
