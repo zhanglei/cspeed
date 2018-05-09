@@ -1,4 +1,4 @@
-# CSpeed 基于C语言的扩展框架 v2.1.11手册 #
+# CSpeed 基于C语言的扩展框架 v2.1.12手册 #
 
 ## 快速上手 ##
 
@@ -12,7 +12,7 @@ CSpeed作为一个开源C语言PHP扩展，为了更加方便开发者进行项�
 
 **2、PHP7.x**
 
-## 安装 CSpeed v2.1.11 ##
+## 安装 CSpeed v2.1.12 ##
 
 **CSpeed** 扩展目前在 **Github** 与 **码云** 平台均有代码存储库，用户只需下载源码然后按照如下方法安装即可：
 
@@ -45,7 +45,7 @@ extension=cspeed.so
 4、systemctl restart php-fpm 或者 systemctl restart httpd
 ```
 
-## 环境配置  ##
+## 路由环境配置  ##
 
 默认情况下 **CSpeed** 会从服务器的请求参数 **PATH-INFO** 获取路由信息并进行解析，用户也可以配置成从 **URL** 获取 **GET参数**  来进行路由解析，开发者仅需要从ini配置文件设置即可，如下：
 
@@ -85,6 +85,13 @@ location ~ \.php {
 ```ini
 location / {
     rewrite ^/(.*)$ /index.php?__csurl=/$1 last;
+}
+
+location ~ \.php {
+    fastcgi_pass   127.0.0.1:9000;
+    fastcgi_index  index.php;  
+    fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+    include        fastcgi_params;
 }
 ```
 
@@ -715,34 +722,44 @@ Percentage of the requests served within a certain time (ms)
 
 ```php
 [core]
-core.application                = ../app                                             ; WEB目录
-core.bootstrap                  = ../app/bootstrap.php                               ; 指定 BootInit 类目录
-core.bootstrap.method.string    = __init                                             ; 指定 BootInit 类的初始化方法的前缀
-core.router.modules             =  index,home,say,back                               ; 注册多模块
-core.router.default.module      =  index                                             ; 默认模块
-core.router.default.controller  =  index                                             ; 默认控制器
-core.router.default.action      =  index                                             ; 默认方法
-core.view.ext                   =  phtml                                             ; 视图文件后缀
-core.view.auto.render           =  1                                                 ; 是否自动渲染视图，１：自动渲染、０：不渲染
-core.url.pattern                = '.html'
+core.application                = ../app                 ; WEB目录
+core.bootstrap                  = ../app/bootstrap.php   ; 指定bootstrap 类目录
+core.bootstrap.class.name 		= BootInit				 ; 引导类名称
+core.bootstrap.method.string    = __init                 ; 指定Bootstrap类的初始化方法的前缀 
+core.router.modules             = index,home,back        ; 注册多模块
+core.router.default.module      = index                  ; 默认模块
+core.router.default.controller  = index                  ; 默认控制器
+core.router.default.action      = index                  ; 默认方法
+core.view.ext                   = phtml                  ; 视图文件后缀
+core.view.auto.render           = on                     ; 是否自动渲染视图，on、true、yes：自动渲染、off、false、no：不渲染
+core.url.pattern                = .html                  ; 伪静态设置
+core.debug.mode                 = on                     ; 是否开启调试模式 on、true、yes：开启调试模式、off、false、no：关闭调试模式
+core.path.info.symbol           = __csurl                ; 使用GET形式获取路由URL的GET参数名
+core.path.info.mode             = auto                   ; PATH(PATH-INFO)、GET、AUTO
 
 [db]
-db.master.dsn                   =  "mysql:host=localhost;port=3306;dbname=supjos"    ; 数据库类型
+db.master.dsn                   =  'mysql:host=localhost;port=3306;dbname=supjos'    ; 数据库类型
 db.master.username              =  root                                              ; 数据库用户名
 db.master.password              =  3333                                              ; 数据库密码
 
 [dev:core]
-core.application                = ../app                                             ; WEB目录
-core.bootstrap                  = ../app/bootstrap.php                               ; 指定 BootInit 类目录
-core.bootstrap.method.string    = __init                                             ; 指定 BootInit 类的初始化方法的前缀
-core.router.modules             =  index,home                                        ; 注册多模块
-core.router.default.module      =  index                                             ; 默认模块
-core.router.default.controller  =  Index                                             ; 默认控制器
-core.router.default.action      =  index                                             ; 默认方法
-core.view.ext                   =  xhtml                                             ; 视图文件后缀
+core.application                = ../app                 ; WEB目录
+core.bootstrap                  = ../app/bootstrap.php   ; 指定bootstrap 类目录
+core.bootstrap.class.name 		= BootInit				 ; 引导类名称
+core.bootstrap.method.string    = __init                 ; 指定Bootstrap类的初始化方法的前缀 
+core.router.modules             = index,home,back        ; 注册多模块
+core.router.default.module      = index                  ; 默认模块
+core.router.default.controller  = index                  ; 默认控制器
+core.router.default.action      = index                  ; 默认方法
+core.view.ext                   = phtml                  ; 视图文件后缀
+core.view.auto.render           = on                     ; 是否自动渲染视图，on、true、yes：自动渲染、off、false、no：不渲染
+core.url.pattern                = .html                  ; 伪静态设置
+core.debug.mode                 = on                     ; 是否开启调试模式 on、true、yes：开启调试模式、off、false、no：关闭调试模式
+core.path.info.symbol           = __csurl                ; 使用GET形式获取路由URL的GET参数名
+core.path.info.mode             = auto                   ; PATH(PATH-INFO)、GET、AUTO
 
 [dev:db]
-db.master.dsn                   =  "mysql:host=localhost;port=3306;dbname=supjos"    ; 数据库类型
+db.master.dsn                   =  'mysql:host=localhost;port=3306;dbname=supjos'    ; 数据库类型
 db.master.username              =  root                                              ; 数据库用户名
 db.master.password              =  3333                                              ; 数据库密码
 ```

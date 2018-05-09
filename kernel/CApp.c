@@ -495,7 +495,8 @@ CSPEED_METHOD(App, bootstrap)/*{{{ proto App::bootstrap()*/
     if (!instanceof_function(bootstrap_class_ptr, cspeed_bootinit_ce)){
         cspeed_print_info(
             E_ERROR, 
-            "BootInit class must implements interface \\Cs\\BootInit."
+            "%s class must implements interface \\Cs\\BootInit.",
+            ZSTR_VAL(CSPEED_G(boot_class_name))
         );
         RETURN_FALSE
     }
