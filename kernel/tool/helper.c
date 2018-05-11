@@ -78,17 +78,13 @@ cspeed_print_info(int type, const char *format, ...)
     } else {
         /* Not in debug mode */
         va_list args;
-        size_t ret;
         char *buffer;
-        size_t size;
 
         va_start(args, format);
-        size = vspprintf(&buffer, 0, format, args);
-        ret = PHPWRITE(buffer, size);
+        vspprintf(&buffer, 0, format, args);
+        cspeed_exit(buffer);
         efree(buffer);
         va_end(args);
-
-        cspeed_exit("");
     }
 }
 
