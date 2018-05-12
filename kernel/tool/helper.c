@@ -69,14 +69,7 @@ void
 cspeed_print_info(int type, const char *format, ...)
 {
     if ( CSPEED_G(core_debug_mode) == 1 ) {
-        /* DEBUG MODE */
-        va_list args;
-
-        va_start(args, format);
-        php_verror(NULL, "", type, format, args);
-        va_end(args);
-    } else {
-        /* Not in debug mode */
+        /* DEBUG MODE */    
         va_list args;
         char *buffer;
 
@@ -84,6 +77,14 @@ cspeed_print_info(int type, const char *format, ...)
         vspprintf(&buffer, 0, format, args);
         cspeed_exit(buffer);
         efree(buffer);
+        va_end(args);
+
+    } else {
+        /* Not in debug mode */
+        va_list args;
+
+        va_start(args, format);
+        php_verror(NULL, "", type, format, args);
         va_end(args);
     }
 }

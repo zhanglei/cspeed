@@ -134,7 +134,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define CORE_ROUTER_DEFAULT_MODULE              "home"
 #define CORE_ROUTER_DEFAULT_CONTROLLER          "index"
 #define CORE_ROUTER_DEFAULT_ACTION              "index"
-#define CORE_VIEW_EXT                           "phtml"
+#define CORE_VIEW_EXT                           "html"
 #define CORE_URL_PATTERN                        ".html"
 #define CORE_VIEW_AUTO_RENDER                   "0"
 #define CORE_BOOSTRAP_METHOD_STRING             "__init"
