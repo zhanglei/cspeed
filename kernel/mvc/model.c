@@ -678,6 +678,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_get, 0, 0, 1)
     ZEND_ARG_INFO(0, attr_name)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_get_object, 0, 0, 0)
+ZEND_END_ARG_INFO()
 #endif
 
 /* }}} */
@@ -1293,7 +1296,14 @@ CSPEED_METHOD(Model, save)/*{{{ proto Model::save()*/
     RETURN_FALSE
 }/*}}}*/
 
+
 #if 0
+CSPEED_METHOD(Model, getObject)
+{
+    RETURN_OBJ(zend_objects_clone_obj(getThis()));
+}
+
+
 CSPEED_METHOD(Model, __get)
 {
     zend_string *attr_name;
@@ -1598,6 +1608,9 @@ static const zend_function_entry cspeed_model_functions[] = {
     CSPEED_ME(Model, asArray, arginfo_cspeed_model_as_array, ZEND_ACC_PUBLIC)
     CSPEED_ME(Model, setErrorCallback, arginfo_cspeed_model_set_error_callback, ZEND_ACC_PUBLIC)
     CSPEED_ME(Model, onErrorCallback, arginfo_cspeed_model_on_error_callback, ZEND_ACC_PUBLIC)
+#if 0
+    CSPEED_ME(Model, getObject, arginfo_cspeed_model_get_object, ZEND_ACC_PUBLIC)
+#endif 
 
     PHP_FE_END
 };/*}}}*/

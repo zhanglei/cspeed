@@ -1193,6 +1193,8 @@ add_multi_object_property(zval *object, zval *multi_properties, zval *ret_val) /
         ZEND_HASH_FOREACH_VAL( Z_ARRVAL_P(multi_properties), val_value ) {
             if ( (Z_TYPE_P(val_value) == IS_ARRAY) && zend_hash_num_elements(Z_ARRVAL_P(val_value)) ) {
                 zval t_object;
+#if 0
+                /* Not to create_object use the zend function to do the copy job. */
                 object_and_properties_init(
                     &t_object, 
                     Z_OBJCE_P(object), 
@@ -1201,6 +1203,9 @@ add_multi_object_property(zval *object, zval *multi_properties, zval *ret_val) /
                 copy_object_properties(&t_object, object);
                 zval_add_ref(val_value);
                 SEPARATE_ZVAL(val_value);
+#endif
+                zend_object *dest_object = zend_objects_clone_obj(object);
+                ZVAL_OBJ(&t_object, dest_object);
                 zend_update_property(
                     cspeed_model_ce, 
                     &t_object, 
