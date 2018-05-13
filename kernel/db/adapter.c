@@ -202,7 +202,6 @@ zend_bool output_sql_errors(zval *pdo_statement, zval *model_object)  /*{{{ Retu
                 );
                 if ( Z_TYPE(ret_val) == IS_FALSE ) {
                     zval_ptr_dtor(&ret_val);
-                    php_request_shutdown(NULL);
                     return TRUE;
                 }
                 zval_ptr_dtor(&ret_val);
@@ -222,7 +221,6 @@ zend_bool output_sql_errors(zval *pdo_statement, zval *model_object)  /*{{{ Retu
                 );
                 if ( Z_TYPE(ret_val) == IS_FALSE ) {
                     zval_ptr_dtor(&ret_val);
-                    php_request_shutdown(NULL);
                     return TRUE;
                 }
                 zval_ptr_dtor(&ret_val);
