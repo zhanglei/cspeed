@@ -156,9 +156,13 @@ PHP_RSHUTDOWN_FUNCTION(cspeed)
     zend_string_release(CSPEED_G(core_path_info_mode));
     zend_string_release(CSPEED_G(boot_class_name));
 
-    /* free the memory */
-    pefree(CSPEED_G(di_object), GC_FLAGS(CSPEED_G(di_object)) & IS_STR_PERSISTENT);
-    pefree(CSPEED_G(router_object), GC_FLAGS(CSPEED_G(router_object)) & IS_STR_PERSISTENT);
+#if 0
+    pefree(CSPEED_G(di_object), 1);
+    pefree(CSPEED_G(router_object), 1); 
+#endif
+    /* free the memory, use this dtor instead of the pefree */
+    zend_object_std_dtor(CSPEED_G(di_object));
+    zend_object_std_dtor(CSPEED_G(router_object));
     CSPEED_G(di_object) = NULL;
     CSPEED_G(router_object) = NULL;
 
