@@ -673,6 +673,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_as_array, 0, 0, 0)
 ZEND_END_ARG_INFO()
+
+#if 0
+ZEND_BEGIN_ARG_INFO_EX(arginfo_cspeed_model_get, 0, 0, 1)
+    ZEND_ARG_INFO(0, attr_name)
+ZEND_END_ARG_INFO()
+#endif
+
 /* }}} */
 
 CSPEED_METHOD(Model, __construct)/*{{{ proto Model::construct()*/
@@ -1285,6 +1292,35 @@ CSPEED_METHOD(Model, save)/*{{{ proto Model::save()*/
     }
     RETURN_FALSE
 }/*}}}*/
+
+#if 0
+CSPEED_METHOD(Model, __get)
+{
+    zend_string *attr_name;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &attr_name) == FAILURE)
+    {
+        return ;
+    }
+    /* if parameters are the magic data, retrive it from the magic_data */
+    HashTable *properties = Z_OBJPROP_P(getThis());
+    if ( properties && zend_hash_num_elements(properties) ) {
+        zval *result = zend_hash_find(properties, attr_name);
+        if ( result && !ZVAL_IS_NULL(result) ) {
+            RETURN_ZVAL(result, 1, NULL);
+        }
+        RETURN_NULL();
+    } else {
+        /* Find the wheather the property in margic_data */
+        zval *magic_datas = zend_read_property(cspeed_model_ce, getThis(), CSPEED_STRL(CSPEED_MODEL_MAGIC_DATAS), 1, NULL);
+        /* Wheather in magic_data or not. */
+        if (magic_datas && zend_hash_num_elements(Z_ARRVAL_P(magic_datas))) {
+            zval *result = zend_hash_find(Z_ARRVAL_P(magic_datas), attr_name);
+            RETURN_ZVAL(result, 1, NULL);
+        }
+        RETURN_NULL();
+    }
+}
+#endif
 
 CSPEED_METHOD(Model, delete)/*{{{ proto Model::delete()*/
 {
