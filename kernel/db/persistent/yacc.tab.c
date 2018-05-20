@@ -121,6 +121,7 @@
 	#include <stdio.h>
 	#include <string.h>
     #include <stdlib.h>
+    #include "yacc.h"
 
 	/* Some internal functions needed by bison & flex */
 	extern int yylex();
@@ -129,15 +130,18 @@
 
 	/* The api functions to user to invoke from outside. */
 	char *fake_table_name = "?!!?";
-    char *sql_parser_result = "";
     char *query_table_name = "";
-    extern char *parse_sql(char *, char *);
 
     /* All things need for user-input */
 	typedef struct yy_buffer_state * YY_BUFFER_STATE;
 	extern int yyparse();
 	extern YY_BUFFER_STATE yy_scan_string(char * str);
 	extern void yy_delete_buffer(YY_BUFFER_STATE buffer);
+  
+  /* SQL RESULT */
+  SQL_PARSER_RESULT sql_parsing_result;
+	/* The api to the other appliaction. */
+  SQL_PARSER_RESULT *parse_sql(char *, char *);
 
 	/**
 	 * find the string is exists or not.
@@ -208,13 +212,13 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 75 "yacc.y"
+#line 76 "yacc.y"
 {
 	char *val;
 	int flag;
 }
 /* Line 193 of yacc.c.  */
-#line 222 "yacc.tab.c"
+#line 223 "yacc.tab.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -227,7 +231,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 235 "yacc.tab.c"
+#line 236 "yacc.tab.c"
 
 #ifdef short
 # undef short
@@ -526,10 +530,10 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   142,   142,   143,   144,   145,   155,   172,   177,   190,
-     195,   205,   229,   232,   243,   257,   260,   270,   283,   286,
-     296,   306,   320,   323,   332,   349,   364,   371,   380,   395,
-     408,   418,   436,   442,   451,   463,   472
+       0,   143,   143,   144,   145,   146,   156,   174,   179,   192,
+     197,   207,   231,   234,   245,   259,   262,   272,   285,   288,
+     298,   308,   322,   325,   334,   351,   367,   374,   383,   398,
+     412,   422,   441,   447,   456,   468,   477
 };
 #endif
 
@@ -1481,7 +1485,7 @@ yyreduce:
   switch (yyn)
     {
         case 6:
-#line 156 "yacc.y"
+#line 157 "yacc.y"
     {
     	size_t length = strlen((yyvsp[(1) - (8)].val)) 		/*select*/
     					 + strlen((yyvsp[(2) - (8)].val))	/*select_fields*/
@@ -1492,14 +1496,15 @@ yyreduce:
     					 + strlen((yyvsp[(7) - (8)].val))   /*orderby_opts*/
     					 + strlen((yyvsp[(8) - (8)].val))   /*limit_opts*/
     					 + 1;
-    	sql_parser_result = (char *)malloc(sizeof(char) * length);
-    	memset(sql_parser_result, 0, length);
-    	sprintf(sql_parser_result, "%s %s %s %s%s%s%s%s", (yyvsp[(1) - (8)].val), (yyvsp[(2) - (8)].val), (yyvsp[(3) - (8)].val), (yyvsp[(4) - (8)].val), (yyvsp[(5) - (8)].val), (yyvsp[(6) - (8)].val), (yyvsp[(7) - (8)].val), (yyvsp[(8) - (8)].val));
+    	sql_parsing_result.sql_result = (char *)malloc(sizeof(char) * length);
+    	memset(sql_parsing_result.sql_result, 0, length);
+    	sprintf(sql_parsing_result.sql_result, "%s %s %s %s%s%s%s%s", (yyvsp[(1) - (8)].val), (yyvsp[(2) - (8)].val), (yyvsp[(3) - (8)].val), (yyvsp[(4) - (8)].val), (yyvsp[(5) - (8)].val), (yyvsp[(6) - (8)].val), (yyvsp[(7) - (8)].val), (yyvsp[(8) - (8)].val));
+    	sql_parsing_result.sql_type = 1;
     ;}
     break;
 
   case 7:
-#line 173 "yacc.y"
+#line 175 "yacc.y"
     {
 		replace_fake_table(strdup((yyvsp[(1) - (1)].val)), (yyval.val));
 		/*$$ = strdup($1);*/
@@ -1507,7 +1512,7 @@ yyreduce:
     break;
 
   case 8:
-#line 178 "yacc.y"
+#line 180 "yacc.y"
     {
 		size_t length = strlen((yyvsp[(1) - (3)].val)) + strlen((yyvsp[(2) - (3)].val)) + strlen((yyvsp[(3) - (3)].val)) + 1;
 		char *fields = (char *)malloc(sizeof(char)*length);
@@ -1520,7 +1525,7 @@ yyreduce:
     break;
 
   case 9:
-#line 191 "yacc.y"
+#line 193 "yacc.y"
     {
     	replace_fake_table(strdup((yyvsp[(1) - (1)].val)), (yyvsp[(1) - (1)].val));
     	/*$$ = strdup($1);*/
@@ -1528,7 +1533,7 @@ yyreduce:
     break;
 
   case 10:
-#line 196 "yacc.y"
+#line 198 "yacc.y"
     {
 		size_t length = strlen((yyvsp[(1) - (3)].val)) + strlen((yyvsp[(2) - (3)].val)) + strlen((yyvsp[(3) - (3)].val)) + 1;
 		char *table_name = (char *)malloc(sizeof(char)*length);
@@ -1541,7 +1546,7 @@ yyreduce:
     break;
 
   case 11:
-#line 206 "yacc.y"
+#line 208 "yacc.y"
     {
 		size_t length = strlen((yyvsp[(1) - (7)].val)) + strlen((yyvsp[(2) - (7)].val)) + strlen((yyvsp[(3) - (7)].val)) 
 						+ strlen((yyvsp[(4) - (7)].val)) + strlen((yyvsp[(5) - (7)].val)) + strlen((yyvsp[(6) - (7)].val)) + strlen((yyvsp[(7) - (7)].val)) + 1;
@@ -1565,14 +1570,14 @@ yyreduce:
     break;
 
   case 12:
-#line 229 "yacc.y"
+#line 231 "yacc.y"
     {
 		(yyval.val) = "";/*empty*/
 	;}
     break;
 
   case 13:
-#line 233 "yacc.y"
+#line 235 "yacc.y"
     {
 		size_t length = strlen((yyvsp[(1) - (4)].val)) + strlen((yyvsp[(2) - (4)].val))
 					  + strlen((yyvsp[(3) - (4)].val)) + strlen((yyvsp[(4) - (4)].val)) + 1;
@@ -1586,7 +1591,7 @@ yyreduce:
     break;
 
   case 14:
-#line 244 "yacc.y"
+#line 246 "yacc.y"
     {
 		size_t length = strlen((yyvsp[(1) - (5)].val)) + strlen((yyvsp[(2) - (5)].val)) 
 					  + strlen((yyvsp[(3) - (5)].val)) + strlen((yyvsp[(4) - (5)].val)) + strlen((yyvsp[(5) - (5)].val)) + 1;
@@ -1600,14 +1605,14 @@ yyreduce:
     break;
 
   case 15:
-#line 257 "yacc.y"
+#line 259 "yacc.y"
     { 
 		(yyval.val) = "";/*empty*/
 	;}
     break;
 
   case 16:
-#line 261 "yacc.y"
+#line 263 "yacc.y"
     {
 		size_t length = strlen((yyvsp[(1) - (2)].val)) + strlen((yyvsp[(2) - (2)].val)) + 1;
 		char *groupby_opts = (char *)malloc(sizeof(char) * length);
@@ -1620,7 +1625,7 @@ yyreduce:
     break;
 
   case 17:
-#line 271 "yacc.y"
+#line 273 "yacc.y"
     {
 		size_t length = strlen((yyvsp[(1) - (3)].val)) + strlen((yyvsp[(2) - (3)].val)) + strlen((yyvsp[(3) - (3)].val)) + 1;
 		char *groupby_opts = (char *)malloc(sizeof(char) * length);
@@ -1633,14 +1638,14 @@ yyreduce:
     break;
 
   case 18:
-#line 283 "yacc.y"
+#line 285 "yacc.y"
     {
 		(yyval.val) = "";
 	;}
     break;
 
   case 19:
-#line 287 "yacc.y"
+#line 289 "yacc.y"
     {
 		size_t length = strlen((yyvsp[(1) - (2)].val)) + strlen((yyvsp[(2) - (2)].val)) + 1;
 		char *orderby_opts = (char *)malloc(sizeof(char) * length);
@@ -1653,7 +1658,7 @@ yyreduce:
     break;
 
   case 20:
-#line 297 "yacc.y"
+#line 299 "yacc.y"
     {
 		size_t length = strlen((yyvsp[(1) - (3)].val)) + strlen((yyvsp[(2) - (3)].val)) + strlen((yyvsp[(3) - (3)].val)) + 1;
 		char *orderby_opts = (char *)malloc(sizeof(char) * length);
@@ -1666,7 +1671,7 @@ yyreduce:
     break;
 
   case 21:
-#line 307 "yacc.y"
+#line 309 "yacc.y"
     {
 		size_t length = strlen((yyvsp[(1) - (4)].val)) + strlen((yyvsp[(2) - (4)].val))
 					  + strlen((yyvsp[(3) - (4)].val)) + strlen((yyvsp[(4) - (4)].val)) + 1;
@@ -1680,14 +1685,14 @@ yyreduce:
     break;
 
   case 22:
-#line 320 "yacc.y"
+#line 322 "yacc.y"
     {
 		(yyval.val) = "";/*empty*/
 	;}
     break;
 
   case 23:
-#line 324 "yacc.y"
+#line 326 "yacc.y"
     {
 		size_t length = strlen((yyvsp[(1) - (2)].val)) + strlen((yyvsp[(2) - (2)].val)) + 1;
 		char *limit_opts = (char *)malloc(sizeof(char) * length);
@@ -1699,7 +1704,7 @@ yyreduce:
     break;
 
   case 24:
-#line 333 "yacc.y"
+#line 335 "yacc.y"
     {
 		size_t length = strlen((yyvsp[(1) - (4)].val)) + strlen((yyvsp[(2) - (4)].val))
 					  + strlen((yyvsp[(3) - (4)].val)) + strlen((yyvsp[(4) - (4)].val)) + 1;
@@ -1712,7 +1717,7 @@ yyreduce:
     break;
 
   case 25:
-#line 350 "yacc.y"
+#line 352 "yacc.y"
     {
 	    size_t length = strlen((yyvsp[(1) - (5)].val))      /*udpate*/
     					 + strlen((yyvsp[(2) - (5)].val))	/*table_name*/
@@ -1720,21 +1725,22 @@ yyreduce:
     					 + strlen((yyvsp[(4) - (5)].val))   /*update_opts*/
     					 + strlen((yyvsp[(5) - (5)].val))   /*where_opts*/
     					 + 1;
-    	sql_parser_result = (char *)malloc(sizeof(char) * length);
-    	memset(sql_parser_result, 0, length);
-    	sprintf(sql_parser_result, "%s %s %s %s%s", (yyvsp[(1) - (5)].val), (yyvsp[(2) - (5)].val), (yyvsp[(3) - (5)].val), (yyvsp[(4) - (5)].val), (yyvsp[(5) - (5)].val));
+    	sql_parsing_result.sql_result = (char *)malloc(sizeof(char) * length);
+    	memset(sql_parsing_result.sql_result, 0, length);
+    	sprintf(sql_parsing_result.sql_result, "%s %s %s %s%s", (yyvsp[(1) - (5)].val), (yyvsp[(2) - (5)].val), (yyvsp[(3) - (5)].val), (yyvsp[(4) - (5)].val), (yyvsp[(5) - (5)].val));
+    	sql_parsing_result.sql_type = 2;
 	;}
     break;
 
   case 26:
-#line 365 "yacc.y"
+#line 368 "yacc.y"
     {
 		(yyval.val) = strdup((yyvsp[(1) - (1)].val));
 	;}
     break;
 
   case 27:
-#line 372 "yacc.y"
+#line 375 "yacc.y"
     {
 		size_t length = strlen((yyvsp[(1) - (3)].val)) + strlen((yyvsp[(2) - (3)].val)) + strlen((yyvsp[(3) - (3)].val)) + 1;
 		char *update_opts = (char *)malloc(sizeof(char) * length);
@@ -1746,7 +1752,7 @@ yyreduce:
     break;
 
   case 28:
-#line 381 "yacc.y"
+#line 384 "yacc.y"
     {
 		size_t length = strlen((yyvsp[(1) - (5)].val)) + strlen((yyvsp[(2) - (5)].val)) 
 					  + strlen((yyvsp[(3) - (5)].val)) + strlen((yyvsp[(4) - (5)].val)) + strlen((yyvsp[(5) - (5)].val)) + 1;
@@ -1759,28 +1765,29 @@ yyreduce:
     break;
 
   case 29:
-#line 396 "yacc.y"
+#line 399 "yacc.y"
     {
 	    size_t length = strlen((yyvsp[(1) - (4)].val))      /*delete*/
     					 + strlen((yyvsp[(2) - (4)].val))	/*from*/
     					 + strlen((yyvsp[(3) - (4)].val))   /*delete_table_name*/
     					 + strlen((yyvsp[(4) - (4)].val))   /*where_opts*/
     					 + 1;
-    	sql_parser_result = (char *)malloc(sizeof(char) * length);
-    	memset(sql_parser_result, 0, length);
-    	sprintf(sql_parser_result, "%s %s %s%s", (yyvsp[(1) - (4)].val), (yyvsp[(2) - (4)].val), (yyvsp[(3) - (4)].val), (yyvsp[(4) - (4)].val));
+    	sql_parsing_result.sql_result = (char *)malloc(sizeof(char) * length);
+    	memset(sql_parsing_result.sql_result, 0, length);
+    	sprintf(sql_parsing_result.sql_result, "%s %s %s%s", (yyvsp[(1) - (4)].val), (yyvsp[(2) - (4)].val), (yyvsp[(3) - (4)].val), (yyvsp[(4) - (4)].val));
+    	sql_parsing_result.sql_type = 3;
 	;}
     break;
 
   case 30:
-#line 409 "yacc.y"
+#line 413 "yacc.y"
     {
 		(yyval.val) = strdup((yyvsp[(1) - (1)].val));
 	;}
     break;
 
   case 31:
-#line 419 "yacc.y"
+#line 423 "yacc.y"
     {
 	    size_t length = strlen((yyvsp[(1) - (9)].val))      /*insert into*/
     					 + strlen((yyvsp[(2) - (9)].val))	/*table_name*/
@@ -1792,21 +1799,22 @@ yyreduce:
     					 + strlen((yyvsp[(8) - (9)].val))   /*insert_values*/
     					 + strlen((yyvsp[(9) - (9)].val))   /*RPARATHES*/
     					 + 1;
-    	sql_parser_result = (char *)malloc(sizeof(char) * length);
-    	memset(sql_parser_result, 0, length);
-    	sprintf(sql_parser_result, "%s %s %s%s%s %s%s%s%s", (yyvsp[(1) - (9)].val), (yyvsp[(2) - (9)].val), (yyvsp[(3) - (9)].val), (yyvsp[(4) - (9)].val), (yyvsp[(5) - (9)].val), (yyvsp[(6) - (9)].val), (yyvsp[(7) - (9)].val), (yyvsp[(8) - (9)].val), (yyvsp[(9) - (9)].val));
+    	sql_parsing_result.sql_result = (char *)malloc(sizeof(char) * length);
+    	memset(sql_parsing_result.sql_result, 0, length);
+    	sprintf(sql_parsing_result.sql_result, "%s %s %s%s%s %s%s%s%s", (yyvsp[(1) - (9)].val), (yyvsp[(2) - (9)].val), (yyvsp[(3) - (9)].val), (yyvsp[(4) - (9)].val), (yyvsp[(5) - (9)].val), (yyvsp[(6) - (9)].val), (yyvsp[(7) - (9)].val), (yyvsp[(8) - (9)].val), (yyvsp[(9) - (9)].val));
+    	sql_parsing_result.sql_type = 4;
 	;}
     break;
 
   case 32:
-#line 437 "yacc.y"
+#line 442 "yacc.y"
     {
 		(yyval.val) = strdup((yyvsp[(1) - (1)].val));
 	;}
     break;
 
   case 33:
-#line 443 "yacc.y"
+#line 448 "yacc.y"
     {
 		size_t length = strlen((yyvsp[(1) - (1)].val)) + 1;
 		char *insert_fieds = (char *)malloc(sizeof(char) * length);
@@ -1818,7 +1826,7 @@ yyreduce:
     break;
 
   case 34:
-#line 452 "yacc.y"
+#line 457 "yacc.y"
     {
 		size_t length = strlen((yyvsp[(1) - (3)].val)) + strlen((yyvsp[(2) - (3)].val)) + strlen((yyvsp[(3) - (3)].val)) + 1;
 		char *insert_fieds = (char *)malloc(sizeof(char) * length);
@@ -1830,7 +1838,7 @@ yyreduce:
     break;
 
   case 35:
-#line 464 "yacc.y"
+#line 469 "yacc.y"
     {
 		size_t length = strlen((yyvsp[(1) - (1)].val)) + 1;
 		char *insert_values = (char *)malloc(sizeof(char) * length);
@@ -1842,7 +1850,7 @@ yyreduce:
     break;
 
   case 36:
-#line 473 "yacc.y"
+#line 478 "yacc.y"
     {
 		size_t length = strlen((yyvsp[(1) - (3)].val)) + strlen((yyvsp[(2) - (3)].val)) + strlen((yyvsp[(3) - (3)].val)) + 1;
 		char *insert_values = (char *)malloc(sizeof(char) * length);
@@ -1855,7 +1863,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1863 "yacc.tab.c"
+#line 1868 "yacc.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2069,7 +2077,7 @@ yyreturn:
 }
 
 
-#line 482 "yacc.y"
+#line 487 "yacc.y"
 
 
 /**
@@ -2078,8 +2086,8 @@ yyreturn:
  */
 int yyerror(const char *s)
 {
-	printf("[error: %s]\n", s);
-	sql_parser_result = NULL;
+	sql_parsing_result.sql_result = strdup(s);
+	sql_parsing_result.sql_type = 0;
 	return 0;
 }
 
@@ -2089,12 +2097,12 @@ int yyerror(const char *s)
  * calling:
  * free(pointer_to_result);
  */
-char *parse_sql(char *sql_statement, char *table_name)
+SQL_PARSER_RESULT *parse_sql(char *sql_statement, char *table_name)
 {
 	query_table_name = table_name;
     YY_BUFFER_STATE buffer = yy_scan_string(sql_statement);
     yyparse();
     yy_delete_buffer(buffer);
-    return sql_parser_result;
+    return &sql_parsing_result;
 }
 

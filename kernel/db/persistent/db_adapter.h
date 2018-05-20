@@ -22,7 +22,7 @@
 #define CSPEED_PERSISTENT_DB_ADAPTER_H
 
 extern zend_class_entry *cspeed_db_adapter_ce;
-extern char *parse_sql(char *sql_statement, char *table_name);
+extern SQL_PARSER_RESULT *parse_sql(char *sql_statement, char *table_name);
 
 /* The sharedKey for table field */
 #define SHARED_KEY          "_sharedKey"
@@ -35,6 +35,9 @@ extern char *parse_sql(char *sql_statement, char *table_name);
 
 /* The SQL that the PDO will execute */
 #define RAW_SQL             "_raw_sql"
+
+/* SQL type */
+#define RAW_SQL_TYPE        "_raw_sql_type"
 
 CSPEED_INIT(db_adapter);
 

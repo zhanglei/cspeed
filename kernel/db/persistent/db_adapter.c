@@ -29,9 +29,10 @@
 #include "Zend/zend_API.h"
 #include "ext/standard/info.h"
 
-#include "Zend/zend_smart_str.h"
 #include "kernel/tool/helper.h"
+#include "Zend/zend_smart_str.h"
 #include "ext/standard/php_string.h" 
+#include "kernel/db/persistent/yacc.h"
 #include "kernel/db/persistent/yacc.tab.h"
 #include "kernel/db/persistent/db_adapter.h"
 
@@ -130,16 +131,18 @@ CSPEED_METHOD(DbAdapter, createCommand)
         return ;
     }
     zval *table_name = zend_read_property(Z_OBJCE_P(getThis()), getThis(), CSPEED_STRL(TABLE_NAME), 1, NULL);
-    char *sql_result = parse_sql(ZSTR_VAL(dbname), Z_STRVAL_P(table_name));
-    if (sql_result == NULL) {
+    SQL_PARSER_RESULT *sql_result = parse_sql(ZSTR_VAL(dbname), Z_STRVAL_P(table_name));
+    if (sql_result->sql_type == 0) {
+        free(sql_result->sql_result);
         cspeed_print_info(
             E_ERROR,
             "SQL: 1064 Unkown grammer."
         );
         RETURN_ZVAL(getThis(), 1, NULL);
     } else {
-        zend_update_property_string(Z_OBJCE_P(getThis()), getThis(), CSPEED_STRL(RAW_SQL), sql_result);
-        free(sql_result);
+        zend_update_property_string(Z_OBJCE_P(getThis()), getThis(), CSPEED_STRL(RAW_SQL), sql_result->sql_result);
+        zend_update_property_long(Z_OBJCE_P(getThis()), getThis(), CSPEED_STRL(RAW_SQL_TYPE), sql_result->sql_type);
+        free(sql_result->sql_result);
         RETURN_ZVAL(getThis(), 1, NULL);
     }
 }
@@ -150,7 +153,7 @@ CSPEED_METHOD(DbAdapter, execute)
     zval *h_size = zend_read_property(Z_OBJCE_P(getThis()), getThis(), CSPEED_STRL(HORIZONTAL_SIZE), 1, NULL);
     zval *shared_key = zend_read_property(Z_OBJCE_P(getThis()), getThis(), CSPEED_STRL(SHARED_KEY), 1, NULL);
     zval *raw_sql = zend_read_property(Z_OBJCE_P(getThis()), getThis(), CSPEED_STRL(RAW_SQL), 1, NULL);
-
+    zval *raw_sql_type = zend_read_property(Z_OBJCE_P(getThis()), getThis(), CSPEED_STRL(RAW_SQL_TYPE), 1, NULL);
     if (!raw_sql || ZVAL_IS_NULL(raw_sql)) {
         cspeed_print_info(
             E_ERROR,
@@ -160,7 +163,7 @@ CSPEED_METHOD(DbAdapter, execute)
 
     /* TRIM the RAW_SQL's first space chars */
     zend_string *prepared_sql = php_trim(Z_STR_P(raw_sql), CSPEED_STRL(" "), 3);
-    if ( memcmp(ZSTR_VAL(php_string_tolower(prepared_sql)), "select", strlen("select")) == 0 )
+    if ( Z_LVAL_P(raw_sql_type) == 1 )
     {
         /* Enter the SELECT mode */
         smart_str sql = {0};
@@ -241,4 +244,5 @@ CSPEED_INIT(db_adapter)
     zend_declare_property_long(cspeed_db_adapter_ce, CSPEED_STRL(HORIZONTAL_SIZE), 5, ZEND_ACC_PRIVATE);
     zend_declare_property_string(cspeed_db_adapter_ce, CSPEED_STRL(TABLE_NAME), "", ZEND_ACC_PRIVATE);
     zend_declare_property_string(cspeed_db_adapter_ce, CSPEED_STRL(RAW_SQL), "", ZEND_ACC_PRIVATE);
+    zend_declare_property_string(cspeed_db_adapter_ce, CSPEED_STRL(RAW_SQL_TYPE), "", ZEND_ACC_PRIVATE);
 }
