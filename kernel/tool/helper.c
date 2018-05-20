@@ -58,7 +58,16 @@ cspeed_exit(char *exit_info)
         0,
         "%s('%s');",
         "exit",
-        (!exit_info || CSPEED_STRING_NOT_EMPTY(exit_info)) ? exit_info : ""
+        (!exit_info || CSPEED_STRING_NOT_EMPTY(exit_info)) ? ZSTR_VAL(
+            php_addslashes(
+                strpprintf(
+                    0, 
+                    "%s", 
+                    exit_info
+                ), 
+                IS_TRUE
+            )
+        ) : ""
     ));
     zend_eval_string(exit_string, &ret_val, "exit");
     zval_ptr_dtor(&ret_val);

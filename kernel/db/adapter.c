@@ -202,7 +202,7 @@ zend_bool output_sql_errors(zval *pdo_statement, zval *model_object)  /*{{{ Retu
                 );
                 if ( Z_TYPE(ret_val) == IS_FALSE ) {
                     zval_ptr_dtor(&ret_val);
-                    return TRUE;
+                    cspeed_exit("");
                 }
                 zval_ptr_dtor(&ret_val);
             } else {
@@ -221,7 +221,7 @@ zend_bool output_sql_errors(zval *pdo_statement, zval *model_object)  /*{{{ Retu
                 );
                 if ( Z_TYPE(ret_val) == IS_FALSE ) {
                     zval_ptr_dtor(&ret_val);
-                    return TRUE;
+                    cspeed_exit("");
                 }
                 zval_ptr_dtor(&ret_val);
             }
@@ -232,7 +232,6 @@ zend_bool output_sql_errors(zval *pdo_statement, zval *model_object)  /*{{{ Retu
             Z_LVAL_P(sql_code), 
             Z_STRVAL_P(sql_info)
         );
-        return TRUE;
     }
     return FALSE;
 }/*}}}*/
@@ -484,6 +483,13 @@ CSPEED_METHOD(Adapter, from)/*{{{ proto Adapter::from($table)*/
         ) == FAILURE
     ) {
         return ;
+    }
+    if ( !CSPEED_STRING_NOT_EMPTY(ZSTR_VAL(table)) ) {
+        cspeed_print_info(
+            E_ERROR,
+            "%s",
+            "The tablename must be a valid string."
+        );
     }
     zend_update_property_string(
         cspeed_adapter_ce, 
@@ -1257,7 +1263,7 @@ CSPEED_INIT(adapter)/*{{{*/
     zend_declare_property_null(
         cspeed_adapter_ce, 
         CSPEED_STRL(CSPEED_DB_ERROR_CALLBACK), 
-        ZEND_ACC_PRIVATE
+        ZEND_ACC_PROTECTED
     );
 }/*}}}*/
 

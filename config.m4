@@ -51,6 +51,8 @@ if test "$PHP_CSPEED" != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH(curl, $CURL_DIR/$PHP_LIBDIR, CURL_SHARED_LIBADD)
 
   PHP_NEW_EXTENSION(cspeed,
+    kernel/db/persistent/yacc.tab.c     \
+    kernel/db/persistent/lex.yy.c       \
     classes.c                           \
     cspeed.c                            \
     kernel/CApp.c                       \
@@ -74,6 +76,7 @@ if test "$PHP_CSPEED" != "no"; then
     kernel/mvc/router.c                 \
     kernel/console/task.c               \
     kernel/console/parse.c              \
+    kernel/db/persistent/db_adapter.c   \
     kernel/db/adapter.c,
   $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_ADD_BUILD_DIR([$ext_builddir/kernel])
@@ -84,6 +87,7 @@ if test "$PHP_CSPEED" != "no"; then
   PHP_ADD_BUILD_DIR([$ext_builddir/kernel/net])
   PHP_ADD_BUILD_DIR([$ext_builddir/kernel/tool])
   PHP_ADD_BUILD_DIR([$ext_builddir/kernel/console])
+  PHP_ADD_BUILD_DIR([$ext_builddir/kernel/db/persistent])
 
   PHP_SUBST(CURL_SHARED_LIBADD)
 fi

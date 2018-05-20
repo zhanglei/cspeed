@@ -91,6 +91,9 @@ PHP_MINIT_FUNCTION(cspeed)
 
     /* CLI */
     task_init();
+
+    /* DbAdapter */
+    db_adapter_init();
     
     /* After initialise, return SUCCESS means OK */
     return SUCCESS;
