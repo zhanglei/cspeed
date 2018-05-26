@@ -258,6 +258,80 @@ int stringstr(char *str, char *pattern)
     return FALSE;
 }
 
+
+/**
+ * Replace the tablename with query_table_name or the raw table_name
+ * return the value to the three parameter named dest.
+ * so that the `dest` value must be writable.
+ */
+void replace_fake_name(char *str, char *find_str, char *fake_name, char *dest)
+{
+    /* if exists the table name,replace it with fake_name */
+    int pos_dot = stringexists(str, ".");
+    
+    /* if exists the query_table_name or not. */
+    char temp_str[256] = {0};
+    strncpy(temp_str, str, pos_dot == -1 ? strlen(str) : pos_dot);
+    int pos = stringexists(temp_str, find_str);
+    
+    if ( pos != -1 ) {
+        /* find the query_table_name */
+        if ( pos_dot == -1 ){
+            /* Dot[.] not found */
+            sprintf(dest, "%s", fake_name);
+        } else {
+            /* found the dot[.] */
+            sprintf(dest, "%s.%s", fake_name, str + pos_dot + 1);
+        }
+    } else {
+        /* Not found the query_table_name */
+        sprintf(dest, "%s", str);
+    }
+}
+
+/**
+ * To replace all name into the need string.
+ *  You must known that, the `dest` must be writeable !!!
+ */
+void replace_all_name(char *src, char *subject, char *replace_subject, char *dest, int *length)
+{
+    int space = 0;
+    char *temp_src = strdup(src);
+    char *temp_result = strtok(src, ",");
+    
+    if (strncmp(src, temp_src, strlen(temp_src)) == 0)
+    {
+        temp_result = strtok(src, " ");
+        space = 1;
+    }
+
+    if (temp_result == NULL)
+    {
+        replace_fake_name(src, subject, replace_subject, dest);
+    }
+    
+    char return_string[125] = {0};
+    while(temp_result != NULL)
+    {
+        replace_fake_name(temp_result, subject, replace_subject, return_string);
+        strncat(dest, return_string, strlen(return_string));
+        *length += strlen(return_string);
+        if (space) {
+            temp_result = strtok(NULL, " ");
+        } else {
+            temp_result = strtok(NULL, ",");
+        }
+        if (temp_result != NULL) {
+            if (space) {
+                strncat(dest, " ", strlen(" "));
+            } else {
+                strncat(dest, ",", strlen(","));
+            }
+            *length += 1;
+        } 
+    }
+}
+
 /* {{{ php_simple_ini_parser_cb */
 void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_type, zval *arr)
 {

@@ -43,24 +43,25 @@
      FROM = 259,
      JOIN = 260,
      WHERE = 261,
-     ON = 262,
-     GROUPBY = 263,
-     HAVING = 264,
-     ORDERBY = 265,
-     NAME = 266,
-     COMMA = 267,
-     EQUAL = 268,
-     AS = 269,
-     ORDER_RULE = 270,
-     AND = 271,
-     LIMIT = 272,
-     LPARATHES = 273,
-     RPARATHES = 274,
-     VALUES = 275,
-     UPDATE = 276,
-     SET = 277,
-     DELETE = 278,
-     INSERT = 279
+     IN = 262,
+     ON = 263,
+     GROUPBY = 264,
+     HAVING = 265,
+     ORDERBY = 266,
+     NAME = 267,
+     COMMA = 268,
+     EQUAL = 269,
+     AS = 270,
+     ORDER_RULE = 271,
+     AND = 272,
+     LIMIT = 273,
+     LPARATHES = 274,
+     RPARATHES = 275,
+     VALUES = 276,
+     UPDATE = 277,
+     SET = 278,
+     DELETE = 279,
+     INSERT = 280
    };
 #endif
 /* Tokens.  */
@@ -68,37 +69,38 @@
 #define FROM 259
 #define JOIN 260
 #define WHERE 261
-#define ON 262
-#define GROUPBY 263
-#define HAVING 264
-#define ORDERBY 265
-#define NAME 266
-#define COMMA 267
-#define EQUAL 268
-#define AS 269
-#define ORDER_RULE 270
-#define AND 271
-#define LIMIT 272
-#define LPARATHES 273
-#define RPARATHES 274
-#define VALUES 275
-#define UPDATE 276
-#define SET 277
-#define DELETE 278
-#define INSERT 279
+#define IN 262
+#define ON 263
+#define GROUPBY 264
+#define HAVING 265
+#define ORDERBY 266
+#define NAME 267
+#define COMMA 268
+#define EQUAL 269
+#define AS 270
+#define ORDER_RULE 271
+#define AND 272
+#define LIMIT 273
+#define LPARATHES 274
+#define RPARATHES 275
+#define VALUES 276
+#define UPDATE 277
+#define SET 278
+#define DELETE 279
+#define INSERT 280
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 25 "yacc.y"
+#line 79 "yacc.y"
 {
 	char *val;
 	int flag;
 }
 /* Line 1529 of yacc.c.  */
-#line 102 "yacc.tab.h"
+#line 104 "yacc.tab.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

@@ -21,8 +21,11 @@
 #ifndef CSPEED_PERSISTENT_DB_ADAPTER_H
 #define CSPEED_PERSISTENT_DB_ADAPTER_H
 
+/*The DbAdapter class entry. */
 extern zend_class_entry *cspeed_db_adapter_ce;
-extern SQL_PARSER_RESULT *parse_sql(char *sql_statement, char *table_name);
+
+/* External prototypes of the parse_sql function */
+extern SQL_PARSER_RESULT *parse_sql(char *sql_statement);
 
 /* The sharedKey for table field */
 #define SHARED_KEY          "_sharedKey"
@@ -39,6 +42,13 @@ extern SQL_PARSER_RESULT *parse_sql(char *sql_statement, char *table_name);
 /* SQL type */
 #define RAW_SQL_TYPE        "_raw_sql_type"
 
+/* ALL configs of the DbAdapter. */
+#define DBADAPTER_CONFIGS   "_db_configs"
+
+/* The faker table name */
+#define DB_FAKER_TABLE_NAME  "?!????"
+
+/* The prototype of the DbAdapter class. */
 CSPEED_INIT(db_adapter);
 
 #endif  

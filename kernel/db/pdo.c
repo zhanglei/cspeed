@@ -30,6 +30,7 @@
 #include "ext/pdo/php_pdo_driver.h"
 
 #include "kernel/db/pdo.h"
+#include "kernel/db/adapter.h"
 
 /**
  * This is the tool helpers to help the developer to develop the PDO databaesed Extension
@@ -223,7 +224,23 @@ void cspeed_pdo_statement_set_fetch_mode(zval *pdostatement_obj, int fetch_style
     call_user_function(NULL, pdostatement_obj, &function_name, retval, param_count, params);
 }/*}}}*/
 
+/**{{{ proto To execute the SQL */
+void cspeed_pdo_execute_sql(zval *pdo_object, zval *call_object, char *sql, zval *param_property, zval *retval)
+{
+    zval ret_val, pdo_statement, ret;
+    cspeed_pdo_prepare(pdo_object, sql, &pdo_statement);
+    cspeed_pdo_statement_set_fetch_mode(&pdo_statement, 2, &ret);
+    cspeed_pdo_statement_execute(&pdo_statement, param_property, &ret_val);
 
+    if (!output_sql_errors(&pdo_statement, call_object)){
+        cspeed_pdo_statement_fetch_all(
+            &pdo_statement, 
+            retval
+        );
+    } else {
+        ZVAL_NULL(retval);
+    }
+}/*}}}*/
 
 /*
  * Local variables:

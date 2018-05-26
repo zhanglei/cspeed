@@ -91,6 +91,14 @@ char *substr(char *str, int start, int length);
 /* Return the given pattern exists in str or not. */
 int stringstr(char *str, char *pattern);
 
+/* Replace the fake name with ?!? */
+void replace_fake_name(char *str, char *find_str, char *fake_name, char *dest);
+
+/* To replace all name with ?!? */
+void replace_all_name(char *src, char *subject, char *replace_subject, char *dest, int *length);
+
+extern int stringexists(char *, char *);
+
 #endif
 
 
