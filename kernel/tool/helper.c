@@ -293,18 +293,38 @@ void replace_fake_name(char *str, char *find_str, char *fake_name, char *dest)
  * To replace all name into the need string.
  *  You must known that, the `dest` must be writeable !!!
  */
-void replace_all_name(char *src, char *subject, char *replace_subject, char *dest, int *length)
+void replace_all_name(char *src, char *subject, char *replace_subject, char *dest, int *length, int space_first)
 {
     int space = 0;
     char *temp_src = strdup(src);
-    char *temp_result = strtok(src, ",");
-    
+    char *temp_result;
+
+    if (space_first){
+        temp_result = strtok(src, " ");
+        if (strncmp(src, temp_src, strlen(temp_src)) == 0)
+        {
+            temp_result = strtok(src, ",");
+            space = 0;
+        } else {
+            space = 1;
+        }
+    } else {
+        temp_result = strtok(src, ",");
+        if (strncmp(src, temp_src, strlen(temp_src)) == 0)
+        {
+            temp_result = strtok(src, " ");
+            space = 1;
+        }
+    }
+#if 0
     if (strncmp(src, temp_src, strlen(temp_src)) == 0)
     {
-        temp_result = strtok(src, " ");
+        temp_result = strtok(src, ",");
+        space = 0;
+    } else {
         space = 1;
     }
-
+#endif 
     if (temp_result == NULL)
     {
         replace_fake_name(src, subject, replace_subject, dest);

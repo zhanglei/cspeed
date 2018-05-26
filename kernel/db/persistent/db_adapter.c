@@ -188,7 +188,8 @@ CSPEED_METHOD(DbAdapter, createCommand)
                                 )
                             ), 
                             temp_fields,
-                            &length
+                            &length,
+                            0
                         );
                         strcpy(fields, temp_fields);
                     }
@@ -208,7 +209,8 @@ CSPEED_METHOD(DbAdapter, createCommand)
                                 )
                             ), 
                             temp_tableName,
-                            &length
+                            &length,
+                            1
                         );
                         strcpy(tableName, temp_tableName);
                     }
@@ -229,7 +231,8 @@ CSPEED_METHOD(DbAdapter, createCommand)
                                 )
                             ), 
                             temp_where_opts,
-                            &length
+                            &length,
+                            1
                         );
                         strcpy(where_opts, temp_where_opts);
                     }
@@ -251,7 +254,8 @@ CSPEED_METHOD(DbAdapter, createCommand)
                                 )
                             ), 
                             temp_groupby_opts,
-                            &length
+                            &length,
+                            1
                         );
                         strcpy(groupby_opts, temp_groupby_opts);
                     }
@@ -273,7 +277,8 @@ CSPEED_METHOD(DbAdapter, createCommand)
                                 )
                             ), 
                             temp_orderby_opts,
-                            &length
+                            &length,
+                            1
                         );
                         strcpy(orderby_opts, temp_orderby_opts);
                     }
@@ -295,7 +300,8 @@ CSPEED_METHOD(DbAdapter, createCommand)
                                 )
                             ), 
                             temp_limit_opts,
-                            &length
+                            &length,
+                            1
                         );
                         strcpy(limit_opts, temp_limit_opts);
                     }
@@ -544,7 +550,7 @@ CSPEED_METHOD(DbAdapter, execute)
                 NULL
             );
             zval temp_result;
-            cspeed_exit(Z_STRVAL_P(sql_statement));
+            // cspeed_exit(Z_STRVAL_P(sql_statement));
             cspeed_pdo_execute_sql(adapter_pdo_object, getThis(), Z_STRVAL_P(sql_statement), NULL, &temp_result);
             zend_hash_merge(Z_ARRVAL(ultimate_result), Z_ARRVAL(temp_result), zval_add_ref, 0);
             zval_ptr_dtor(&temp_result);

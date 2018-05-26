@@ -4,6 +4,7 @@
  */
 struct _select_statement
 {
+	int field_as;
 	char *select;
 	char *fields;
 	char *from;

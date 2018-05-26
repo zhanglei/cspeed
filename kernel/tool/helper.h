@@ -95,7 +95,7 @@ int stringstr(char *str, char *pattern);
 void replace_fake_name(char *str, char *find_str, char *fake_name, char *dest);
 
 /* To replace all name with ?!? */
-void replace_all_name(char *src, char *subject, char *replace_subject, char *dest, int *length);
+void replace_all_name(char *src, char *subject, char *replace_subject, char *dest, int *length, int space_first);
 
 extern int stringexists(char *, char *);
 
