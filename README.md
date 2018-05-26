@@ -1,4 +1,4 @@
-# CSpeed 基于C语言的扩展框架 v2.1.12手册 #
+# CSpeed 基于C语言的扩展框架 v2.1.13手册 #
 
 ## 快速上手 ##
 
@@ -12,7 +12,83 @@ CSpeed作为一个开源C语言PHP扩展，为了更加方便开发者进行项�
 
 **2、PHP7.x**
 
-## 安装 CSpeed v2.1.12 ##
+
+## CSpeed v2.1.13 alpha ##
+
+```php
+新版本 v2.1.13 分布式数据库的测试版本。需要拉取分布式数据库分支源码
+目前已经初具模型：
+采用Bison & Flex 进行语法与词法分析
+底层采用 PDO 进行数据库操作
+```
+
+不支持的特性：
+
+```
+1. SELECT 语句不支持 模糊查询如下：
+	SELECT *
+	如果一定需要模糊查询，请使用替换语法：
+	SELECT tablename.* 进行替换
+	
+2. 不支持 SELECT的嵌套查询，如：
+	SELECT name,age FROM （SELECT supjos.* FROM supjos） AS tmp
+	
+3. 不支持函数调用，如：
+	SELECT MAX(time) FROM supjos
+	
+```	
+
+支持的特性：
+
+```php
+1. 嵌套JOIN，含 INNER JOIN、RIGHT JOIN、LEFT JOIN等
+2. GROUP BY
+3. ORDER BY
+4. LIMIT(MySQL、PostgreSQL特有)
+5. 字段别名： SELECT supjos.name as sname,blog.name as bname
+
+```
+
+示例：
+
+```php
+$adapter = new DbAdapter();
+$adapter->loadConfig([
+    /** All the tables */
+    'tables' => [
+        'supjos',
+        'blog'
+    ],
+    /** The sharding key for CSpeed to choosing the Db */
+    'shardingKey' => 'id',
+    /** The horizontal size of tables */
+    'hSize' => 2,
+    /** All Dbs in CSpeed, and all db must be the same structures */
+    'Dbs' => [
+        'db1', 'db2', 'db3'
+    ],
+    /** The ReadDbs, string value to let system find in global Di container, or Adapter object */
+    'readDb'    => [
+        'db',
+        'db2'
+    ],
+    /** The WriteDbs, string value to let system find in global Di container, or Adapter object */
+    'writeDb'   => [
+        'db2'
+    ],
+    /**Balance 1 means RW apart. 2 means using readDb & 3 means using writeDb in all CURD */
+    'balance' => 1
+]);
+echo '<pre>';        
+$adapter->createCommand(
+    "SELECT supjos.id,supjos.name,supjos.age as sage,blog.name as bname FROM supjos,blog WHERE blog.id IN(1,2)"
+);
+echo '<br>';
+print_r($adapter->execute());
+```
+
+
+## 安装 CSpeed v2.1.13 ##
 
 **CSpeed** 扩展目前在 **Github** 与 **码云** 平台均有代码存储库，用户只需下载源码然后按照如下方法安装即可：
 
