@@ -266,8 +266,12 @@ int stringstr(char *str, char *pattern)
  */
 void replace_fake_name(char *str, char *find_str, char *fake_name, char *dest)
 {
-    /* if exists the table name,replace it with fake_name */
+    /**
+     * if exists the table name,replace it with fake_name
+     *  max(supjos.id) as d
+     */
     int pos_dot = stringexists(str, ".");
+    int pos_lp  = stringexists(str, "(");
     
     /* if exists the query_table_name or not. */
     char temp_str[256] = {0};
@@ -281,7 +285,13 @@ void replace_fake_name(char *str, char *find_str, char *fake_name, char *dest)
             sprintf(dest, "%s", fake_name);
         } else {
             /* found the dot[.] */
-            sprintf(dest, "%s.%s", fake_name, str + pos_dot + 1);
+            if (pos_lp != -1) {
+                char temp_lp[256] = {0};
+                strncpy(temp_lp, str, pos_lp + 1);
+                sprintf(dest, "%s%s.%s", temp_lp, fake_name, str + pos_dot + 1);
+            } else {
+                sprintf(dest, "%s.%s", fake_name, str + pos_dot + 1);
+            }
         }
     } else {
         /* Not found the query_table_name */
@@ -316,15 +326,6 @@ void replace_all_name(char *src, char *subject, char *replace_subject, char *des
             space = 1;
         }
     }
-#if 0
-    if (strncmp(src, temp_src, strlen(temp_src)) == 0)
-    {
-        temp_result = strtok(src, ",");
-        space = 0;
-    } else {
-        space = 1;
-    }
-#endif 
     if (temp_result == NULL)
     {
         replace_fake_name(src, subject, replace_subject, dest);

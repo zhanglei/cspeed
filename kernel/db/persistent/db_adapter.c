@@ -320,15 +320,22 @@ CSPEED_METHOD(DbAdapter, createCommand)
             strncat(select_result, sql_result->select_statement.from, strlen(sql_result->select_statement.from));
             strncat(select_result, " ", strlen(" "));
             strncat(select_result, tableName, strlen(tableName));
-            strncat(select_result, " ", strlen(" "));
-            strncat(select_result, where_opts, strlen(where_opts));
-            strncat(select_result, " ", strlen(" "));
-            strncat(select_result, groupby_opts, strlen(groupby_opts));
-            strncat(select_result, " ", strlen(" "));
-            strncat(select_result, orderby_opts, strlen(orderby_opts));
-            strncat(select_result, " ", strlen(" "));
-            strncat(select_result, limit_opts, strlen(limit_opts));
-
+            if ( CSPEED_STRING_NOT_EMPTY(where_opts) ) {
+                strncat(select_result, " ", strlen(" "));
+                strncat(select_result, where_opts, strlen(where_opts));
+            }
+            if ( CSPEED_STRING_NOT_EMPTY(groupby_opts) ) {
+                strncat(select_result, " ", strlen(" "));
+                strncat(select_result, groupby_opts, strlen(groupby_opts));
+            }
+            if ( CSPEED_STRING_NOT_EMPTY(orderby_opts) ) {
+                strncat(select_result, " ", strlen(" "));
+                strncat(select_result, orderby_opts, strlen(orderby_opts));
+            }
+            if ( CSPEED_STRING_NOT_EMPTY(limit_opts) ) {
+                strncat(select_result, " ", strlen(" "));
+                strncat(select_result, limit_opts, strlen(limit_opts));
+            }
             /* SQL result strncat ending. */
         }
 
