@@ -417,7 +417,7 @@ CSPEED_METHOD(DbAdapter, createCommand)
         zend_update_property_str(Z_OBJCE_P(getThis()), getThis(), CSPEED_STRL(RAW_SQL), sql.s);
         smart_str_free(&sql);
         free(select_result);
-
+        select_result = NULL;
     }  else if (sql_result->sql_type == 2) {
         /**
          * 2 : means the UPDATE command
@@ -618,8 +618,10 @@ CSPEED_METHOD(DbAdapter, createCommand)
             zend_update_property_long(Z_OBJCE_P(getThis()), getThis(), CSPEED_STRL(DBADAPTER_DB_HASH), table_hash_value);
             zval_ptr_dtor(&ret_val);
             free(update_result);
+            update_result = NULL;
         }
         free(sql_result->sql_result);
+        sql_result->sql_result = NULL;
         RETURN_ZVAL(getThis(), 1, NULL);
 
     }  else if (sql_result->sql_type == 3) {
@@ -786,8 +788,10 @@ CSPEED_METHOD(DbAdapter, createCommand)
             zend_update_property_long(Z_OBJCE_P(getThis()), getThis(), CSPEED_STRL(DBADAPTER_DB_HASH), table_hash_value);
             zval_ptr_dtor(&ret_val);
             free(delete_result);
+            delete_result = NULL;
         }
         free(sql_result->sql_result);
+        sql_result->sql_result = NULL;
         RETURN_ZVAL(getThis(), 1, NULL);
     }  else if (sql_result->sql_type == 4) {
         /**
@@ -976,8 +980,10 @@ CSPEED_METHOD(DbAdapter, createCommand)
             zend_update_property_long(Z_OBJCE_P(getThis()), getThis(), CSPEED_STRL(DBADAPTER_DB_HASH), table_hash_value);
             zval_ptr_dtor(&ret_val);
             free(insert_result);
+            insert_result = NULL;
         }
         free(sql_result->sql_result);
+        sql_result->sql_result = NULL;
         RETURN_ZVAL(getThis(), 1, NULL);
     }
 
