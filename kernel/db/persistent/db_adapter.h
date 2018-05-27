@@ -25,7 +25,7 @@
 extern zend_class_entry *cspeed_db_adapter_ce;
 
 /* External prototypes of the parse_sql function */
-extern SQL_PARSER_RESULT *parse_sql(char *sql_statement);
+extern SQL_PARSER_RESULT *parse_sql(char *sql_statement, char *sharding_key);
 
 /* The sharedKey for table field */
 #define SHARED_KEY          "_sharedKey"
@@ -44,6 +44,9 @@ extern SQL_PARSER_RESULT *parse_sql(char *sql_statement);
 
 /* ALL configs of the DbAdapter. */
 #define DBADAPTER_CONFIGS   "_db_configs"
+
+/* The db hash */
+#define DBADAPTER_DB_HASH   "_db_hash"
 
 /* The faker table name */
 #define DB_FAKER_TABLE_NAME  "?!????"

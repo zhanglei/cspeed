@@ -300,6 +300,28 @@ void replace_fake_name(char *str, char *find_str, char *fake_name, char *dest)
 }
 
 /**
+ * Caculator the string's hash value
+ * according to the expression:
+ *  crc_value = crc_value * 31 + char
+ */
+unsigned long long int string_crc(char *str, size_t str_len)
+{
+    if (str_len < 1)
+    {
+        return 0;
+    }
+
+    size_t start = 0;
+    unsigned long long int crc_value = 0;
+
+    for(; start < str_len; start++)
+    {
+        crc_value += crc_value * 31 + *(str + start);
+    }
+    return crc_value;
+}
+
+/**
  * To replace all name into the need string.
  *  You must known that, the `dest` must be writeable !!!
  */

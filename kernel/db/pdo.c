@@ -225,18 +225,25 @@ void cspeed_pdo_statement_set_fetch_mode(zval *pdostatement_obj, int fetch_style
 }/*}}}*/
 
 /**{{{ proto To execute the SQL */
-void cspeed_pdo_execute_sql(zval *pdo_object, zval *call_object, char *sql, zval *param_property, zval *retval)
+void cspeed_pdo_execute_sql(zval *pdo_object, zval *call_object, char *sql, zval *param_property, zval *retval, int query_or_not)
 {
     zval ret_val, pdo_statement, ret;
     cspeed_pdo_prepare(pdo_object, sql, &pdo_statement);
     cspeed_pdo_statement_set_fetch_mode(&pdo_statement, 2, &ret);
     cspeed_pdo_statement_execute(&pdo_statement, param_property, &ret_val);
-
+    zval_ptr_dtor(&ret_val);
     if (!output_sql_errors(&pdo_statement, call_object)){
-        cspeed_pdo_statement_fetch_all(
-            &pdo_statement, 
-            retval
-        );
+        if (query_or_not) {
+            cspeed_pdo_statement_fetch_all(
+                &pdo_statement, 
+                retval
+            );
+        } else {
+            cspeed_pdo_statement_row_count(
+                &pdo_statement,
+                retval
+            );
+        }
     } else {
         ZVAL_NULL(retval);
     }

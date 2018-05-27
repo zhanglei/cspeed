@@ -50,7 +50,7 @@
      ORDERBY = 266,
      NAME = 267,
      COMMA = 268,
-     EQUAL = 269,
+     RELATION = 269,
      AS = 270,
      ORDER_RULE = 271,
      AND = 272,
@@ -76,7 +76,7 @@
 #define ORDERBY 266
 #define NAME 267
 #define COMMA 268
-#define EQUAL 269
+#define RELATION 269
 #define AS 270
 #define ORDER_RULE 271
 #define AND 272

@@ -200,11 +200,19 @@ zend_bool output_sql_errors(zval *pdo_statement, zval *model_object)  /*{{{ Retu
                     2, 
                     params
                 );
-                if ( Z_TYPE(ret_val) == IS_FALSE ) {
+                
+                if ( Z_TYPE(ret_val) == IS_FALSE )
+                {
                     zval_ptr_dtor(&ret_val);
-                    cspeed_exit("");
+                    cspeed_print_info(
+                        E_ERROR, 
+                        "SQL: %d %s", 
+                        Z_LVAL_P(sql_code), 
+                        Z_STRVAL_P(sql_info)
+                    );
+                } else {
+                    zval_ptr_dtor(&ret_val);
                 }
-                zval_ptr_dtor(&ret_val);
             } else {
                 /* 2. when onErrorCallback method exists in object, call it */
                 zval ret_val;
@@ -219,19 +227,20 @@ zend_bool output_sql_errors(zval *pdo_statement, zval *model_object)  /*{{{ Retu
                     params, 
                     &ret_val
                 );
-                if ( Z_TYPE(ret_val) == IS_FALSE ) {
+                if ( Z_TYPE(ret_val) == IS_FALSE )
+                {
                     zval_ptr_dtor(&ret_val);
-                    cspeed_exit("");
+                    cspeed_print_info(
+                        E_ERROR, 
+                        "SQL: %d %s", 
+                        Z_LVAL_P(sql_code), 
+                        Z_STRVAL_P(sql_info)
+                    );
+                } else {
+                    zval_ptr_dtor(&ret_val);
                 }
-                zval_ptr_dtor(&ret_val);
             }
         }
-        cspeed_print_info(
-            E_ERROR, 
-            "SQL: %d %s", 
-            Z_LVAL_P(sql_code), 
-            Z_STRVAL_P(sql_info)
-        );
     }
     return FALSE;
 }/*}}}*/

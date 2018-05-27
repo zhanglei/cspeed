@@ -97,7 +97,11 @@ void replace_fake_name(char *str, char *find_str, char *fake_name, char *dest);
 /* To replace all name with ?!? */
 void replace_all_name(char *src, char *subject, char *replace_subject, char *dest, int *length, int space_first);
 
+/* Check the string is exists or not. */
 extern int stringexists(char *, char *);
+
+/* Caculator the string's hash value. */
+unsigned long long int string_crc(char *str, size_t str_len);
 
 #endif
 

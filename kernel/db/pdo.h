@@ -74,7 +74,7 @@ void cspeed_pdo_statement_row_count(zval *pdostatement_obj, zval *retval);
 void cspeed_pdo_statement_set_fetch_mode(zval *pdostatement_obj, int fetch_style, zval *retval);
 
 /*Run the SQL execute command. */
-void cspeed_pdo_execute_sql(zval *pdo_object, zval *call_object, char *sql, zval *param_property, zval *retval);
+void cspeed_pdo_execute_sql(zval *pdo_object, zval *call_object, char *sql, zval *param_property, zval *retval, int query_or_not);
 
 #endif
 
