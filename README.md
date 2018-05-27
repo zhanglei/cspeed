@@ -13,7 +13,7 @@ CSpeed作为一个开源C语言PHP扩展，为了更加方便开发者进行项�
 **2、PHP7.x**
 
 
-## CSpeed v2.1.13 alpha ##
+## CSpeed v2.1.13 分布式数据库 alpha ##
 
 ```php
 新版本 v2.1.13 分布式数据库的测试版本。需要拉取分布式数据库分支源码
@@ -22,7 +22,7 @@ CSpeed作为一个开源C语言PHP扩展，为了更加方便开发者进行项�
 底层采用 PDO 进行数据库操作
 ```
 
-不支持的特性：
+**不支持的特性**[ **后续版本添加支持** ]：
 
 ```
 1. SELECT 语句不支持 模糊查询如下：
@@ -30,60 +30,87 @@ CSpeed作为一个开源C语言PHP扩展，为了更加方便开发者进行项�
 	如果一定需要模糊查询，请使用替换语法：
 	SELECT tablename.* 进行替换
 	
-2. 不支持 SELECT的嵌套查询，如：
+2. 不支持 SELECT 的嵌套查询，如：
 	SELECT name,age FROM （SELECT supjos.* FROM supjos） AS tmp
-	
-3. 不支持函数调用，如：
-	SELECT MAX(time) FROM supjos
+
+3. 不支持批量 INSERT INTO
+
+4. 不支持 SELECT 查询的表的 AS 别名
 	
 ```	
 
-支持的特性：
+支持：
 
 ```php
-1. 嵌套JOIN，含 INNER JOIN、RIGHT JOIN、LEFT JOIN等
-2. GROUP BY
-3. ORDER BY
-4. LIMIT(MySQL、PostgreSQL特有)
-5. 字段别名： SELECT supjos.name as sname,blog.name as bname
+1. SELECT 查询
 
+2. INSERT 插入
+
+3. UPDATE 更新
+
+4. DELETE 删除
 ```
+
+**在进行 INSERT | UPDATE | DELETE 操作的时候必须指定配置文件所配置的 shardingKey 字段，否则引擎会提示:**
+
+**INSERT**操作：
+
+```php
+SQL: 1064 'INSERT' command must provide shardingKey..
+```
+
+**DELETE**操作：
+
+```php
+DELETE command must provide `shardingKey` WHERE condition.
+```
+
+**UPDATE**操作：
+
+```php
+UPDATE command must provide `shardingKey` IN WHERE condition.
+```
+
 
 示例：
 
 ```php
+// 初始化分布式数据库模型
 $adapter = new DbAdapter();
+
+// 加载配置文件
+// 分表、分库配置
 $adapter->loadConfig([
-    /** All the tables */
+    /** 分表数据表名称 */
     'tables' => [
         'supjos',
         'blog'
     ],
-    /** The sharding key for CSpeed to choosing the Db */
+    /** 分表、分库键 */
     'shardingKey' => 'id',
-    /** The horizontal size of tables */
+    /** 水平分表大小 */
     'hSize' => 2,
-    /** All Dbs in CSpeed, and all db must be the same structures */
-    'Dbs' => [
-        'db1', 'db2', 'db3'
-    ],
-    /** The ReadDbs, string value to let system find in global Di container, or Adapter object */
+    /** 分库数据库适配器[读写分离] */
     'readDb'    => [
         'db',
         'db2'
     ],
-    /** The WriteDbs, string value to let system find in global Di container, or Adapter object */
+    /** 分库数据库适配器[读写分离] */
     'writeDb'   => [
         'db2'
     ],
-    /**Balance 1 means RW apart. 2 means using readDb & 3 means using writeDb in all CURD */
-    'balance' => 1
+    /**1. 读写分离. 2. 全部操作使用readDb 3. 全部操作使用writeDb*/
+    'balance' => 1,
+	/* 当数据库适配器不存在容器中的时候是否显示错误信息 */
+	'displayDbNotExistError' => true    
 ]);
-echo '<pre>';        
+
+// 执行SQL操作
 $adapter->createCommand(
     "SELECT supjos.id,supjos.name,supjos.age as sage,blog.name as bname FROM supjos,blog WHERE blog.id IN(1,2)"
 );
-echo '<br>';
+
+// 打印SQL结果
 print_r($adapter->execute());
 ```
 
