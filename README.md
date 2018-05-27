@@ -1,4 +1,4 @@
-# CSpeed 基于C语言的扩展框架 v2.1.12手册 #
+# CSpeed 基于C语言的扩展框架 v2.1.13手册 #
 
 ## 快速上手 ##
 
@@ -12,7 +12,110 @@ CSpeed作为一个开源C语言PHP扩展，为了更加方便开发者进行项�
 
 **2、PHP7.x**
 
-## 安装 CSpeed v2.1.12 ##
+
+## CSpeed v2.1.13 分布式数据库 alpha ##
+
+```php
+新版本 v2.1.13 分布式数据库的测试版本。需要拉取分布式数据库分支源码
+目前已经初具模型：
+采用Bison & Flex 进行语法与词法分析
+底层采用 PDO 进行数据库操作
+```
+
+**不支持的特性**[ **后续版本添加支持** ]：
+
+```
+1. SELECT 语句不支持 模糊查询如下：
+	SELECT *
+	如果一定需要模糊查询，请使用替换语法：
+	SELECT tablename.* 进行替换
+	
+2. 不支持 SELECT 的嵌套查询，如：
+	SELECT name,age FROM （SELECT supjos.* FROM supjos） AS tmp
+
+3. 不支持批量 INSERT INTO
+
+4. 不支持 SELECT 查询的表的 AS 别名
+	
+```	
+
+支持：
+
+```php
+1. SELECT 查询
+
+2. INSERT 插入
+
+3. UPDATE 更新
+
+4. DELETE 删除
+```
+
+**在进行 INSERT | UPDATE | DELETE 操作的时候必须指定配置文件所配置的 shardingKey 字段，否则引擎会提示:**
+
+**INSERT**操作：
+
+```php
+SQL: 1064 'INSERT' command must provide shardingKey..
+```
+
+**DELETE**操作：
+
+```php
+DELETE command must provide `shardingKey` WHERE condition.
+```
+
+**UPDATE**操作：
+
+```php
+UPDATE command must provide `shardingKey` IN WHERE condition.
+```
+
+
+示例：
+
+```php
+// 初始化分布式数据库模型
+$adapter = new DbAdapter();
+
+// 加载配置文件
+// 分表、分库配置
+$adapter->loadConfig([
+    /** 分表数据表名称 */
+    'tables' => [
+        'supjos',
+        'blog'
+    ],
+    /** 分表、分库键 */
+    'shardingKey' => 'id',
+    /** 水平分表大小 */
+    'hSize' => 2,
+    /** 分库数据库适配器[读写分离] */
+    'readDb'    => [
+        'db',
+        'db2'
+    ],
+    /** 分库数据库适配器[读写分离] */
+    'writeDb'   => [
+        'db2'
+    ],
+    /**1. 读写分离. 2. 全部操作使用readDb 3. 全部操作使用writeDb*/
+    'balance' => 1,
+	/* 当数据库适配器不存在容器中的时候是否显示错误信息 */
+	'displayDbNotExistError' => true    
+]);
+
+// 执行SQL操作
+$adapter->createCommand(
+    "SELECT supjos.id,supjos.name,supjos.age as sage,blog.name as bname FROM supjos,blog WHERE blog.id IN(1,2)"
+);
+
+// 打印SQL结果
+print_r($adapter->execute());
+```
+
+
+## 安装 CSpeed v2.1.13 ##
 
 **CSpeed** 扩展目前在 **Github** 与 **码云** 平台均有代码存储库，用户只需下载源码然后按照如下方法安装即可：
 
